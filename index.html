@@ -278,6 +278,36 @@ html, body {
   box-shadow: 0 0 6px var(--gold-glow);
 }
 
+/* ── Pulse strip (bugün/hafta/ay) ── */
+.dash-pulse {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  padding: 12px 16px 0;
+}
+.pulse-cell {
+  background: linear-gradient(180deg, #0A0A0A 0%, #050505 100%);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--gold);
+  border-radius: var(--r);
+  padding: 8px 10px;
+}
+.pulse-k {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  color: var(--text3);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.pulse-v {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-top: 2px;
+}
+
 /* ── Metric cards ── */
 .metrics-row {
   display: grid;
@@ -841,10 +871,13 @@ html, body {
       <div class="screen-header" style="padding-bottom:0">
         <div>
           <div class="page-title">Genel Bakış</div>
-          <div class="page-sub" id="dash-sub">Nisan 2026</div>
+          <div class="page-sub" id="dash-sub"></div>
         </div>
         <div style="text-align:right;font-size:10px;color:var(--text3);margin-top:4px" id="saved-at"></div>
       </div>
+
+      <!-- Today / Week pulse -->
+      <div id="dash-pulse" class="dash-pulse"></div>
 
       <!-- Month filter -->
       <div class="month-scroll" id="month-chips"></div>
@@ -1141,8 +1174,29 @@ const ICATS=[
   {id:'diger-gelir', label:'Diğer Gelir',      color:'#888'},
 ];
 const cmap=Object.fromEntries([...CATS,...ICATS].map(c=>[c.id,c]));
-const MN=['Eki-25','Kas-25','Ara-25','Oca-26','Şub-26','Mar-26'];
-const MK=['2025-10','2025-11','2025-12','2026-01','2026-02','2026-03'];
+// Rolling 6-month window ending at current month
+const MONTH_SHORT=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+const MONTH_LONG=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+function buildMonthWindow(){
+  const now=new Date();
+  const mn=[],mk=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const yy=String(d.getFullYear()).slice(2);
+    const mm=String(d.getMonth()+1).padStart(2,'0');
+    mn.push(MONTH_SHORT[d.getMonth()]+'-'+yy);
+    mk.push(d.getFullYear()+'-'+mm);
+  }
+  return {mn,mk};
+}
+const _win=buildMonthWindow();
+const MN=_win.mn;
+const MK=_win.mk;
+const CUR_IDX=5; // current month is always last slot
+function curMonthLabel(){
+  const now=new Date();
+  return MONTH_LONG[now.getMonth()]+' '+now.getFullYear();
+}
 const GOAL=30000;
 const DEF_BUD={kira:8500,muhasebe:2750,spor:1500,fatura:6000,dijital:3500,market:7000,yemek:3500,eticaret:2500,ulasim:1500,saglik:0,egitim:1000,eglence:1000,giyim:1500,yatirim:3000,vergi:5000,nakit:2000,diger:0};
 const FAV=[
@@ -1218,7 +1272,7 @@ let S = {
   incomes:  [],
   budgets:  {...DEF_BUD},
   selCat: 'yemek',
-  expM: null, expC: null, incM: null, dashM: null
+  expM: null, expC: null, incM: null, dashM: CUR_IDX
 };
 
 function loadFromStorage() {
@@ -1277,6 +1331,21 @@ function getAlerts(){
 // ══════════════════════════════════════════════════════════════
 let pnlCh;
 function renderDash(){
+  // Today / Week pulse (gerçek zamanlı)
+  const _tD=new Date();
+  const _tIso2=_tD.toISOString().slice(0,10);
+  const _wS=new Date(_tD); _wS.setDate(_tD.getDate()-((_tD.getDay()+6)%7));
+  const _wIso2=_wS.toISOString().slice(0,10);
+  const _todayG=S.expenses.filter(e=>e.d===_tIso2&&e.cat!=='uyap').reduce((a,e)=>a+e.amt,0);
+  const _weekG=S.expenses.filter(e=>e.d>=_wIso2&&e.d<=_tIso2&&e.cat!=='uyap').reduce((a,e)=>a+e.amt,0);
+  const _mtdG=S.expenses.filter(e=>e.d.slice(0,7)===MK[CUR_IDX]&&e.cat!=='uyap').reduce((a,e)=>a+e.amt,0);
+  const dp=document.getElementById('dash-pulse');
+  if(dp) dp.innerHTML=`
+    <div class="pulse-cell"><div class="pulse-k">BUGÜN</div><div class="pulse-v">${fmt(_todayG)} ₺</div></div>
+    <div class="pulse-cell"><div class="pulse-k">BU HAFTA</div><div class="pulse-v">${fmt(_weekG)} ₺</div></div>
+    <div class="pulse-cell"><div class="pulse-k">BU AY</div><div class="pulse-v">${fmt(_mtdG)} ₺</div></div>
+  `;
+
   // Month chips
   const mc=document.getElementById('month-chips');
   mc.innerHTML=`<button class="m-chip ${S.dashM===null?'on':''}" onclick="setDashM(null)">Tümü</button>`+MN.map((m,i)=>`<button class="m-chip ${S.dashM===i?'on':''}" onclick="setDashM(${i})">${m}</button>`).join('');
@@ -1287,7 +1356,7 @@ function renderDash(){
   const curI=displayM!==null?monthI(displayM):S.incomes.reduce((a,i)=>a+i.amt,0)/6;
   const net=curI-curG;
 
-  document.getElementById('dash-sub').textContent=displayM!==null?MN[displayM]:'Tüm Dönem Özeti';
+  document.getElementById('dash-sub').textContent=displayM===null?'Tüm Dönem Özeti':(displayM===CUR_IDX?curMonthLabel()+' · güncel ay':MN[displayM]);
   document.getElementById('dash-metrics').innerHTML=`
     <div class="metric ${curG>GOAL?'red':''}">
       <div class="metric-label">KİŞİSEL GİDER</div>
