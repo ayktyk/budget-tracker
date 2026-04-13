@@ -8,6 +8,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bütçe">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -1102,8 +1105,14 @@ html, body {
             <button class="action-btn secondary" onclick="exportData()">⬇ JSON Yedek Al</button>
             <button class="action-btn secondary" onclick="document.getElementById('imp-f').click()">⬆ Yedek Yükle</button>
             <input type="file" id="imp-f" accept=".json" style="display:none" onchange="importData(event)">
+            <button class="action-btn secondary" onclick="resetAll()" style="color:#E05656;border-color:rgba(224,86,86,0.3)">⟲ Tüm Verileri Sıfırla</button>
+            <button class="action-btn secondary" onclick="reseedDemo()">↻ Demo Verileri Yükle</button>
           </div>
           <div id="data-st" style="font-size:11px;color:var(--green);margin-top:8px"></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:6px;line-height:1.5">
+            <b>Sıfırla:</b> Tüm giderleri, gelirleri ve bütçeleri siler.<br>
+            <b>Demo Yükle:</b> Örnek verileri tekrar ekler (mevcut verinizin üstüne).
+          </div>
         </div>
       </div>
 
@@ -1267,7 +1276,7 @@ function buildSeed(){
 const SEED = buildSeed();
 
 let S = {
-  expenses: [...SEED],
+  expenses: [],
   userExp:  [],
   incomes:  [],
   budgets:  {...DEF_BUD},
@@ -1278,8 +1287,24 @@ let S = {
 function loadFromStorage() {
   try {
     const ue = localStorage.getItem('ay_exp');
-    if (ue) { S.userExp = JSON.parse(ue); S.expenses = [...SEED, ...S.userExp]; }
-  } catch(e) {}
+    const migrated = localStorage.getItem('ay_seed_migrated');
+    if (ue !== null) {
+      S.userExp = JSON.parse(ue);
+      // Migration: eski sürümden gelen kullanıcılar için SEED'i bir kez userExp'e taşı
+      // Böylece mevcut görünen veri kaybolmaz, ama bundan sonra silme kalıcı olur
+      if (!migrated) {
+        S.userExp = [...SEED, ...S.userExp];
+        localStorage.setItem('ay_seed_migrated', '1');
+        localStorage.setItem('ay_exp', JSON.stringify(S.userExp));
+      }
+    } else {
+      // İlk açılış: seed verisini userExp'e taşı, bir daha SEED geri gelmeyecek
+      S.userExp = [...SEED];
+      localStorage.setItem('ay_seed_migrated', '1');
+      localStorage.setItem('ay_exp', JSON.stringify(S.userExp));
+    }
+    S.expenses = [...S.userExp];
+  } catch(e) { S.expenses = [...S.userExp]; }
   try {
     const ic = localStorage.getItem('ay_inc');
     if (ic) S.incomes = JSON.parse(ic);
@@ -1483,7 +1508,8 @@ function quickAdd(){
 }
 
 function renderQuickRecents(){
-  const recent=[...S.expenses].sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id)).slice(0,8);
+  // En son EKLENEN üstte (id = timestamp-base36, insertion order)
+  const recent=[...S.expenses].sort((a,b)=>b.id.localeCompare(a.id)).slice(0,8);
   document.getElementById('quick-recents').innerHTML=recent.length?recent.map(t=>{
     const c=cmap[t.cat]||{color:'#888',icon:'📌',label:t.cat};
     return`<div class="tx-entry">
@@ -1569,18 +1595,22 @@ function renderTxn(){
   let txns=[...S.expenses];
   if(S.expM!==null) txns=txns.filter(e=>mIdx(e.d)===S.expM);
   if(S.expC!==null) txns=txns.filter(e=>e.cat===S.expC);
-  txns.sort((a,b)=>b.d.localeCompare(a.d)||b.amt-a.amt);
-  document.getElementById('txn-list').innerHTML=txns.slice(0,100).map(t=>{
+  txns.sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id));
+  const totalShown=txns.reduce((a,t)=>a+t.amt,0);
+  document.getElementById('txn-list').innerHTML=(txns.length?`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 2px 10px;border-bottom:0.5px solid var(--border);margin-bottom:6px"><span style="font-size:10px;color:var(--text3)">${txns.length} kayıt${txns.length>100?' · ilk 100':''}</span><span style="font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;color:var(--gold)">${fmt(totalShown)} ₺</span></div>`:'')+txns.slice(0,100).map(t=>{
     const c=cmap[t.cat]||{color:'#888',icon:'📌',label:t.cat};
     return`<div class="tx-entry">
       <div class="tx-dot-wrap" style="background:${c.color}18">${c.icon}</div>
       <div class="tx-info"><div class="tx-desc">${t.desc}</div><div class="tx-meta">${t.d} · ${t.bank}</div></div>
       <div class="tx-right">
         <div class="tx-amt">${fmt(t.amt)} ₺</div>
-        <span class="tx-cat-tag" style="background:${c.color}18;color:${c.color}">${c.label}</span>
+        <div style="display:flex;gap:4px;align-items:center;margin-top:3px">
+          <span class="tx-cat-tag" style="background:${c.color}18;color:${c.color}">${c.label}</span>
+          <button onclick="delExp('${t.id}')" style="font-size:9px;padding:2px 7px;border:0.5px solid rgba(255,255,255,0.1);border-radius:4px;background:none;color:var(--text3);cursor:pointer;font-family:'Inter',sans-serif">sil</button>
+        </div>
       </div>
     </div>`;
-  }).join('');
+  }).join('')||`<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Kayıt yok</div>`;
 }
 function setEM(m){S.expM=m;renderTxn();}
 function setEC(c){S.expC=c;renderTxn();}
@@ -1664,6 +1694,20 @@ async function parseStmt(){
 // ══════════════════════════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════════════════════════
+function resetAll(){
+  if(!confirm('Tüm giderler, gelirler ve bütçeler silinecek. Emin misin?'))return;
+  S.userExp=[];S.expenses=[];S.incomes=[];S.budgets={...DEF_BUD};
+  save();toast('✓ Veriler sıfırlandı');
+  renderDash();renderQuickRecents&&renderQuickRecents();renderTxn&&renderTxn();renderIncome&&renderIncome();renderBudget&&renderBudget();
+}
+function reseedDemo(){
+  if(!confirm('Demo verileri mevcut kayıtlarınıza EKLENECEK. Devam?'))return;
+  const fresh=buildSeed();
+  S.userExp=[...S.userExp,...fresh];
+  S.expenses=[...S.userExp];
+  save();toast('✓ Demo veriler eklendi');
+  renderDash();renderQuickRecents&&renderQuickRecents();renderTxn&&renderTxn();
+}
 function exportData(){
   const b=new Blob([JSON.stringify({expenses:S.userExp,incomes:S.incomes,budgets:S.budgets},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='butce_'+new Date().toISOString().slice(0,10)+'.json';a.click();
@@ -1672,7 +1716,7 @@ function exportData(){
 function importData(e){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.expenses){S.userExp=d.expenses;S.expenses=[...SEED,...S.userExp];}if(d.incomes)S.incomes=d.incomes;if(d.budgets)S.budgets={...DEF_BUD,...d.budgets};save();toast('✓ Veri yüklendi');go('dash',document.getElementById('nb-dash'));}catch{toast('Hata: geçersiz dosya',true);}};
+  r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.expenses){S.userExp=d.expenses;S.expenses=[...S.userExp];}if(d.incomes)S.incomes=d.incomes;if(d.budgets)S.budgets={...DEF_BUD,...d.budgets};save();toast('✓ Veri yüklendi');go('dash',document.getElementById('nb-dash'));}catch{toast('Hata: geçersiz dosya',true);}};
   r.readAsText(f);
 }
 
