@@ -4,8 +4,8 @@
   "description": "Kişisel bütçe ve gelir takip uygulaması",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#F2F2F7",
+  "theme_color": "#F2F2F7",
   "orientation": "portrait",
   "icons": [
     {
