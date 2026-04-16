@@ -14,64 +14,242 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* ══════════════════════════════════════════════════════════
-   APPLE WALLET INSPIRED — Light, calm, cards-first, minimal noise
+   THEME ENGINE — Beyaz · Obsidian · Gece Mavisi · Şampanya
    ══════════════════════════════════════════════════════════ */
-:root {
-  /* Surfaces */
-  --bg:       #F2F2F7;   /* system background */
-  --surface:  #FFFFFF;   /* primary card */
-  --surface2: #F9F9FB;   /* alt surface */
-  --surface3: #EFEFF4;   /* chip / hover */
 
-  /* Hairlines */
+/* ───── BEYAZ (default) — Apple Wallet inspired ───── */
+:root,
+[data-theme="beyaz"] {
+  --bg:       #F2F2F7;
+  --surface:  #FFFFFF;
+  --surface2: #F9F9FB;
+  --surface3: #EFEFF4;
+
   --border:   rgba(60,60,67,0.08);
   --border2:  rgba(60,60,67,0.14);
 
-  /* Text */
   --text:     #1D1D1F;
   --text2:    #6E6E73;
   --text3:    #A1A1A6;
 
-  /* Brand accents */
-  --green:      #30B875;   /* dolar yeşili */
+  --green:      #30B875;
   --green2:     #1F9A5E;
   --green-soft: #E6F6EC;
   --green-glow: rgba(48,184,117,0.22);
 
-  /* Semantic */
   --red:       #E0544B;
   --red-soft:  #FDECEA;
+  --red-glow:  rgba(224,84,75,0.22);
   --blue:      #0A84FF;
   --orange:    #F2A33C;
   --yellow:    #E8C547;
   --purple:    #7B6FE0;
 
-  /* Geometry — soft, wallet-like */
+  --accent:     var(--green);
+  --accent2:    var(--green2);
+  --accent-soft:var(--green-soft);
+
+  --sh1: 0 1px 2px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.04);
+  --sh2: 0 1px 3px rgba(0,0,0,0.05), 0 4px 14px rgba(0,0,0,0.04);
+  --sh3: 0 8px 24px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
+
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body:    'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-num:     'JetBrains Mono', 'Manrope', sans-serif;
+}
+
+/* ───── OBSIDIAN — Jet black minimalism ───── */
+[data-theme="obsidian"] {
+  --bg:       #060608;
+  --surface:  #111114;
+  --surface2: #16161B;
+  --surface3: #1E1E25;
+
+  --border:   rgba(255,255,255,0.06);
+  --border2:  rgba(255,255,255,0.12);
+
+  --text:     #F4F4F6;
+  --text2:    #9C9CA6;
+  --text3:    #5E5E68;
+
+  --green:      #32D583;
+  --green2:     #22B368;
+  --green-soft: rgba(50,213,131,0.14);
+  --green-glow: rgba(50,213,131,0.35);
+
+  --red:       #F25D55;
+  --red-soft:  rgba(242,93,85,0.14);
+  --red-glow:  rgba(242,93,85,0.35);
+
+  --accent:     var(--green);
+  --accent2:    var(--green2);
+  --accent-soft:var(--green-soft);
+
+  --sh1: 0 1px 2px rgba(0,0,0,0.35), 0 0 0 0.5px rgba(255,255,255,0.04);
+  --sh2: 0 2px 8px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.04) inset;
+  --sh3: 0 14px 40px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.35);
+}
+
+/* ───── GECE MAVİSİ — Midnight navy + antique gold ───── */
+[data-theme="midnight"] {
+  --bg:       #0A1324;
+  --surface:  #10203A;
+  --surface2: #142746;
+  --surface3: #1B325A;
+
+  --border:   rgba(255,255,255,0.06);
+  --border2:  rgba(200,168,90,0.22);
+
+  --text:     #EDE9D9;
+  --text2:    #A7B3CB;
+  --text3:    #6B7890;
+
+  --green:      #5BD6A1;
+  --green2:     #3AB988;
+  --green-soft: rgba(91,214,161,0.14);
+  --green-glow: rgba(91,214,161,0.32);
+
+  --red:       #F07A70;
+  --red-soft:  rgba(240,122,112,0.14);
+  --red-glow:  rgba(240,122,112,0.3);
+
+  --accent:      #C8A85A;
+  --accent2:     #E1C07A;
+  --accent-soft: rgba(200,168,90,0.16);
+
+  --sh1: 0 1px 2px rgba(0,0,0,0.3);
+  --sh2: 0 2px 10px rgba(0,0,0,0.4);
+  --sh3: 0 16px 44px rgba(0,0,0,0.55);
+}
+
+/* ───── YEŞİL — Forest emerald ───── */
+[data-theme="yesil"] {
+  --bg:       #F2F7F3;
+  --surface:  #FFFFFF;
+  --surface2: #EAF3EC;
+  --surface3: #D8E9DC;
+
+  --border:   rgba(32,82,48,0.08);
+  --border2:  rgba(32,82,48,0.18);
+
+  --text:     #0F3A20;
+  --text2:    #4A6B56;
+  --text3:    #8AA695;
+
+  --green:      #1F7A3D;
+  --green2:     #155C2C;
+  --green-soft: rgba(31,122,61,0.14);
+  --green-glow: rgba(31,122,61,0.3);
+
+  --red:       #C14A3B;
+  --red-soft:  rgba(193,74,59,0.12);
+  --red-glow:  rgba(193,74,59,0.28);
+
+  --accent:     #1F7A3D;
+  --accent2:    #155C2C;
+  --accent-soft:rgba(31,122,61,0.14);
+
+  --sh1: 0 1px 2px rgba(15,58,32,0.05);
+  --sh2: 0 2px 8px rgba(15,58,32,0.08), 0 4px 14px rgba(15,58,32,0.05);
+  --sh3: 0 10px 28px rgba(15,58,32,0.14);
+}
+
+/* ───── KIRMIZI — Bordeaux / deep wine ───── */
+[data-theme="kirmizi"] {
+  --bg:       #1A0A0D;
+  --surface:  #241014;
+  --surface2: #2C141A;
+  --surface3: #3A1A22;
+
+  --border:   rgba(255,255,255,0.06);
+  --border2:  rgba(212,160,115,0.22);
+
+  --text:     #F5E6D3;
+  --text2:    #C9A185;
+  --text3:    #8C6A58;
+
+  --green:      #6FBF7A;
+  --green2:     #4FA05C;
+  --green-soft: rgba(111,191,122,0.14);
+  --green-glow: rgba(111,191,122,0.3);
+
+  --red:       #E85A52;
+  --red-soft:  rgba(232,90,82,0.18);
+  --red-glow:  rgba(232,90,82,0.36);
+
+  --accent:      #D4A073;
+  --accent2:     #B8834C;
+  --accent-soft: rgba(212,160,115,0.16);
+
+  --sh1: 0 1px 2px rgba(0,0,0,0.35);
+  --sh2: 0 2px 10px rgba(0,0,0,0.48);
+  --sh3: 0 16px 44px rgba(0,0,0,0.6);
+}
+
+/* ───── ŞAMPANYA — Warm champagne + bronze ───── */
+[data-theme="champagne"] {
+  --bg:       #F4ECE0;
+  --surface:  #FBF6EE;
+  --surface2: #F2E6D3;
+  --surface3: #E8D8BE;
+
+  --border:   rgba(61,46,26,0.08);
+  --border2:  rgba(184,138,68,0.28);
+
+  --text:     #3D2E1A;
+  --text2:    #7A6344;
+  --text3:    #A58A65;
+
+  --green:      #6FA86A;
+  --green2:     #528A4E;
+  --green-soft: rgba(111,168,106,0.16);
+  --green-glow: rgba(111,168,106,0.3);
+
+  --red:       #C85A45;
+  --red-soft:  rgba(200,90,69,0.14);
+  --red-glow:  rgba(200,90,69,0.3);
+
+  --accent:      #B88A44;
+  --accent2:     #9E7232;
+  --accent-soft: rgba(184,138,68,0.16);
+
+  --sh1: 0 1px 2px rgba(61,46,26,0.06);
+  --sh2: 0 2px 8px rgba(61,46,26,0.08), 0 4px 14px rgba(61,46,26,0.05);
+  --sh3: 0 10px 28px rgba(61,46,26,0.12);
+}
+
+/* Shared tokens */
+:root,
+[data-theme] {
   --r:  10px;
   --rl: 16px;
   --rx: 22px;
 
-  /* Shadows */
-  --sh1: 0 1px 2px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.04);
-  --sh2: 0 1px 3px rgba(0,0,0,0.05), 0 4px 14px rgba(0,0,0,0.04);
-  --sh3: 0 8px 24px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body:    'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-num:     'JetBrains Mono', 'Manrope', sans-serif;
+
+  --blue:      #0A84FF;
+  --orange:    #F2A33C;
+  --yellow:    #E8C547;
+  --purple:    #7B6FE0;
 
   /* Compat aliases (keep old names working) */
   --bg1: var(--surface);
   --bg2: var(--surface2);
   --bg3: var(--surface3);
   --bg4: var(--surface3);
-  --gold: var(--green);
-  --gold2: var(--green2);
-  --gold3: var(--green2);
+  --gold: var(--accent);
+  --gold2: var(--accent2);
+  --gold3: var(--accent2);
   --gold-glow: var(--green-glow);
   --border-g: var(--border2);
   --green-color: var(--green);
   --red2: var(--red);
-  --grad-gold: linear-gradient(180deg,#37C983 0%,#30B875 50%,#259862 100%);
+  --grad-gold: linear-gradient(180deg, var(--accent) 0%, var(--accent2) 100%);
   --grad-line: linear-gradient(90deg, transparent, var(--border2), transparent);
 }
 
@@ -706,10 +884,332 @@ html, body {
 /* ── Divider ── */
 .section-gap { height: 8px; }
 
+/* ══════════════════════════════════════════════════════════════
+   NEW DASHBOARD — Calendar-first, premium typography
+   ══════════════════════════════════════════════════════════════ */
+body { font-family: var(--font-body); }
+
+.dash-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px 10px;
+}
+.dash-hello {
+  font-size: 12px; color: var(--text2); letter-spacing: 0.06em;
+  text-transform: uppercase; font-weight: 600;
+}
+.dash-title {
+  font-family: var(--font-display);
+  font-size: 34px; line-height: 1.02; font-weight: 400;
+  color: var(--text); margin-top: 2px;
+  letter-spacing: -0.015em;
+  font-style: italic;
+}
+.theme-btn {
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 1px solid var(--border2); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: transform 0.15s ease;
+  box-shadow: var(--sh1);
+}
+.theme-btn:active { transform: scale(0.94); }
+.theme-swatch {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 50%, var(--green) 100%);
+  border: 1.5px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--border2);
+}
+
+/* Balance card */
+.balance-card {
+  margin: 6px 14px 14px;
+  padding: 20px 20px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rx);
+  box-shadow: var(--sh2);
+  position: relative; overflow: hidden;
+}
+.balance-card::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(90% 80% at 100% 0%, var(--accent-soft) 0%, transparent 60%);
+  pointer-events: none; opacity: 0.6;
+}
+.balance-card > * { position: relative; z-index: 1; }
+.bal-label {
+  font-size: 10px; letter-spacing: 0.14em;
+  color: var(--text2); font-weight: 600; text-transform: uppercase;
+}
+.bal-value {
+  font-family: var(--font-num);
+  font-size: 36px; line-height: 1.1; font-weight: 500;
+  margin-top: 6px; letter-spacing: -0.03em;
+  color: var(--text);
+}
+.bal-split {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-top: 16px;
+}
+.bal-cell {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+}
+.bal-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.bal-in { background: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
+.bal-out { background: var(--red); box-shadow: 0 0 0 3px var(--red-soft); }
+.bal-k {
+  font-size: 10px; color: var(--text2);
+  letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;
+}
+.bal-v {
+  font-family: var(--font-num);
+  font-size: 15px; font-weight: 600; margin-top: 2px;
+  color: var(--text);
+}
+.bal-goal { margin-top: 16px; }
+.bal-goal-bar {
+  height: 6px; border-radius: 999px;
+  background: var(--surface3); overflow: hidden;
+}
+.bal-goal-fill {
+  height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  width: 0%; transition: width 0.5s ease;
+}
+.bal-goal-meta {
+  display: flex; justify-content: space-between; margin-top: 8px;
+  font-size: 11px; font-family: var(--font-num);
+}
+.bal-goal-meta > span:first-child { color: var(--accent); font-weight: 600; }
+.bal-goal-target { color: var(--text3); }
+
+/* Calendar */
+.cal-wrap {
+  margin: 0 14px 14px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rx);
+  box-shadow: var(--sh1);
+}
+.cal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.cal-month {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 400;
+  letter-spacing: -0.01em; color: var(--text);
+  font-style: italic;
+}
+.cal-nav {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text); font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.cal-nav:active { background: var(--surface3); }
+.cal-dow {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 2px; margin-bottom: 6px;
+}
+.cal-dow span {
+  text-align: center; font-size: 10px;
+  color: var(--text3); font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.cal-day {
+  aspect-ratio: 1 / 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border-radius: 10px;
+  font-family: var(--font-num);
+  font-size: 13px; font-weight: 500;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer; position: relative;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.cal-day:hover { background: var(--surface2); }
+.cal-day.other { color: var(--text3); opacity: 0.45; }
+.cal-day.today {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+.cal-day.sel {
+  background: var(--accent);
+  color: #fff; border-color: var(--accent);
+}
+.cal-day.sel .dots .dot { border-color: rgba(255,255,255,0.6); }
+.cal-day .num { line-height: 1; margin-top: 2px; }
+.cal-day .dots {
+  display: flex; gap: 3px; margin-top: 3px;
+  min-height: 6px;
+}
+.cal-day .dots .dot {
+  width: 5px; height: 5px; border-radius: 50%;
+}
+.dots .d-in, .cal-legend .d-in { background: var(--green); }
+.dots .d-out, .cal-legend .d-out { background: var(--red); }
+.cal-legend {
+  display: flex; gap: 16px; justify-content: center; margin-top: 12px;
+  font-size: 11px; color: var(--text2);
+}
+.cal-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.cal-legend .dot {
+  width: 7px; height: 7px; border-radius: 50%; display: inline-block;
+}
+
+/* Day transactions */
+.day-list {
+  margin: 0 14px 14px;
+}
+.day-list-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 0 4px 10px;
+}
+.day-list-title {
+  font-family: var(--font-display); font-size: 20px; font-weight: 400;
+  color: var(--text); letter-spacing: -0.01em; font-style: italic;
+}
+.day-list-meta { font-size: 11px; color: var(--text2); font-family: var(--font-num); }
+.day-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  margin-bottom: 6px;
+}
+.day-row-ic {
+  width: 34px; height: 34px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.day-row-ic.in { background: var(--green-soft); }
+.day-row-ic.out { background: var(--red-soft); }
+.day-row-body { flex: 1; min-width: 0; }
+.day-row-desc {
+  font-size: 14px; font-weight: 500; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.day-row-cat { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.day-row-amt {
+  font-family: var(--font-num);
+  font-size: 15px; font-weight: 600; flex-shrink: 0;
+}
+.day-row-amt.in { color: var(--green); }
+.day-row-amt.out { color: var(--red); }
+.day-empty {
+  text-align: center; padding: 22px 12px;
+  color: var(--text3); font-size: 13px;
+  background: var(--surface2);
+  border: 1px dashed var(--border2);
+  border-radius: var(--rl);
+}
+
+/* Collapsible details */
+.dash-more {
+  margin: 0 14px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  overflow: hidden;
+}
+.dash-more > summary {
+  list-style: none; cursor: pointer;
+  padding: 14px 16px;
+  font-size: 13px; font-weight: 600;
+  color: var(--text2);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.dash-more > summary::-webkit-details-marker { display: none; }
+.dash-more > summary::after {
+  content: "›"; font-size: 20px; color: var(--text3);
+  transition: transform 0.15s ease;
+}
+.dash-more[open] > summary::after { transform: rotate(90deg); }
+.dash-more-body { padding: 0 10px 10px; }
+
+/* Theme picker sheet */
+.theme-sheet {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.32);
+  display: none; align-items: flex-end; justify-content: center;
+  backdrop-filter: blur(6px);
+}
+.theme-sheet.on { display: flex; }
+.theme-sheet-card {
+  width: 100%; max-width: 480px;
+  background: var(--surface);
+  border-radius: 22px 22px 0 0;
+  padding: 20px 18px 28px;
+  box-shadow: var(--sh3);
+  animation: sheet-up 0.22s ease;
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); } to { transform: translateY(0); }
+}
+.theme-sheet-title {
+  font-family: var(--font-display); font-size: 26px; font-weight: 400;
+  margin-bottom: 16px; letter-spacing: -0.015em;
+  color: var(--text); font-style: italic;
+}
+.theme-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.theme-opt {
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  border-radius: var(--rl);
+  padding: 12px;
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 10px; cursor: pointer;
+  transition: transform 0.12s ease;
+}
+.theme-opt:active { transform: scale(0.98); }
+.theme-opt.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.theme-prev {
+  width: 100%; aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  display: block;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.tp-beyaz    { background: linear-gradient(135deg, #F2F2F7 0%, #FFFFFF 55%, #E6F6EC 100%); }
+.tp-obsidian { background: linear-gradient(135deg, #060608 0%, #111114 55%, #32D583 140%); }
+.tp-midnight { background: linear-gradient(135deg, #0A1324 0%, #142746 60%, #C8A85A 140%); }
+.tp-champagne{ background: linear-gradient(135deg, #F4ECE0 0%, #FBF6EE 55%, #B88A44 140%); }
+.tp-yesil    { background: linear-gradient(135deg, #F2F7F3 0%, #D8E9DC 55%, #1F7A3D 140%); }
+.tp-kirmizi  { background: linear-gradient(135deg, #1A0A0D 0%, #3A1A22 55%, #D4A073 140%); }
+.theme-name {
+  font-size: 15px; font-weight: 400; color: var(--text);
+  font-family: var(--font-display); letter-spacing: -0.005em;
+  font-style: italic;
+}
+
+/* Typography polish for existing pages */
+.page-title { font-family: var(--font-display); letter-spacing: -0.015em; font-weight: 400; font-style: italic; font-size: 26px; }
+.card-title { font-family: var(--font-display); letter-spacing: -0.01em; font-weight: 400; font-style: italic; font-size: 17px; }
+
 /* ── Responsive ── */
 @media(max-width:360px) {
   .cat-grid { grid-template-columns: repeat(4,1fr); }
   #q-amt { font-size: 44px; width: 180px; }
+  .bal-value { font-size: 34px; }
+  .cal-day { font-size: 12px; }
 }
 </style>
 </head>
@@ -721,47 +1221,115 @@ html, body {
 
     <!-- ── DASHBOARD ── -->
     <div id="s-dash" class="screen on">
-      <div class="screen-header" style="padding-bottom:0">
+      <!-- Top bar: title + theme picker -->
+      <div class="dash-topbar">
         <div>
-          <div class="page-title">Genel Bakış</div>
-          <div class="page-sub" id="dash-sub"></div>
+          <div class="dash-hello" id="dash-hello">Merhaba</div>
+          <div class="dash-title" id="dash-sub">Bu Ay</div>
         </div>
-        <div style="text-align:right;font-size:10px;color:var(--text3);margin-top:4px" id="saved-at"></div>
+        <button class="theme-btn" id="theme-btn" aria-label="Tema değiştir" onclick="openThemePicker()">
+          <span class="theme-swatch" id="theme-swatch"></span>
+        </button>
       </div>
 
-      <!-- Today / Week pulse -->
-      <div id="dash-pulse" class="dash-pulse"></div>
-
-      <!-- Month filter -->
-      <div class="month-scroll" id="month-chips"></div>
-
-      <!-- Metrics -->
-      <div class="metrics-row" id="dash-metrics"></div>
-
-      <!-- Goal bar -->
-      <div class="goal-wrap">
-        <div class="goal-header">
-          <span class="goal-label">AYLIK KİŞİSEL GİDER HEDEFİ</span>
-          <span id="goal-status" style="font-size:11px;font-weight:600;font-family:'Space Grotesk',sans-serif"></span>
+      <!-- Balance card: net + income/expense -->
+      <div class="balance-card">
+        <div class="bal-label">NET BAKİYE</div>
+        <div class="bal-value" id="bal-net">—</div>
+        <div class="bal-split">
+          <div class="bal-cell">
+            <span class="bal-dot bal-in"></span>
+            <div>
+              <div class="bal-k">Gelir</div>
+              <div class="bal-v" id="bal-inc">—</div>
+            </div>
+          </div>
+          <div class="bal-cell">
+            <span class="bal-dot bal-out"></span>
+            <div>
+              <div class="bal-k">Gider</div>
+              <div class="bal-v" id="bal-exp">—</div>
+            </div>
+          </div>
         </div>
-        <div class="goal-bar"><div class="goal-fill" id="goal-fill"></div></div>
-        <div class="goal-ticks"><span class="goal-tick">₺0</span><span class="goal-tick" style="color:var(--green2);font-weight:600">₺30.000 hedef</span></div>
+        <div class="bal-goal">
+          <div class="bal-goal-bar"><div class="bal-goal-fill" id="goal-fill"></div></div>
+          <div class="bal-goal-meta"><span id="goal-status">—</span><span id="goal-target" class="bal-goal-target">₺30.000 hedef</span></div>
+        </div>
       </div>
 
-      <!-- Chart -->
-      <div class="card" style="margin-top:14px">
-        <div class="card-title">Gelir vs Gider Trendi</div>
-        <div class="chart-wrap"><canvas id="pnl-chart" role="img" aria-label="Gelir gider trendi">Trend grafiği</canvas></div>
+      <!-- Calendar -->
+      <div class="cal-wrap">
+        <div class="cal-head">
+          <button class="cal-nav" onclick="navDashMonth(-1)" aria-label="Önceki ay">‹</button>
+          <div class="cal-month" id="cal-month">—</div>
+          <button class="cal-nav" onclick="navDashMonth(1)" aria-label="Sonraki ay">›</button>
+        </div>
+        <div class="cal-dow">
+          <span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="cal-legend">
+          <span><span class="dot d-in"></span>gelir</span>
+          <span><span class="dot d-out"></span>gider</span>
+        </div>
       </div>
 
-      <!-- P&L -->
-      <div class="card">
-        <div class="card-title">Aylık Net P&L</div>
-        <div id="pnl-table"></div>
-      </div>
+      <!-- Selected day transactions -->
+      <div class="day-list" id="day-list"></div>
 
-      <!-- Alerts -->
-      <div class="alerts-wrap" id="dash-alerts"></div>
+      <!-- Collapsible: detaylar (mevcut dashboard içerikleri) -->
+      <details class="dash-more">
+        <summary>Detaylar · grafik · uyarılar</summary>
+        <div class="dash-more-body">
+          <div id="dash-pulse" class="dash-pulse"></div>
+          <div class="month-scroll" id="month-chips"></div>
+          <div class="metrics-row" id="dash-metrics"></div>
+          <div class="card" style="margin-top:14px">
+            <div class="card-title">Gelir vs Gider Trendi</div>
+            <div class="chart-wrap"><canvas id="pnl-chart" role="img" aria-label="Gelir gider trendi">Trend grafiği</canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Aylık Net P&L</div>
+            <div id="pnl-table"></div>
+          </div>
+          <div class="alerts-wrap" id="dash-alerts"></div>
+          <div style="text-align:right;font-size:10px;color:var(--text3);margin-top:10px" id="saved-at"></div>
+        </div>
+      </details>
+
+      <!-- Theme picker modal -->
+      <div id="theme-sheet" class="theme-sheet" onclick="closeThemePicker(event)">
+        <div class="theme-sheet-card" onclick="event.stopPropagation()">
+          <div class="theme-sheet-title">Tema</div>
+          <div class="theme-grid">
+            <button class="theme-opt" data-set="beyaz" onclick="setTheme('beyaz')">
+              <span class="theme-prev tp-beyaz"></span>
+              <span class="theme-name">Beyaz</span>
+            </button>
+            <button class="theme-opt" data-set="obsidian" onclick="setTheme('obsidian')">
+              <span class="theme-prev tp-obsidian"></span>
+              <span class="theme-name">Obsidian</span>
+            </button>
+            <button class="theme-opt" data-set="midnight" onclick="setTheme('midnight')">
+              <span class="theme-prev tp-midnight"></span>
+              <span class="theme-name">Gece Mavisi</span>
+            </button>
+            <button class="theme-opt" data-set="champagne" onclick="setTheme('champagne')">
+              <span class="theme-prev tp-champagne"></span>
+              <span class="theme-name">Şampanya</span>
+            </button>
+            <button class="theme-opt" data-set="yesil" onclick="setTheme('yesil')">
+              <span class="theme-prev tp-yesil"></span>
+              <span class="theme-name">Yeşil</span>
+            </button>
+            <button class="theme-opt" data-set="kirmizi" onclick="setTheme('kirmizi')">
+              <span class="theme-prev tp-kirmizi"></span>
+              <span class="theme-name">Kırmızı</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div class="section-gap"></div>
     </div>
@@ -1131,7 +1699,7 @@ let S = {
   incomes:  [],
   budgets:  {...DEF_BUD},
   selCat: 'yemek',
-  expM: null, expC: null, incM: null, dashM: CUR_IDX
+  expM: null, expC: null, incM: null, dashM: CUR_IDX, dashDay: ''
 };
 
 function loadFromStorage() {
@@ -1202,10 +1770,44 @@ function getAlerts(){
 }
 
 // ══════════════════════════════════════════════════════════════
-// RENDER DASHBOARD
+// RENDER DASHBOARD (calendar-first)
 // ══════════════════════════════════════════════════════════════
 let pnlCh;
 function renderDash(){
+  // ─── NEW: balance card + calendar (primary view) ───
+  const m = S.dashM!==null ? S.dashM : CUR_IDX;
+  const monthKey = MK[m];
+  const monthLabel = MN[m];
+  const monthInc = monthI(m);
+  const monthExp = monthP(m);
+  const monthNet = monthInc - monthExp;
+
+  // Greeting / title
+  const hour = new Date().getHours();
+  const hello = hour<6?'İyi geceler':hour<12?'Günaydın':hour<18?'İyi günler':'İyi akşamlar';
+  const helloEl = document.getElementById('dash-hello');
+  if(helloEl) helloEl.textContent = hello;
+  const subEl = document.getElementById('dash-sub');
+  if(subEl) subEl.textContent = monthLabel + (m===CUR_IDX?' · bu ay':'');
+
+  // Balance
+  const balNet=document.getElementById('bal-net');
+  const balInc=document.getElementById('bal-inc');
+  const balExp=document.getElementById('bal-exp');
+  if(balNet){
+    balNet.textContent = (monthNet>=0?'+':'−') + fmt(Math.abs(monthNet)) + ' ₺';
+    balNet.style.color = monthNet>=0 ? 'var(--text)' : 'var(--red)';
+  }
+  if(balInc) balInc.textContent = (monthInc>0?'+':'') + fmt(monthInc) + ' ₺';
+  if(balExp) balExp.textContent = '−' + fmt(monthExp) + ' ₺';
+
+  // Calendar
+  renderDashCalendar(monthKey);
+
+  // Selected day list
+  renderDayList();
+
+  // ─── Existing widgets (inside collapsible <details>) ───
   // Today / Week pulse (gerçek zamanlı)
   const _tD=new Date();
   const _tIso2=_tD.toISOString().slice(0,10);
@@ -1223,7 +1825,7 @@ function renderDash(){
 
   // Month chips
   const mc=document.getElementById('month-chips');
-  mc.innerHTML=`<button class="m-chip ${S.dashM===null?'on':''}" onclick="setDashM(null)">Tümü</button>`+MN.map((m,i)=>`<button class="m-chip ${S.dashM===i?'on':''}" onclick="setDashM(${i})">${m}</button>`).join('');
+  if(mc) mc.innerHTML=`<button class="m-chip ${S.dashM===null?'on':''}" onclick="setDashM(null)">Tümü</button>`+MN.map((m,i)=>`<button class="m-chip ${S.dashM===i?'on':''}" onclick="setDashM(${i})">${m}</button>`).join('');
 
   const displayM=S.dashM;
   const avgG=[0,1,2,3,4,5].reduce((a,i)=>a+monthP(i),0)/6;
@@ -1231,8 +1833,8 @@ function renderDash(){
   const curI=displayM!==null?monthI(displayM):S.incomes.reduce((a,i)=>a+i.amt,0)/6;
   const net=curI-curG;
 
-  document.getElementById('dash-sub').textContent=displayM===null?'Tüm Dönem Özeti':(displayM===CUR_IDX?curMonthLabel()+' · güncel ay':MN[displayM]);
-  document.getElementById('dash-metrics').innerHTML=`
+  const dmetrics=document.getElementById('dash-metrics');
+  if(dmetrics) dmetrics.innerHTML=`
     <div class="metric ${curG>GOAL?'red':''}">
       <div class="metric-label">KİŞİSEL GİDER</div>
       <div class="metric-value">${fmt(curG)}<span style="font-size:12px;font-weight:400;color:var(--text3)"> ₺</span></div>
@@ -1255,37 +1857,49 @@ function renderDash(){
     </div>
   `;
 
-  // Goal bar
+  // Goal bar (drives the new balance-card goal bar)
   const goalPct=Math.min(110,curG/GOAL*100);
-  document.getElementById('goal-fill').style.width=Math.min(100,goalPct)+'%';
-  document.getElementById('goal-fill').style.background=goalPct>=100?'var(--red)':goalPct>=80?'var(--gold)':'var(--green)';
-  document.getElementById('goal-status').textContent=goalPct>=100?`+${fmt(curG-GOAL)} ₺ aşım`:`${fmt(GOAL-curG)} ₺ kaldı`;
-  document.getElementById('goal-status').style.color=goalPct>=100?'var(--red2)':'var(--green)';
+  const _gf=document.getElementById('goal-fill');
+  const _gs=document.getElementById('goal-status');
+  if(_gf){
+    _gf.style.width=Math.min(100,goalPct)+'%';
+    _gf.style.background=goalPct>=100?'var(--red)':goalPct>=80?'var(--accent)':'linear-gradient(90deg,var(--accent),var(--accent2))';
+  }
+  if(_gs){
+    _gs.textContent=goalPct>=100?`+${fmt(curG-GOAL)} ₺ aşım`:`${fmt(GOAL-curG)} ₺ kaldı`;
+    _gs.style.color=goalPct>=100?'var(--red)':'var(--accent)';
+  }
 
   // Chart
   if(pnlCh) pnlCh.destroy();
   const ctx=document.getElementById('pnl-chart');
   if(ctx){
+    const cs=getComputedStyle(document.documentElement);
+    const colG=cs.getPropertyValue('--green').trim()||'#30B875';
+    const colR=cs.getPropertyValue('--red').trim()||'#E0544B';
+    const colTxt2=cs.getPropertyValue('--text2').trim()||'#6E6E73';
+    const colTxt3=cs.getPropertyValue('--text3').trim()||'#A1A1A6';
     pnlCh=new Chart(ctx,{
       type:'bar',
       data:{labels:MN,datasets:[
-        {label:'Gelir',data:MN.map((_,i)=>monthI(i)),backgroundColor:'rgba(48,184,117,0.85)',borderColor:'rgba(48,184,117,1)',borderWidth:0,borderRadius:6},
-        {label:'Gider',data:MN.map((_,i)=>monthP(i)),backgroundColor:'rgba(224,84,75,0.85)',borderColor:'rgba(224,84,75,1)',borderWidth:0,borderRadius:6},
-        {label:'Hedef',type:'line',data:Array(6).fill(GOAL),borderColor:'rgba(110,110,115,0.45)',borderDash:[4,4],borderWidth:1.5,pointRadius:0,fill:false},
+        {label:'Gelir',data:MN.map((_,i)=>monthI(i)),backgroundColor:colG,borderColor:colG,borderWidth:0,borderRadius:6},
+        {label:'Gider',data:MN.map((_,i)=>monthP(i)),backgroundColor:colR,borderColor:colR,borderWidth:0,borderRadius:6},
+        {label:'Hedef',type:'line',data:Array(6).fill(GOAL),borderColor:colTxt3,borderDash:[4,4],borderWidth:1.5,pointRadius:0,fill:false},
       ]},
       options:{
         responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false}},
         scales:{
-          x:{grid:{display:false,drawBorder:false},ticks:{color:'#6E6E73',font:{size:11},autoSkip:false}},
-          y:{grid:{color:'rgba(60,60,67,0.08)',drawBorder:false},ticks:{color:'#A1A1A6',font:{size:10},callback:v=>fmt(v)+'₺'}}
+          x:{grid:{display:false,drawBorder:false},ticks:{color:colTxt2,font:{size:11},autoSkip:false}},
+          y:{grid:{color:'rgba(128,128,128,0.12)',drawBorder:false},ticks:{color:colTxt3,font:{size:10},callback:v=>fmt(v)+'₺'}}
         }
       }
     });
   }
 
   // P&L table
-  document.getElementById('pnl-table').innerHTML=MN.map((m,i)=>{
+  const _pt=document.getElementById('pnl-table');
+  if(_pt) _pt.innerHTML=MN.map((m,i)=>{
     const g=monthI(i),ex=monthP(i),net=g-ex;
     return`<div class="pnl-row">
       <span class="pnl-month">${m}</span>
@@ -1298,7 +1912,8 @@ function renderDash(){
 
   // Alerts
   const als=getAlerts();
-  document.getElementById('dash-alerts').innerHTML=als.slice(0,4).map(a=>`
+  const _da=document.getElementById('dash-alerts');
+  if(_da) _da.innerHTML=als.slice(0,4).map(a=>`
     <div class="alert-pill ${a.lvl}">
       <div class="alert-dot ${a.lvl}"></div>
       <span class="alert-text"><strong>${a.cat.icon} ${a.cat.label}</strong> — Son 3 ay ort. ${fmt(a.avg3)} ₺ / limit ${fmt(a.lim)} ₺</span>
@@ -1306,6 +1921,151 @@ function renderDash(){
     </div>`).join('');
 }
 function setDashM(m){S.dashM=m;renderDash();}
+
+// ══════════════════════════════════════════════════════════════
+// CALENDAR + DAY VIEW
+// ══════════════════════════════════════════════════════════════
+function renderDashCalendar(monthKey){
+  const grid=document.getElementById('cal-grid');
+  const monthLbl=document.getElementById('cal-month');
+  if(!grid) return;
+
+  const [y,mo]=monthKey.split('-').map(Number);
+  const first=new Date(y,mo-1,1);
+  const last=new Date(y,mo,0);
+  const daysInMonth=last.getDate();
+  // Monday-start offset (0 = Mon)
+  const startOffset=(first.getDay()+6)%7;
+  const prevLast=new Date(y,mo-1,0).getDate();
+
+  // Aggregate amounts per day
+  const incMap={}, expMap={};
+  S.incomes.filter(i=>i.d.slice(0,7)===monthKey).forEach(i=>{ incMap[i.d]=(incMap[i.d]||0)+i.amt; });
+  S.expenses.filter(e=>e.d.slice(0,7)===monthKey).forEach(e=>{ expMap[e.d]=(expMap[e.d]||0)+e.amt; });
+
+  const todayIso=new Date().toISOString().slice(0,10);
+  const selIso=S.dashDay||'';
+
+  // Month header (Turkish)
+  const monthNamesTR=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  if(monthLbl) monthLbl.textContent=monthNamesTR[mo-1]+' '+y;
+
+  let html='';
+  // Previous month tail
+  for(let i=startOffset;i>0;i--){
+    html+=`<div class="cal-day other"><span class="num">${prevLast-i+1}</span><span class="dots"></span></div>`;
+  }
+  // Current month
+  for(let d=1;d<=daysInMonth;d++){
+    const iso=`${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasIn=incMap[iso]>0;
+    const hasOut=expMap[iso]>0;
+    const cls=['cal-day'];
+    if(iso===todayIso) cls.push('today');
+    if(iso===selIso) cls.push('sel');
+    const dots=(hasIn?'<span class="dot d-in"></span>':'')+(hasOut?'<span class="dot d-out"></span>':'');
+    html+=`<div class="${cls.join(' ')}" onclick="selectDay('${iso}')"><span class="num">${d}</span><span class="dots">${dots}</span></div>`;
+  }
+  // Next month head (fill to 6 rows = 42 cells)
+  const totalCells=startOffset+daysInMonth;
+  const trailing=(totalCells%7===0)?0:(7-(totalCells%7));
+  for(let i=1;i<=trailing;i++){
+    html+=`<div class="cal-day other"><span class="num">${i}</span><span class="dots"></span></div>`;
+  }
+  grid.innerHTML=html;
+}
+
+function selectDay(iso){
+  S.dashDay = (S.dashDay===iso) ? '' : iso;
+  renderDash();
+}
+
+function renderDayList(){
+  const list=document.getElementById('day-list');
+  if(!list) return;
+  const iso=S.dashDay;
+  if(!iso){ list.innerHTML=''; return; }
+  const inc=S.incomes.filter(i=>i.d===iso);
+  const exp=S.expenses.filter(e=>e.d===iso);
+  const rows=[
+    ...inc.map(i=>({...i,_k:'in'})),
+    ...exp.map(e=>({...e,_k:'out'}))
+  ].sort((a,b)=>(b.id||0)-(a.id||0));
+
+  const [y,mo,d]=iso.split('-');
+  const mNames=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  const head=`
+    <div class="day-list-head">
+      <span class="day-list-title">${parseInt(d)} ${mNames[parseInt(mo)-1]}</span>
+      <span class="day-list-meta">${rows.length} kayıt</span>
+    </div>`;
+
+  if(!rows.length){
+    list.innerHTML=head+`<div class="day-empty">Bu gün için kayıt yok</div>`;
+    return;
+  }
+
+  const body=rows.map(r=>{
+    const isIn=r._k==='in';
+    const catObj=isIn ? ICATS.find(c=>c.k===r.cat) : CATS.find(c=>c.k===r.cat);
+    const icon=catObj?catObj.icon:(isIn?'⚖️':'🏷️');
+    const label=catObj?catObj.label:r.cat;
+    return `<div class="day-row">
+      <div class="day-row-ic ${isIn?'in':'out'}">${icon}</div>
+      <div class="day-row-body">
+        <div class="day-row-desc">${(r.desc||label).replace(/</g,'&lt;')}</div>
+        <div class="day-row-cat">${label}${r.bank?' · '+r.bank:''}</div>
+      </div>
+      <div class="day-row-amt ${isIn?'in':'out'}">${isIn?'+':'−'}${fmt(r.amt)} ₺</div>
+    </div>`;
+  }).join('');
+
+  list.innerHTML=head+body;
+}
+
+function navDashMonth(delta){
+  const cur=S.dashM!==null?S.dashM:CUR_IDX;
+  const next=cur+delta;
+  if(next<0||next>=MN.length) return;
+  S.dashM=next;
+  S.dashDay='';
+  renderDash();
+}
+
+// ══════════════════════════════════════════════════════════════
+// THEME PICKER
+// ══════════════════════════════════════════════════════════════
+function setTheme(name){
+  const valid=['beyaz','obsidian','midnight','champagne','yesil','kirmizi'];
+  if(!valid.includes(name)) name='beyaz';
+  document.documentElement.setAttribute('data-theme',name);
+  try{ localStorage.setItem('ay_theme',name); }catch(_){}
+  document.querySelectorAll('.theme-opt').forEach(o=>{
+    o.classList.toggle('on', o.getAttribute('data-set')===name);
+  });
+  closeThemePicker();
+  // re-render chart so its tick colors adapt to theme
+  if(typeof renderDash==='function') renderDash();
+}
+function openThemePicker(){
+  const sh=document.getElementById('theme-sheet');
+  if(!sh) return;
+  sh.classList.add('on');
+  const cur=document.documentElement.getAttribute('data-theme')||'beyaz';
+  document.querySelectorAll('.theme-opt').forEach(o=>{
+    o.classList.toggle('on', o.getAttribute('data-set')===cur);
+  });
+}
+function closeThemePicker(ev){
+  if(ev && ev.target && !ev.target.classList.contains('theme-sheet')) return;
+  const sh=document.getElementById('theme-sheet');
+  if(sh) sh.classList.remove('on');
+}
+function loadTheme(){
+  let t='beyaz';
+  try{ t=localStorage.getItem('ay_theme')||'beyaz'; }catch(_){}
+  document.documentElement.setAttribute('data-theme',t);
+}
 
 // ══════════════════════════════════════════════════════════════
 // QUICK ENTRY
@@ -1612,6 +2372,7 @@ function go(screen,btn){
 // ══════════════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════════════
+loadTheme();
 loadFromStorage();
 </script>
 </body>
