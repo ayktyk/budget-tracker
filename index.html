@@ -1257,11 +1257,15 @@ html, body {
   color: var(--ink);
   font-family: var(--f-sans);
   transition: background 300ms ease, color 300ms ease;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
-body { overflow: hidden; }
-.app { max-width: 520px; background: var(--bg); }
+body { overflow-x: hidden; overflow-y: hidden; position: relative; }
+.app { width:100%; max-width: 520px; background: var(--bg); overflow:hidden; }
 .screen { padding-bottom: 116px; }
 .screen-shell { padding: 18px 16px 0; display:flex; flex-direction:column; gap:12px; }
+.screen-shell > * { min-width:0; max-width:100%; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-l); padding: 20px; box-shadow: var(--shadow-1); margin:0 !important; }
 .card-h { display:flex; justify-content:space-between; align-items:flex-end; gap:12px; margin-bottom:14px; }
 .card-h h3 { margin:0; font: 400 20px/1 var(--f-serif); color:var(--ink); }
@@ -1286,7 +1290,7 @@ body { overflow: hidden; }
 .spark-stick > span { position:absolute; inset:auto 0 0; border-radius:inherit; background:var(--neg); }
 .spark-col.active .spark-stick > span { background:var(--ink); }
 .spark-label { font:500 11px/1 var(--f-mono); color:var(--ink-3); }
-.month-scroll, .filter-row, .bank-chip-row { display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+.month-scroll, .filter-row, .bank-chip-row { display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; max-width:100%; }
 .month-scroll::-webkit-scrollbar, .filter-row::-webkit-scrollbar, .bank-chip-row::-webkit-scrollbar { display:none; }
 .chip, .m-chip, .f-chip, .bank-chip, .theme-chip { padding:8px 14px; border-radius:22px; border:1px solid var(--line-2); background:var(--bg-elev); font:500 13px/1 var(--f-sans); color:var(--ink); cursor:pointer; }
 .m-chip.on, .f-chip.on, .bank-chip.on { background:var(--ink); color:var(--bg); border-color:var(--ink); }
@@ -1348,8 +1352,11 @@ body { overflow: hidden; }
 .b-input { width:92px; background:var(--bg-elev); border:1px solid var(--line-2); border-radius:var(--r-m); padding:10px 12px; color:var(--ink); font:500 13px/1 var(--f-mono); }
 .bbar { height:8px; background:var(--bg-elev); border-radius:999px; overflow:hidden; margin:10px 0 8px; }
 .bsub, .budget-pct { font-family:var(--f-mono); }
-.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
-.cal-day { aspect-ratio:1/1; border-radius:14px; border:1px solid transparent; background:var(--bg-elev); color:var(--ink); }
+.cal-head-nav { display:flex; align-items:center; gap:8px; min-width:0; }
+.cal-month { white-space:nowrap; min-width:0; }
+.cal-dow, .cal-grid { width:100%; grid-template-columns:repeat(7,minmax(0,1fr)); }
+.cal-grid { display:grid; gap:6px; }
+.cal-day { aspect-ratio:1/1; min-width:0; border-radius:14px; border:1px solid transparent; background:var(--bg-elev); color:var(--ink); }
 .cal-day.other { opacity:.45; }
 .cal-day.today { border-color:var(--ink); }
 .cal-day.sel { background:var(--ink); color:var(--bg); }
@@ -1382,6 +1389,18 @@ body { overflow: hidden; }
 .seed-banner-text { font:500 12px/1.45 var(--f-sans); }
 .seed-banner-close { border:none; background:rgba(255,255,255,0.18); color:#fff; border-radius:999px; padding:8px 12px; font:500 12px/1 var(--f-sans); }
 .toast { bottom:96px; background:var(--ink); color:var(--bg); border:1px solid var(--line-2); }
+@supports (height: 100svh) {
+  .app { min-height:100svh; height:100svh; }
+}
+@supports not (height: 100svh) {
+  .app { min-height:100vh; height:100vh; }
+}
+.screens { min-height:0; }
+.screen { overflow-x:hidden; overscroll-behavior-y:contain; }
+.metrics-row { padding:0; max-width:100%; }
+.dash-pulse { padding:0; display:flex; flex-wrap:wrap; gap:8px; }
+.dash-calendar-card, .spark-card, .hero-card { overflow:hidden; }
+.chart-wrap, .chart-wrap canvas { max-width:100%; }
 @media (max-width: 420px) {
   .screen-shell { padding-inline: 12px; }
   .cat-grid { grid-template-columns:repeat(2,1fr); }
@@ -1389,6 +1408,33 @@ body { overflow: hidden; }
   .brand-title { font-size:34px; }
   .hero-value { font-size:48px; }
   .amount-big { font-size:60px; }
+}
+@media (max-width: 480px) {
+  .screen-shell { padding:14px 12px 0; }
+  .card, .hero-card { padding:16px; }
+  .card-h { align-items:flex-start; flex-wrap:wrap; }
+  .hero-value { font-size:42px; }
+  .goal-meta-row { flex-direction:column; align-items:flex-start; gap:4px; }
+  .sparkbar { gap:6px; }
+  .metrics-row { grid-template-columns:1fr; }
+  .q-grid-two, .form-row { grid-template-columns:1fr; }
+  .bank-chip-row { flex-wrap:wrap; overflow:visible; }
+  .bank-chip { flex:0 0 auto; padding:7px 10px; font-size:12px; }
+  .cal-head-nav { width:100%; justify-content:space-between; }
+  .cal-month { font-size:12px; }
+  .cal-dow { gap:4px; }
+  .cal-grid { gap:4px; }
+  .cal-day { border-radius:12px; font-size:12px; }
+  .amount-big { font-size:52px; }
+  #q-amt { width:min(170px, 60vw); }
+}
+@media (max-width: 380px) {
+  .brand-title { font-size:30px; }
+  .hero-value { font-size:38px; }
+  .amount-big { font-size:46px; }
+  .cal-dow span { font-size:8px; }
+  .cal-day { font-size:11px; }
+  .nav { width:calc(100% - 18px); bottom:10px; }
 }
 </style>
 </head>
@@ -1832,7 +1878,8 @@ function monoChip(id,size=''){
 function buildDesignLayout(){
   const app=document.querySelector('.app');
   if(!app) return;
-  app.insertAdjacentHTML('afterbegin', `<div id="seed-banner" class="seed-banner" style="display:none"><div class="seed-banner-text"><strong>Demo veriler aktif.</strong> İstersen Detaylar > Veri bölümünden temizleyebilirsin.</div><button class="seed-banner-close" onclick="dismissSeedBanner()">Kapat</button></div>`);
+  const oldBanner=document.getElementById('seed-banner');
+  if(oldBanner) oldBanner.remove();
   document.getElementById('s-dash').innerHTML = `
     <div class="screen-shell">
       <div class="brand-bar">
@@ -1882,14 +1929,11 @@ function buildDesignLayout(){
 }
 function dismissSeedBanner(){
   const el=document.getElementById('seed-banner');
-  if(el) el.style.display='none';
-  try{ localStorage.setItem('ay_seed_banner_dismissed','1'); }catch(_){}
+  if(el) el.remove();
 }
 function maybeShowSeedBanner(){
-  const hasSeed = S.userExp && S.userExp.length >= SEED.length;
-  const dismissed = (()=>{ try{return localStorage.getItem('ay_seed_banner_dismissed')==='1';}catch(_){return false;} })();
   const el=document.getElementById('seed-banner');
-  if(el) el.style.display = hasSeed && !dismissed ? 'flex' : 'none';
+  if(el) el.remove();
 }
 // Rolling 6-month window ending at current month
 const MONTH_SHORT=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
