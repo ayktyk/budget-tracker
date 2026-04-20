@@ -1,11 +1,11 @@
 {
-  "name": "Bütçe Takip — Aykut Yeşilkaya",
-  "short_name": "Bütçe",
-  "description": "Kişisel bütçe ve gelir takip uygulaması",
+  "name": "Bütçem",
+  "short_name": "Bütçem",
+  "description": "Kişisel & mesleki bütçe takibi",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F2F2F7",
-  "theme_color": "#F2F2F7",
+  "background_color": "#0e1117",
+  "theme_color": "#0e1117",
   "orientation": "portrait",
   "icons": [
     {
