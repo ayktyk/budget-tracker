@@ -1444,340 +1444,18 @@ body { overflow-x: hidden; overflow-y: hidden; position: relative; }
   <!-- ═══ SCREENS ═══ -->
   <div class="screens">
 
-    <!-- ── DASHBOARD ── -->
-    <div id="s-dash" class="screen on">
-      <!-- Top bar: title + theme picker -->
-      <div class="dash-topbar">
-        <div>
-          <div class="dash-hello" id="dash-hello">Merhaba</div>
-          <div class="dash-title" id="dash-sub">Bu Ay</div>
-        </div>
-        <button class="theme-btn" id="theme-btn" aria-label="Tema değiştir" onclick="openThemePicker()">
-          <span class="theme-swatch" id="theme-swatch"></span>
-        </button>
+    <!-- ── Ekranlar (içerikler buildDesignLayout() tarafından runtime'da enjekte edilir) ── -->
+    <div id="s-dash" class="screen on"></div>
+    <div id="s-quick" class="screen"></div>
+    <div id="s-income" class="screen"></div>
+    <div id="s-more" class="screen"></div>
+
+    <!-- ── BUDGET (bağımsız ekran, alt nav'daki Bütçe butonu için) ── -->
+    <div id="s-budget" class="screen">
+      <div class="screen-shell">
+        <div class="card"><div class="card-h"><h3>Bütçe</h3><span class="hint">Aylık limitler</span></div><div id="budget-bars-main"></div></div>
+        <div class="section-gap"></div>
       </div>
-
-      <!-- Balance card: net + income/expense -->
-      <div class="balance-card">
-        <div class="bal-label">NET BAKİYE</div>
-        <div class="bal-value" id="bal-net">—</div>
-        <div class="bal-split">
-          <div class="bal-cell">
-            <span class="bal-dot bal-in"></span>
-            <div>
-              <div class="bal-k">Gelir</div>
-              <div class="bal-v" id="bal-inc">—</div>
-            </div>
-          </div>
-          <div class="bal-cell">
-            <span class="bal-dot bal-out"></span>
-            <div>
-              <div class="bal-k">Gider</div>
-              <div class="bal-v" id="bal-exp">—</div>
-            </div>
-          </div>
-        </div>
-        <div class="bal-goal">
-          <div class="bal-goal-bar"><div class="bal-goal-fill" id="goal-fill"></div></div>
-          <div class="bal-goal-meta"><span id="goal-status">—</span><span id="goal-target" class="bal-goal-target">₺30.000 hedef</span></div>
-        </div>
-      </div>
-
-      <!-- Calendar -->
-      <div class="cal-wrap">
-        <div class="cal-head">
-          <button class="cal-nav" onclick="navDashMonth(-1)" aria-label="Önceki ay">‹</button>
-          <div class="cal-month" id="cal-month">—</div>
-          <button class="cal-nav" onclick="navDashMonth(1)" aria-label="Sonraki ay">›</button>
-        </div>
-        <div class="cal-dow">
-          <span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span>
-        </div>
-        <div class="cal-grid" id="cal-grid"></div>
-        <div class="cal-legend">
-          <span><span class="dot d-in"></span>gelir</span>
-          <span><span class="dot d-out"></span>gider</span>
-        </div>
-      </div>
-
-      <!-- Selected day transactions -->
-      <div class="day-list" id="day-list"></div>
-
-      <!-- Collapsible: detaylar (mevcut dashboard içerikleri) -->
-      <details class="dash-more">
-        <summary>Detaylar · grafik · uyarılar</summary>
-        <div class="dash-more-body">
-          <div id="dash-pulse" class="dash-pulse"></div>
-          <div class="month-scroll" id="month-chips"></div>
-          <div class="metrics-row" id="dash-metrics"></div>
-          <div class="card" style="margin-top:14px">
-            <div class="card-title">Gelir vs Gider Trendi</div>
-            <div class="chart-wrap"><canvas id="pnl-chart" role="img" aria-label="Gelir gider trendi">Trend grafiği</canvas></div>
-          </div>
-          <div class="card">
-            <div class="card-title">Aylık Net P&L</div>
-            <div id="pnl-table"></div>
-          </div>
-          <div class="alerts-wrap" id="dash-alerts"></div>
-          <div style="text-align:right;font-size:10px;color:var(--text3);margin-top:10px" id="saved-at"></div>
-        </div>
-      </details>
-
-      <!-- Theme picker modal -->
-      <div id="theme-sheet" class="theme-sheet" onclick="closeThemePicker(event)">
-        <div class="theme-sheet-card" onclick="event.stopPropagation()">
-          <div class="theme-sheet-title">Tema</div>
-          <div class="theme-grid">
-            <button class="theme-opt" data-set="beyaz" onclick="setTheme('beyaz')">
-              <span class="theme-prev tp-beyaz"></span>
-              <span class="theme-name">Beyaz</span>
-            </button>
-            <button class="theme-opt" data-set="obsidian" onclick="setTheme('obsidian')">
-              <span class="theme-prev tp-obsidian"></span>
-              <span class="theme-name">Obsidian</span>
-            </button>
-            <button class="theme-opt" data-set="midnight" onclick="setTheme('midnight')">
-              <span class="theme-prev tp-midnight"></span>
-              <span class="theme-name">Gece Mavisi</span>
-            </button>
-            <button class="theme-opt" data-set="champagne" onclick="setTheme('champagne')">
-              <span class="theme-prev tp-champagne"></span>
-              <span class="theme-name">Şampanya</span>
-            </button>
-            <button class="theme-opt" data-set="yesil" onclick="setTheme('yesil')">
-              <span class="theme-prev tp-yesil"></span>
-              <span class="theme-name">Yeşil</span>
-            </button>
-            <button class="theme-opt" data-set="kirmizi" onclick="setTheme('kirmizi')">
-              <span class="theme-prev tp-kirmizi"></span>
-              <span class="theme-name">Kırmızı</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-gap"></div>
-    </div>
-
-    <!-- ── QUICK ENTRY ── -->
-    <div id="s-quick" class="screen">
-      <div class="screen-header" style="padding-bottom:4px">
-        <div><div class="page-title">Hızlı Giriş</div><div class="page-sub">Nakit · Havale · Gider</div></div>
-        <div id="quick-date-display" style="font-size:11px;color:var(--text3);margin-top:6px;font-family:'Space Grotesk',sans-serif;text-align:right"></div>
-      </div>
-
-      <!-- Amount -->
-      <div class="quick-amount-display">
-        <div class="amount-label">Tutar</div>
-        <div class="amount-input-row">
-          <span class="currency-symbol">₺</span>
-          <input type="number" id="q-amt" placeholder="0" inputmode="decimal" step="any">
-        </div>
-      </div>
-
-      <!-- Description + Date + Bank -->
-      <div class="quick-fields">
-        <div class="qfield">
-          <label>Açıklama / Kime / Nerede</label>
-          <input type="text" id="q-desc" placeholder="örn: Hebun Çorba, BİM, İbrahim Yaman..." autocomplete="off">
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="qfield">
-            <label>Tarih</label>
-            <input type="date" id="q-date">
-          </div>
-          <div class="qfield">
-            <label>Kaynak</label>
-            <select id="q-bank">
-              <option value="Havale">🔄 Havale</option>
-              <option value="Nakit">💵 Nakit</option>
-              <option value="İşbank">🔵 İşbank</option>
-              <option value="Enpara">🟣 Enpara</option>
-              <option value="VakıfBank">🟢 VakıfBank</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Categories -->
-      <div class="cat-section" style="margin-top:14px">
-        <div class="cat-section-label">Kategori</div>
-        <div class="cat-grid" id="cat-grid"></div>
-      </div>
-
-      <button class="add-btn" onclick="quickAdd()">Ekle ↑</button>
-
-      <!-- Son girişler -->
-      <div class="card" style="margin-top:14px">
-        <div class="card-title">Son Girişler</div>
-        <div id="quick-recents"></div>
-      </div>
-
-      <!-- Sık havaleler -->
-      <div class="card">
-        <div class="card-title">Sık Havaleler</div>
-        <div class="fav-list" id="fav-list"></div>
-      </div>
-
-      <div class="section-gap"></div>
-    </div>
-
-    <!-- ── INCOME ── -->
-    <div id="s-income" class="screen">
-      <div class="screen-header">
-        <div><div class="page-title">Gelirler</div><div class="page-sub">Müvekkil ödemeleri</div></div>
-      </div>
-
-      <!-- Add income -->
-      <div class="card" style="margin-top:14px">
-        <div class="card-title">Yeni Gelir Ekle</div>
-        <div class="form-row">
-          <div class="field"><label>Tarih</label><input type="date" id="gi-date"></div>
-          <div class="field"><label>Tutar (₺)</label><input type="number" id="gi-amt" placeholder="0" inputmode="decimal"></div>
-        </div>
-        <div class="field" style="margin-bottom:10px"><label>Müvekkil / Açıklama</label><input type="text" id="gi-desc" placeholder="Müvekkil adı, dava türü..."></div>
-        <div class="form-row">
-          <div class="field"><label>Kategori</label>
-            <select id="gi-cat">
-              <option value="tahsilat">⚖️ UYAP Tahsilatı</option>
-              <option value="vekalet">💼 Vekalet Ücreti</option>
-              <option value="danismanlik">🤝 Danışmanlık</option>
-              <option value="avans">💰 Dava Avansı</option>
-              <option value="diger-gelir">📌 Diğer</option>
-            </select>
-          </div>
-          <div class="field"><label>Hesap</label>
-            <select id="gi-bank">
-              <option>Enpara</option><option>İşbank</option><option>VakıfBank</option><option>Nakit</option>
-            </select>
-          </div>
-        </div>
-        <button class="action-btn primary" onclick="addIncome()">Gelir Kaydet ↑</button>
-      </div>
-
-      <!-- Income history -->
-      <div class="filter-row" id="inc-mf"></div>
-
-      <div class="card" style="margin-top:10px">
-        <div class="card-title" style="display:flex;justify-content:space-between">
-          <span>Gelir Geçmişi</span>
-          <span id="inc-total" style="color:var(--green);font-family:'Space Grotesk',sans-serif;font-weight:700"></span>
-        </div>
-        <div id="inc-list"></div>
-      </div>
-      <div class="section-gap"></div>
-    </div>
-
-    <!-- ── MORE (Budget + Transactions + Calendar + Settings) ── -->
-    <div id="s-more" class="screen">
-      <div class="screen-header">
-        <div><div class="page-title">Detaylar</div></div>
-      </div>
-
-      <!-- Sub-tabs -->
-      <div class="filter-row" style="margin-top:10px">
-        <button class="f-chip on" onclick="setMoreTab('budget',this)">Bütçe</button>
-        <button class="f-chip" onclick="setMoreTab('txn',this)">İşlemler</button>
-        <button class="f-chip" onclick="setMoreTab('calendar',this)">Takvim</button>
-        <button class="f-chip" onclick="setMoreTab('sabit',this)">Sabit Giderler</button>
-        <button class="f-chip" onclick="setMoreTab('ekstre',this)">Ekstre Yükle</button>
-        <button class="f-chip" onclick="setMoreTab('data',this)">Veri</button>
-      </div>
-
-      <div id="more-budget" class="more-panel">
-        <div class="card" style="margin-top:10px">
-          <div class="card-title">Aylık Bütçe Limitleri</div>
-          <div id="budget-bars"></div>
-        </div>
-      </div>
-
-      <div id="more-txn" class="more-panel" style="display:none">
-        <div class="filter-row" id="txn-mf" style="margin-top:10px"></div>
-        <div class="filter-row" id="txn-cf"></div>
-        <div class="card"><div id="txn-list"></div></div>
-      </div>
-
-      <div id="more-calendar" class="more-panel" style="display:none">
-        <div class="card" style="margin-top:10px">
-          <div class="card-title">Nisan 2026 — Ödeme Takvimi</div>
-          <div class="cal-grid" id="cal-grid"></div>
-          <div id="cal-legend" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;font-size:10px;color:var(--text3)"></div>
-        </div>
-        <div class="card">
-          <div class="card-title">Yaklaşan Ödemeler</div>
-          <div id="upcoming-pmts"></div>
-        </div>
-        <div class="card">
-          <div class="card-title" style="color:var(--gold)">Ekstre İş Akışı</div>
-          <div style="font-size:12px;color:var(--text2);line-height:2">
-            <div>📅 <strong style="color:var(--text)">5'i</strong> → İşbank ekstresi yapıştır</div>
-            <div>📅 <strong style="color:var(--text)">11'i</strong> → VakıfBank ekstresi yapıştır</div>
-            <div>📅 <strong style="color:var(--text)">23'ü</strong> → Enpara ekstresi yapıştır</div>
-            <div>🔄 <strong style="color:var(--text)">Her zaman</strong> → Nakit + havaleler anlık gir</div>
-          </div>
-        </div>
-      </div>
-
-      <div id="more-sabit" class="more-panel" style="display:none">
-        <div class="card" style="margin-top:10px">
-          <div class="card-title">Aylık Sabit Giderler</div>
-          <div id="fixed-list"></div>
-        </div>
-      </div>
-
-      <div id="more-ekstre" class="more-panel" style="display:none">
-        <div class="card" style="margin-top:10px">
-          <div class="card-title">Ekstre — Gemini AI</div>
-          <div class="field" style="margin-bottom:10px">
-            <label>Gemini API Key</label>
-            <input type="password" id="gemini-key" placeholder="AIza... anahtarını buraya yapıştırın" oninput="saveGeminiKey(this.value)">
-            <div style="font-size:10px;color:var(--text3);margin-top:6px;line-height:1.5">
-              Google AI Studio'dan aldığın Gemini API anahtarını buraya yapıştır. Anahtar yalnızca bu tarayıcının localStorage'ında tutulur.
-            </div>
-          </div>
-          <div class="field" style="margin-bottom:10px"><label>Banka</label>
-            <select id="stmt-bank" style="width:auto;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--r);padding:10px 12px;color:var(--text);font-family:'Inter',sans-serif;outline:none">
-              <option>İşbank</option><option>Enpara</option><option>VakıfBank</option>
-            </select>
-          </div>
-          <div class="field" style="margin-bottom:10px"><label>Ekstre Metni</label>
-            <textarea id="stmt-text" placeholder="Bankadan kopyaladığınız ekstre satırlarını buraya yapıştırın..."></textarea>
-          </div>
-          <button class="action-btn primary" onclick="parseStmt()" id="parse-btn">İçe Aktar</button>
-          <div style="font-size:10px;color:var(--text3);margin-top:8px;line-height:1.5">
-            Bu işlem önce Gemini ile analiz eder. Gemini hata verirse yerel parser devreye girer ve bulunan giderleri aylık harcamalara ekler.
-          </div>
-          <div id="parse-res" style="margin-top:10px;font-size:11px;font-family:monospace;color:var(--text2);white-space:pre-wrap;line-height:1.6"></div>
-        </div>
-        <div class="card">
-          <div class="card-title">Genel Harcama Analizi</div>
-          <div style="font-size:11px;color:var(--text2);line-height:1.7;margin-bottom:10px">
-            Son 6 ay giderleri, gelirler, bütçeler ve büyük harcamalar Gemini ile yorumlanır. Bu alan veri eklemez, sadece analiz yazar.
-          </div>
-          <button class="action-btn primary" onclick="analyzeAllSpending()" id="analyze-all-btn">Analiz Et</button>
-          <div id="analysis-res" style="margin-top:10px;font-size:11px;font-family:monospace;color:var(--text2);white-space:pre-wrap;line-height:1.7"></div>
-        </div>
-      </div>
-
-      <div id="more-data" class="more-panel" style="display:none">
-        <div class="card" style="margin-top:10px">
-          <div class="card-title">Veri Yönetimi</div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <button class="action-btn secondary" onclick="exportData()">⬇ JSON Yedek Al</button>
-            <button class="action-btn secondary" onclick="document.getElementById('imp-f').click()">⬆ Yedek Yükle</button>
-            <input type="file" id="imp-f" accept=".json" style="display:none" onchange="importData(event)">
-            <button class="action-btn secondary" onclick="resetAll()" style="color:#E05656;border-color:rgba(224,86,86,0.3)">⟲ Tüm Verileri Sıfırla</button>
-            <button class="action-btn secondary" onclick="reseedDemo()">↻ Demo Verileri Yükle</button>
-          </div>
-          <div id="data-st" style="font-size:11px;color:var(--green);margin-top:8px"></div>
-          <div style="font-size:10px;color:var(--text3);margin-top:6px;line-height:1.5">
-            <b>Sıfırla:</b> Tüm giderleri, gelirleri ve bütçeleri siler.<br>
-            <b>Demo Yükle:</b> Örnek verileri tekrar ekler (mevcut verinizin üstüne).
-          </div>
-        </div>
-      </div>
-
-      <div class="section-gap"></div>
     </div>
 
   </div><!-- .screens -->
@@ -1837,11 +1515,10 @@ const CATS=[
   {id:'diger',    label:'Diğer',      icon:'📌', color:'#777'},
 ];
 const ICATS=[
-  {id:'tahsilat',    label:'UYAP Tahsilatı',  color:'#3EC98A'},
-  {id:'vekalet',     label:'Vekalet Ücreti',  color:'#4CAF68'},
-  {id:'danismanlik', label:'Danışmanlık',      color:'#3EC9C4'},
-  {id:'avans',       label:'Dava Avansı',      color:'#5B8DE8'},
-  {id:'diger-gelir', label:'Diğer Gelir',      color:'#888'},
+  {id:'dava',          label:'Dava',          color:'#4CAF68'},
+  {id:'arabuluculuk',  label:'Arabuluculuk',  color:'#3EC9C4'},
+  {id:'danisma',       label:'Danışma',       color:'#5B8DE8'},
+  {id:'diger',         label:'Diğer',         color:'#888'},
 ];
 const cmap=Object.fromEntries([...CATS,...ICATS].map(c=>[c.id,c]));
 const CAT_META = {
@@ -1863,6 +1540,12 @@ const CAT_META = {
   uyap:{mono:'U',color:'#6b5b95',label:'UYAP'},
   nakit:{mono:'N',color:'#8a857d',label:'Nakit'},
   diger:{mono:'D',color:'#8a857d',label:'Diğer'},
+  // Yeni gelir kategorileri
+  dava:{mono:'D',color:'#4CAF68',label:'Dava'},
+  arabuluculuk:{mono:'A',color:'#3EC9C4',label:'Arabuluculuk'},
+  danisma:{mono:'D',color:'#5B8DE8',label:'Danışma'},
+  // Legacy gelir kategorileri — eski kayıtlar migration'da 'diger'e düştü,
+  // yine de label'ları görünsün diye tutuyoruz
   tahsilat:{mono:'T',color:'#5b7553',label:'Tahsilat'},
   vekalet:{mono:'V',color:'#3d6a4e',label:'Vekalet'},
   danismanlik:{mono:'D',color:'#4a7a8a',label:'Danışmanlık'},
@@ -1892,8 +1575,8 @@ function buildDesignLayout(){
         <div class="hero-metrics"><span>Gelir <strong id="bal-inc">—</strong></span><span>·</span><span>Kişisel Gider <strong id="bal-exp">—</strong></span><span>·</span><span class="uyap-badge">Mesleki <strong id="bal-uyap">—</strong></span></div>
         <div class="goal-wrap-hero"><div class="goal-track"><div class="goal-fill-hero" id="goal-fill"></div></div><div class="goal-meta-row"><span id="goal-status">—</span><span id="goal-target">₺30.000 hedef</span></div></div>
       </div>
-      <div class="card spark-card"><div class="card-h"><h3>Altı Aylık Nabız</h3><span class="hint">Gider ritmi</span></div><div class="sparkbar" id="dash-spark"></div></div>
       <div class="card dash-calendar-card"><div class="card-h"><h3>Takvim</h3><div class="cal-head-nav"><button class="cal-nav btn-ghost" onclick="navDashMonth(-1)">‹</button><div class="cal-month" id="dash-cal-month">—</div><button class="cal-nav btn-ghost" onclick="navDashMonth(1)">›</button></div></div><div class="cal-dow"><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span></div><div class="cal-grid dash-grid" id="dash-cal-grid"></div></div>
+      <div class="card spark-card"><div class="card-h"><h3>Altı Aylık Nabız</h3><span class="hint">Gider ritmi</span></div><div class="sparkbar" id="dash-spark"></div></div>
       <div class="card"><div class="card-h"><h3>Gün Akışı</h3><span class="hint">Seçili gün</span></div><div class="day-list" id="day-list"></div></div>
       <div class="month-scroll" id="month-chips"></div>
       <div class="metrics-row" id="dash-metrics"></div>
@@ -1906,24 +1589,22 @@ function buildDesignLayout(){
     <div class="screen-shell">
       <div class="card fav-strip-card"><div class="card-h"><h3>Sık Havale</h3><span class="hint">Tek dokunuş</span></div><div class="fav-list fav-strip" id="fav-list"></div></div>
       <div class="card quick-main-card"><div class="card-h"><h3>Hızlı Giriş</h3><span class="hint" id="quick-date-display">—</span></div><div class="amount-big-wrap"><div class="amount-big"><span class="amount-currency">₺</span><input type="text" id="q-amt" placeholder="0" inputmode="decimal" autocomplete="off"></div></div><div class="numpad" id="quick-pad"><button onclick="quickPad('1')">1</button><button onclick="quickPad('2')">2</button><button onclick="quickPad('3')">3</button><button onclick="quickPad('4')">4</button><button onclick="quickPad('5')">5</button><button onclick="quickPad('6')">6</button><button onclick="quickPad('7')">7</button><button onclick="quickPad('8')">8</button><button onclick="quickPad('9')">9</button><button onclick="quickPad(',')">,</button><button onclick="quickPad('0')">0</button><button onclick="quickPad('del')">Sil</button></div><div class="quick-fields"><div class="qfield"><label>Açıklama</label><input class="input" type="text" id="q-desc" placeholder="örn: Hebun Çorba, BİM, İbrahim Yaman..." autocomplete="off"></div><div class="q-grid-two"><div class="qfield"><label>Tarih</label><input class="input" type="date" id="q-date"></div><div class="qfield"><label>Kaynak</label><select id="q-bank" style="display:none"><option value="Havale">Havale</option><option value="Nakit">Nakit</option><option value="İşbank">İşbank</option><option value="Enpara">Enpara</option><option value="VakıfBank">VakıfBank</option></select><div class="bank-chip-row" id="q-bank-chips"></div></div></div></div><div class="cat-section"><div class="eyebrow">Kategori</div><div class="cat-grid" id="cat-grid"></div></div><button class="btn btn-primary btn-block" onclick="quickAdd()">Kaydet</button></div>
-      <div class="card"><div class="card-h"><h3>Son Girişler</h3><span class="hint">En yeni 8</span></div><div id="quick-recents"></div></div>
+      <div class="card"><div class="card-h"><h3>İşlemler</h3><span class="hint">Tüm kayıtlar</span></div><div class="filter-row filter-row-tight" id="quick-txn-mf"></div><div class="filter-row filter-row-tight" id="quick-txn-cf"></div><div id="quick-txn-list"></div></div>
     </div>`;
   document.getElementById('s-income').innerHTML = `
     <div class="screen-shell">
       <div class="card income-header-card"><div class="eyebrow" id="income-period-label">Gelirler · Dönem</div><div class="hero-value income-total" id="inc-total">—</div></div>
       <div class="filter-row" id="inc-mf"></div>
-      <div class="card"><div class="card-h"><h3>Yeni Gelir</h3><span class="hint">Müvekkil akışı</span></div><div class="form-row"><div class="field"><label>Tarih</label><input class="input" type="date" id="gi-date"></div><div class="field"><label>Tutar (₺)</label><input class="input" type="number" id="gi-amt" placeholder="0" inputmode="decimal"></div></div><div class="field" style="margin-bottom:10px"><label>Müvekkil / Açıklama</label><input class="input" type="text" id="gi-desc" placeholder="Müvekkil adı, dava türü..."></div><div class="field" style="margin-bottom:10px"><label>Gelir Kategorisi</label><div class="cat-grid income-cat-grid" id="income-cat-grid"></div><select id="gi-cat" style="display:none"><option value="tahsilat">UYAP Tahsilatı</option><option value="vekalet">Vekalet Ücreti</option><option value="danismanlik">Danışmanlık</option><option value="avans">Dava Avansı</option><option value="diger-gelir">Diğer</option></select></div><div class="field"><label>Hesap</label><div class="bank-chip-row" id="gi-bank-chips"></div><select id="gi-bank" style="display:none"><option>Enpara</option><option>İşbank</option><option>VakıfBank</option><option>Nakit</option><option>Havale</option></select></div><button class="btn btn-primary btn-block" onclick="addIncome()">Kaydet</button></div>
+      <div class="card"><div class="card-h"><h3>Yeni Gelir</h3><span class="hint">Müvekkil akışı</span></div><div class="form-row"><div class="field"><label>Tarih</label><input class="input" type="date" id="gi-date"></div><div class="field"><label>Tutar (₺)</label><input class="input" type="number" id="gi-amt" placeholder="0" inputmode="decimal"></div></div><div class="field" style="margin-bottom:10px"><label>Müvekkil / Açıklama</label><input class="input" type="text" id="gi-desc" placeholder="Müvekkil adı, dava türü..."></div><div class="field" style="margin-bottom:10px"><label>Gelir Kategorisi</label><div class="cat-grid income-cat-grid" id="income-cat-grid"></div><select id="gi-cat" style="display:none"><option value="dava">Dava</option><option value="arabuluculuk">Arabuluculuk</option><option value="danisma">Danışma</option><option value="diger">Diğer</option></select></div><div class="field"><label>Hesap</label><div class="bank-chip-row" id="gi-bank-chips"></div><select id="gi-bank" style="display:none"><option>Enpara</option><option>İşbank</option><option>VakıfBank</option><option>Nakit</option><option>Havale</option></select></div><button class="btn btn-primary btn-block" onclick="addIncome()">Kaydet</button></div>
       <div class="card"><div class="card-h"><h3>Gelir Geçmişi</h3><span class="hint">Filtreli liste</span></div><div id="inc-list"></div></div>
     </div>`;
   document.getElementById('s-more').innerHTML = `
     <div class="screen-shell">
-      <div class="card theme-picker"><div class="card-h"><h3>Görünüm</h3><span class="hint">Anında değişir</span></div><div class="theme-row"><button data-theme-pick="cream" class="theme-chip" onclick="setTheme('cream')"><span class="sw" style="background:#f4efe6"></span>Krem Kâğıt</button><button data-theme-pick="onyx" class="theme-chip" onclick="setTheme('onyx')"><span class="sw" style="background:#0e1117"></span>Onyx & Altın</button><button data-theme-pick="marble" class="theme-chip" onclick="setTheme('marble')"><span class="sw" style="background:#ecedef"></span>Mermer</button><button data-theme-pick="midnight" class="theme-chip" onclick="setTheme('midnight')"><span class="sw" style="background:#0d1220"></span>Gece Mavisi</button></div></div>
-      <div id="more-budget" class="more-panel"><div class="card" id="budget-card"><div class="card-h"><h3>Bütçe</h3><span class="hint">Son 3 ay ort.</span></div><div id="budget-bars"></div></div></div>
-      <div id="more-txn" class="more-panel"><div class="card"><div class="card-h"><h3>İşlemler</h3><span class="hint">Filtrele</span></div><div class="filter-row filter-row-tight" id="txn-mf"></div><div class="filter-row filter-row-tight" id="txn-cf"></div><div id="txn-list"></div></div></div>
-      <div id="more-calendar" class="more-panel"><div class="card"><div class="card-h"><h3>Takvim</h3><span class="hint">Ödeme akışı</span></div><div class="cal-grid" id="more-cal-grid"></div><div id="upcoming-pmts" class="upcoming-list"></div></div><div class="card"><div class="card-h"><h3>Ekstre İş Akışı</h3><span class="hint">5 / 11 / 23</span></div><div id="calendar-flow"></div></div></div>
-      <div id="more-sabit" class="more-panel"><div class="card"><div class="card-h"><h3>Sabit Giderler</h3><span class="hint">Read only</span></div><div id="fixed-list"></div></div></div>
-      <div id="more-ekstre" class="more-panel"><div class="card"><div class="card-h"><h3>Ekstre Yükle + AI</h3><span class="hint">Gemini + fallback</span></div><details class="api-collapsible"><summary>Gemini API Key</summary><div class="field"><input class="input" type="password" id="gemini-key" placeholder="Gemini API Key (yalnızca cihazınızda saklanır)" oninput="saveGeminiKey(this.value)"></div></details><div class="field"><label>Banka</label><select id="stmt-bank" style="display:none"><option>İşbank</option><option>Enpara</option><option>VakıfBank</option></select><div class="bank-chip-row" id="stmt-bank-chips"></div></div><div class="field"><label>Ekstre Metni</label><textarea class="input stmt-area" id="stmt-text" placeholder="Ekstre metnini buraya yapıştır"></textarea></div><button class="btn btn-primary btn-block" onclick="parseStmt()" id="parse-btn">İçe Aktar</button><div class="field-note">Önce Gemini denenir. Başarısız olursa yerel parser devreye girer.</div><div id="parse-res" class="parse-result"></div></div><div class="card ai-card"><div class="card-h"><h3>Genel Harcama Analizi</h3><span class="hint">Son 6 ay</span></div><div class="field-note">Yeni veri eklemez, sadece yorum üretir.</div><button class="btn btn-secondary btn-block" onclick="analyzeAllSpending()" id="analyze-all-btn">Analiz Et</button><div id="analysis-res" class="analysis-result"></div></div></div>
-      <div id="more-data" class="more-panel"><div class="card"><div class="card-h"><h3>Veri</h3><span class="hint">Yedek / sıfırla</span></div><div class="data-actions"><button class="btn btn-primary btn-block" onclick="exportData()">JSON Yedeği İndir</button><button class="btn btn-secondary btn-block" onclick="document.getElementById('imp-f').click()">JSON Yedeği Yükle</button><input type="file" id="imp-f" accept=".json" style="display:none" onchange="importData(event)"><button class="btn btn-ghost btn-block" onclick="reseedDemo()">Demo Verileri Yeniden Ekle</button><button class="btn btn-danger btn-block" onclick="resetAll()">Tüm Verileri Sıfırla</button></div><div id="data-st" class="field-note"></div></div></div>
+      <div id="more-calendar" class="more-panel"><div class="card"><div class="card-h"><h3>Takvim</h3><span class="hint">Ödeme akışı</span></div><div class="cal-grid" id="more-cal-grid"></div><div id="upcoming-pmts" class="upcoming-list"></div></div><div class="card"><div class="card-h"><h3>Ekstre İş Akışı</h3><span class="hint">Girdiğin tarih esastır</span></div><div id="calendar-flow"></div></div></div>
+      <div id="more-ekstre" class="more-panel"><div class="card"><div class="card-h"><h3>Ekstre Yükle + AI</h3><span class="hint">Gemini + fallback</span></div><details class="api-collapsible"><summary>Gemini API Key</summary><div class="field"><input class="input" type="password" id="gemini-key" placeholder="Gemini API Key (yalnızca cihazınızda saklanır)" oninput="saveGeminiKey(this.value)"><div class="field-note" style="margin-top:6px">⚠ Bu anahtar düz metin olarak cihazınızda saklanır. Sadece güvendiğiniz cihazlarda kullanın.</div></div></details><div class="field"><label>Banka</label><select id="stmt-bank" style="display:none"><option>İşbank</option><option>Enpara</option><option>VakıfBank</option></select><div class="bank-chip-row" id="stmt-bank-chips"></div></div><div class="field"><label>Ekstre Metni</label><textarea class="input stmt-area" id="stmt-text" placeholder="Ekstre metnini buraya yapıştır"></textarea></div><button class="btn btn-primary btn-block" onclick="parseStmt()" id="parse-btn">İçe Aktar</button><div class="field-note">Kalemler <strong>bugünün tarihine</strong> kaydedilir. Önce Gemini denenir; başarısız olursa yerel parser devreye girer.</div><div id="parse-res" class="parse-result"></div></div><div class="card ai-card"><div class="card-h"><h3>Genel Harcama Analizi</h3><span class="hint">Son 6 ay</span></div><div class="field-note">Yeni veri eklemez, sadece yorum üretir.</div><button class="btn btn-secondary btn-block" onclick="analyzeAllSpending()" id="analyze-all-btn">Analiz Et</button><div id="analysis-res" class="analysis-result"></div></div></div>
+      <div id="more-sabit" class="more-panel"><div class="card"><div class="card-h"><h3>Sabit Giderler</h3><span class="hint">Referans listesi</span></div><div id="fixed-list"></div><div class="field-note" style="margin-top:8px">Bu liste bilgi amaçlıdır. Otomatik kayıt oluşturmaz — ödediğinde Hızlı Giriş'ten veya Ekstre Yükle'den ekle.</div></div></div>
+      <div id="more-data" class="more-panel"><div class="card"><div class="card-h"><h3>Veri</h3><span class="hint">Yedek / sıfırla</span></div><div class="data-actions"><button class="btn btn-primary btn-block" onclick="exportData()">JSON Yedeği İndir</button><button class="btn btn-secondary btn-block" onclick="document.getElementById('imp-f').click()">JSON Yedeği Yükle</button><input type="file" id="imp-f" accept=".json" style="display:none" onchange="importData(event)"><button class="btn btn-danger btn-block" onclick="resetAll()">Tüm Verileri Sıfırla</button></div><div id="data-st" class="field-note"></div><div class="field-note" style="margin-top:6px">Sıfırlama öncesi otomatik yedek dosyası indirilir. Yedek dosyasını tekrar yüklerseniz tüm kayıtlarınız geri gelir.</div></div></div>
+      <div id="more-theme" class="more-panel"><div class="card theme-picker"><div class="card-h"><h3>Görünüm</h3><span class="hint">Anında değişir</span></div><div class="theme-row"><button data-theme-pick="cream" class="theme-chip" onclick="setTheme('cream')"><span class="sw" style="background:#f4efe6"></span>Krem Kâğıt</button><button data-theme-pick="onyx" class="theme-chip" onclick="setTheme('onyx')"><span class="sw" style="background:#0e1117"></span>Onyx & Altın</button><button data-theme-pick="marble" class="theme-chip" onclick="setTheme('marble')"><span class="sw" style="background:#ecedef"></span>Mermer</button><button data-theme-pick="midnight" class="theme-chip" onclick="setTheme('midnight')"><span class="sw" style="background:#0d1220"></span>Gece Mavisi</button></div></div></div>
     </div>`;
   document.querySelector('.nav').innerHTML = `<button class="nav-item on" onclick="go('dash',this)" id="nb-dash"><span class="nav-glyph">A</span><span>Ana</span></button><button class="nav-item" onclick="go('income',this)" id="nb-income"><span class="nav-glyph">G</span><span>Gelir</span></button><div class="nav-center"><button class="nav-fab" onclick="go('quick',null)" aria-label="Hızlı giriş">+</button></div><button class="nav-item" onclick="go('budget-shortcut',this)" id="nb-budget"><span class="nav-glyph">B</span><span>Bütçe</span></button><button class="nav-item" onclick="go('more',this)" id="nb-more"><span class="nav-glyph">D</span><span>Detay</span></button>`;
 }
@@ -2025,7 +1706,8 @@ function buildSeed(){
 // ══════════════════════════════════════════════════════════════
 // STATE & STORAGE — localStorage (Vercel deploy için)
 // ══════════════════════════════════════════════════════════════
-const SEED = buildSeed();
+// SEED verisi kaldırıldı. buildSeed() fonksiyonu dead code — referans yok.
+const SEED = [];
 
 let S = {
   expenses: [],
@@ -2039,30 +1721,62 @@ let S = {
 const GEMINI_MODEL='gemini-2.5-flash';
 const GEMINI_KEY_STORAGE='ay_gemini_key';
 
+// ── v2 Migration: eski SEED/demo verisini otomatik yedekleyip temizle ──
+function migrateV2() {
+  if (localStorage.getItem('ay_migrated_v2') === '1') return;
+  try {
+    const expRaw = localStorage.getItem('ay_exp');
+    const incRaw = localStorage.getItem('ay_inc');
+    const budRaw = localStorage.getItem('ay_bud');
+    const backup = {
+      exportedAt: new Date().toISOString(),
+      note: 'Otomatik yedek — v2 sıfırlama öncesi',
+      expenses: expRaw ? JSON.parse(expRaw) : [],
+      incomes:  incRaw ? JSON.parse(incRaw) : [],
+      budgets:  budRaw ? JSON.parse(budRaw) : {},
+    };
+    // Sadece gerçekten veri varsa yedek dosyası indir
+    if ((backup.expenses && backup.expenses.length) || (backup.incomes && backup.incomes.length)) {
+      const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'ay_backup_' + new Date().toISOString().slice(0,10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  } catch(e) {
+    console.warn('migrateV2 backup failed:', e);
+  }
+  // Eski kayıtları temizle, budget/tema/gemini key korunur
+  localStorage.removeItem('ay_exp');
+  localStorage.removeItem('ay_inc');
+  localStorage.removeItem('ay_seed_migrated');
+  localStorage.setItem('ay_migrated_v2', '1');
+}
+
 function loadFromStorage() {
+  migrateV2();
   try {
     const ue = localStorage.getItem('ay_exp');
-    const migrated = localStorage.getItem('ay_seed_migrated');
-    if (ue !== null) {
-      S.userExp = JSON.parse(ue);
-      // Migration: eski sürümden gelen kullanıcılar için SEED'i bir kez userExp'e taşı
-      // Böylece mevcut görünen veri kaybolmaz, ama bundan sonra silme kalıcı olur
-      if (!migrated) {
-        S.userExp = [...SEED, ...S.userExp];
-        localStorage.setItem('ay_seed_migrated', '1');
-        localStorage.setItem('ay_exp', JSON.stringify(S.userExp));
-      }
-    } else {
-      // İlk açılış: seed verisini userExp'e taşı, bir daha SEED geri gelmeyecek
-      S.userExp = [...SEED];
-      localStorage.setItem('ay_seed_migrated', '1');
-      localStorage.setItem('ay_exp', JSON.stringify(S.userExp));
-    }
+    if (ue !== null) S.userExp = JSON.parse(ue);
     S.expenses = [...S.userExp];
   } catch(e) { S.expenses = [...S.userExp]; }
   try {
     const ic = localStorage.getItem('ay_inc');
     if (ic) S.incomes = JSON.parse(ic);
+  } catch(e) {}
+  // Gelir kategorisi migration: bilinmeyen kategoriler 'diger'e düş
+  try {
+    const validInc = new Set(ICATS.map(c=>c.id));
+    let changed = false;
+    S.incomes = S.incomes.map(i => {
+      if (!validInc.has(i.cat)) { changed = true; return {...i, cat:'diger'}; }
+      return i;
+    });
+    if (changed) localStorage.setItem('ay_inc', JSON.stringify(S.incomes));
   } catch(e) {}
   try {
     const bu = localStorage.getItem('ay_bud');
@@ -2075,7 +1789,6 @@ function loadFromStorage() {
     {value:'İşbank',label:'İşbank'},{value:'VakıfBank',label:'VakıfBank'},{value:'Enpara',label:'Enpara'}
   ], document.getElementById('stmt-bank')?.value || 'İşbank', "pickStmtBank('__VAL__')");
   renderDash();
-  maybeShowSeedBanner();
 }
 
 function save() {
@@ -2335,17 +2048,20 @@ function parseStatementFallback(text,bank){
   return rows;
 }
 function importStatementRows(rows){
+  // Ekstre giriş tarihi override: orijinal transaction tarihlerini yoksay,
+  // hepsini bugüne kaydet. Takvimde tek kırmızı nokta, bütçe kategorileri korunur.
+  const today=new Date().toISOString().slice(0,10);
   let added=0;
   rows.forEach(row=>{
     const clean={
       id:row.id||genId(),
-      d:String(row.d||'').slice(0,10),
+      d:today,  // orijinal row.d yoksayıldı
       desc:(row.desc||'').trim(),
       amt:Math.abs(Number(row.amt)||0),
       cat:CATS.some(c=>c.id===row.cat)?row.cat:'diger',
       bank:(row.bank||'').trim()
     };
-    if(!clean.d||!clean.desc||!clean.amt||!clean.bank) return;
+    if(!clean.desc||!clean.amt||!clean.bank) return;
     S.userExp.push(clean);
     S.expenses.push(clean);
     added++;
@@ -2699,7 +2415,7 @@ function favAdd(f){
   S.userExp.push(newFav);
   S.expenses.push(newFav);
   save();toast(`✓ ${f.label} — ${fmt(f.amt)} ₺`);
-  renderQuickRecents();renderDash();
+  renderTxn();renderDash();
 }
 
 function quickAdd(){
@@ -2717,28 +2433,24 @@ function quickAdd(){
   toast(`✓ ${desc} — ${fmt(amt)} ₺ eklendi`);
   document.getElementById('q-amt').value='';
   document.getElementById('q-desc').value='';
-  renderQuickRecents();renderDash();
+  renderTxn();renderDash();
 }
 
+// Legacy — quick-recents kartı kaldırıldı, renderTxn artık işlemleri gösteriyor
 function renderQuickRecents(){
+  const el=document.getElementById('quick-recents');
+  if(!el) return;
   const recent=[...S.expenses].sort((a,b)=>b.id.localeCompare(a.id)).slice(0,8);
-  document.getElementById('quick-recents').innerHTML=recent.length?recent.map(t=>{
+  el.innerHTML=recent.length?recent.map(t=>{
     const c=catMeta(t.cat);
-    return`<div class="tx-entry list-row">
-      ${monoChip(t.cat,'sm')}
-      <div class="tx-info"><div class="tx-desc">${t.desc}</div><div class="tx-meta">${t.d} · ${t.bank}</div></div>
-      <div class="tx-right">
-        <div class="tx-amt row-amt neg">${fmt(t.amt)} ₺</div>
-        <button onclick="delExp('${t.id}')" style="font-size:9px;padding:2px 7px;border:0.5px solid rgba(255,255,255,0.1);border-radius:4px;background:none;color:var(--text3);cursor:pointer;font-family:'Inter',sans-serif;margin-top:3px">sil</button>
-      </div>
-    </div>`;
+    return`<div class="tx-entry list-row">${monoChip(t.cat,'sm')}<div class="tx-info"><div class="tx-desc">${t.desc}</div><div class="tx-meta">${t.d} · ${t.bank}</div></div><div class="tx-right"><div class="tx-amt row-amt neg">${fmt(t.amt)} ₺</div><button onclick="delExp('${t.id}')" style="font-size:9px;padding:2px 7px;border:0.5px solid rgba(255,255,255,0.1);border-radius:4px;background:none;color:var(--text3);cursor:pointer;font-family:'Inter',sans-serif;margin-top:3px">sil</button></div></div>`;
   }).join(''):`<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">Henüz giriş yok</div>`;
 }
 
 function delExp(id){
   S.userExp=S.userExp.filter(e=>e.id!==id);
   S.expenses=S.expenses.filter(e=>e.id!==id);
-  save();renderQuickRecents();renderTxn();renderDash();
+  save();renderTxn();renderDash();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2746,7 +2458,9 @@ function delExp(id){
 // ══════════════════════════════════════════════════════════════
 function renderIncome(){
   const mf=document.getElementById('inc-mf');
-  mf.innerHTML=`<button class="f-chip ${S.incM===null?'on':''}" onclick="setIM(null)">Tümü</button>`+MN.map((m,i)=>`<button class="f-chip ${S.incM===i?'on':''}" onclick="setIM(${i})">${m}</button>`).join('');
+  // Ay chips ters sıra: current ay solda, geriye doğru
+  const reversedMN=MN.map((m,i)=>({m,i})).reverse();
+  mf.innerHTML=`<button class="f-chip ${S.incM===null?'on':''}" onclick="setIM(null)">Tümü</button>`+reversedMN.map(({m,i})=>`<button class="f-chip ${S.incM===i?'on':''}" onclick="setIM(${i})">${m}</button>`).join('');
   let incs=[...S.incomes];
   if(S.incM!==null) incs=incs.filter(i=>mIdx(i.d)===S.incM);
   incs.sort((a,b)=>b.d.localeCompare(a.d));
@@ -2788,7 +2502,8 @@ function delInc(id){S.incomes=S.incomes.filter(i=>i.id!==id);save();renderIncome
 // BUDGET
 // ══════════════════════════════════════════════════════════════
 function renderBudget(){
-  document.getElementById('budget-bars').innerHTML=CATS.filter(c=>c.id!=='uyap'&&c.id!=='diger').map(c=>{
+  // Hem s-budget (ayrı ekran) hem de varsa eski more-budget için render et
+  const html=CATS.filter(c=>c.id!=='uyap'&&c.id!=='diger').map(c=>{
     const lim=S.budgets[c.id]||0,avg3=catAvg3(c.id),pct=lim>0?Math.min(115,avg3/lim*100):0,l=lvl(pct);
     const bc={red:'var(--neg)',orange:'var(--warn)',yellow:'var(--warn)',green:'var(--pos)'}[l];
     const pc={red:'var(--neg)',orange:'var(--warn)',yellow:'var(--warn)',green:'var(--pos)'}[l];
@@ -2805,20 +2520,30 @@ function renderBudget(){
       <div class="bsub"><span>Son 3 ay ort: ${fmt(avg3)} ₺</span><span>Limit: ${lim>0?fmt(lim):'—'} ₺</span></div>
     </div>`;
   }).join('');
+  ['budget-bars-main','budget-bars'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.innerHTML=html;
+  });
 }
 
 // ══════════════════════════════════════════════════════════════
 // TRANSACTIONS
 // ══════════════════════════════════════════════════════════════
 function renderTxn(){
-  document.getElementById('txn-mf').innerHTML=`<button class="f-chip ${S.expM===null?'on':''}" onclick="setEM(null)">Tümü</button>`+MN.map((m,i)=>`<button class="f-chip ${S.expM===i?'on':''}" onclick="setEM(${i})">${m}</button>`).join('');
-  document.getElementById('txn-cf').innerHTML=`<button class="f-chip ${S.expC===null?'on':''}" onclick="setEC(null)">Tüm kategoriler</button>`+CATS.map(c=>`<button class="f-chip ${S.expC===c.id?'on':''}" onclick="setEC('${c.id}')">${catMeta(c.id).mono} ${catMeta(c.id).label}</button>`).join('');
+  // Ay chips ters sıra: current ay solda, geriye doğru
+  const reversedMN=MN.map((m,i)=>({m,i})).reverse();
+  const mf=document.getElementById('quick-txn-mf');
+  const cf=document.getElementById('quick-txn-cf');
+  const list=document.getElementById('quick-txn-list');
+  if(mf) mf.innerHTML=`<button class="f-chip ${S.expM===null?'on':''}" onclick="setEM(null)">Tümü</button>`+reversedMN.map(({m,i})=>`<button class="f-chip ${S.expM===i?'on':''}" onclick="setEM(${i})">${m}</button>`).join('');
+  if(cf) cf.innerHTML=`<button class="f-chip ${S.expC===null?'on':''}" onclick="setEC(null)">Tüm kategoriler</button>`+CATS.map(c=>`<button class="f-chip ${S.expC===c.id?'on':''}" onclick="setEC('${c.id}')">${catMeta(c.id).mono} ${catMeta(c.id).label}</button>`).join('');
+  if(!list) return;
   let txns=[...S.expenses];
   if(S.expM!==null) txns=txns.filter(e=>mIdx(e.d)===S.expM);
   if(S.expC!==null) txns=txns.filter(e=>e.cat===S.expC);
   txns.sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id));
   const totalShown=txns.reduce((a,t)=>a+t.amt,0);
-  document.getElementById('txn-list').innerHTML=(txns.length?`<div class="row-meta" style="display:flex;justify-content:space-between;align-items:center;padding:6px 0 10px;border-bottom:1px solid var(--line);margin-bottom:6px"><span>${txns.length} kayıt${txns.length>100?' · ilk 100':''}</span><span class="row-amt">${fmt(totalShown)} ₺</span></div>`:'')+txns.slice(0,100).map(t=>{
+  list.innerHTML=(txns.length?`<div class="row-meta" style="display:flex;justify-content:space-between;align-items:center;padding:6px 0 10px;border-bottom:1px solid var(--line);margin-bottom:6px"><span>${txns.length} kayıt${txns.length>100?' · ilk 100':''}</span><span class="row-amt">${fmt(totalShown)} ₺</span></div>`:'')+txns.slice(0,100).map(t=>{
     const c=catMeta(t.cat);
     return`<div class="tx-entry list-row">
       ${monoChip(t.cat,'sm')}
@@ -2840,33 +2565,41 @@ function setEC(c){S.expC=c;renderTxn();}
 // CALENDAR
 // ══════════════════════════════════════════════════════════════
 function renderCalendar(){
-  const y=2026,mo=3,today=8,fd=new Date(y,mo,1).getDay(),days=new Date(y,mo+1,0).getDate();
-  const evs={
-    4:[{t:'İşbank ekstre',s:'background:#185FA520;color:#5B8DE8'}],
-    14:[{t:'İşbank ödeme',s:'background:#185FA5;color:white'}],
-    20:[{t:'VakıfBank ödeme',s:'background:#3EC98A30;color:#3EC98A'}],
-    22:[{t:'Enpara ekstre',s:'background:#8B6EE820;color:#8B6EE8'}],
-  };
-  S.incomes.filter(i=>i.d.startsWith('2026-04')).forEach(i=>{const d=+i.d.slice(8);if(!evs[d])evs[d]=[];evs[d].push({t:'+'+i.desc.slice(0,8),s:'background:var(--pos-soft);color:var(--pos)'});});
+  // Dinamik: bugünün ayı/yılı
+  const now=new Date();
+  const y=now.getFullYear(),mo=now.getMonth(),today=now.getDate();
+  const fd=new Date(y,mo,1).getDay(),days=new Date(y,mo+1,0).getDate();
+  const monthKey=`${y}-${String(mo+1).padStart(2,'0')}`;
+  // Kullanıcının gerçekten girdiği gider/gelirlerden olayları topla
+  const evs={};
+  S.expenses.filter(e=>e.d.startsWith(monthKey)).forEach(e=>{
+    const d=+e.d.slice(8);
+    if(!evs[d]) evs[d]=[];
+    evs[d].push({t:'-'+(e.desc||'').slice(0,10),s:'background:var(--neg-soft,#ffe5e3);color:var(--neg)'});
+  });
+  S.incomes.filter(i=>i.d.startsWith(monthKey)).forEach(i=>{
+    const d=+i.d.slice(8);
+    if(!evs[d]) evs[d]=[];
+    evs[d].push({t:'+'+(i.desc||'').slice(0,10),s:'background:var(--pos-soft);color:var(--pos)'});
+  });
   const dns=['P','S','Ç','P','C','C','P'];
   const off=fd===0?6:fd-1;
   let h='';
   dns.forEach(d=>{h+=`<div class="cal-h">${d}</div>`;});
   for(let i=0;i<off;i++) h+=`<div></div>`;
-  for(let d=1;d<=days;d++){h+=`<div class="cal-day ${d===today?'today':''}"><div class="cal-dn">${d}</div>`;(evs[d]||[]).forEach(e=>{h+=`<div class="cal-ev" style="${e.s}">${e.t}</div>`;});h+=`</div>`;}
-  document.getElementById('more-cal-grid').innerHTML=h;
-  document.getElementById('upcoming-pmts').innerHTML=[
-    {g:14,t:'İşbank son ödeme',est:'~28.883 ₺',c:'#5B8DE8'},
-    {g:20,t:'VakıfBank son ödeme (UYAP)',est:'~16.840 ₺',c:'#3EC98A'},
-    {g:22,t:'Enpara ekstre',est:'~13-16k ₺ tahmini',c:'#8B6EE8'},
-  ].map(u=>`<div class="upcoming-row"><div class="mono-chip sm"><span class="m">${u.g}</span></div><div class="row-main"><div class="row-title">${u.t}</div></div><div class="row-amt">${u.est}</div></div>`).join('');
+  for(let d=1;d<=days;d++){h+=`<div class="cal-day ${d===today?'today':''}"><div class="cal-dn">${d}</div>`;(evs[d]||[]).slice(0,3).forEach(e=>{h+=`<div class="cal-ev" style="${e.s}">${e.t}</div>`;});h+=`</div>`;}
+  const grid=document.getElementById('more-cal-grid');
+  if(grid) grid.innerHTML=h;
+  // Yaklaşan ödemeler: kullanıcının bu aya kaydettiği gider/gelirlerden bugünden sonrakiler
+  const upcoming=[
+    ...S.expenses.filter(e=>e.d.startsWith(monthKey)&&+e.d.slice(8)>today).map(e=>({g:+e.d.slice(8),t:e.desc,est:'-'+fmt(e.amt)+' ₺',kind:'exp'})),
+    ...S.incomes.filter(i=>i.d.startsWith(monthKey)&&+i.d.slice(8)>today).map(i=>({g:+i.d.slice(8),t:i.desc,est:'+'+fmt(i.amt)+' ₺',kind:'inc'}))
+  ].sort((a,b)=>a.g-b.g).slice(0,8);
+  const up=document.getElementById('upcoming-pmts');
+  if(up) up.innerHTML=upcoming.length?upcoming.map(u=>`<div class="upcoming-row"><div class="mono-chip sm"><span class="m">${u.g}</span></div><div class="row-main"><div class="row-title">${u.t}</div></div><div class="row-amt ${u.kind==='inc'?'pos':'neg'}">${u.est}</div></div>`).join(''):'<div style="text-align:center;padding:12px;color:var(--text3);font-size:11px">Bu ay kalan planlı işlem yok</div>';
+  // Ekstre iş akışı — yumuşak tonda, artık "giriş tarihi" mantığı
   const flow=document.getElementById('calendar-flow');
-  if(flow) flow.innerHTML=[
-    {d:"5'i",t:'İşbank ekstresi yapıştır'},
-    {d:"11'i",t:'VakıfBank ekstresi yapıştır'},
-    {d:"23\'ü",t:'Enpara ekstresi yapıştır'},
-    {d:'Her zaman',t:'Nakit + havaleleri anlık gir'}
-  ].map(f=>`<div class="flow-row"><div class="row-main"><div class="row-title">${f.d}</div><div class="row-meta">${f.t}</div></div></div>`).join('');
+  if(flow) flow.innerHTML=`<div class="flow-row"><div class="row-main"><div class="row-title">Ekstre geldiğinde</div><div class="row-meta">Detaylar › Ekstre Yükle'den yapıştır. Kayıt girdiğin tarihe işlenir; kategoriler otomatik ayrıştırılır.</div></div></div><div class="flow-row"><div class="row-main"><div class="row-title">Nakit / havale</div><div class="row-meta">Hızlı Giriş'ten anlık ekle.</div></div></div>`;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2912,22 +2645,22 @@ async function parseStmt(){
       }));
       const added=importStatementRows(rows);
       save();
-      resultEl.textContent=`✓ Gemini ile ${added} işlem eklendi:\n`+rows.map(t=>`${t.d}  ${t.desc}: ${fmt(t.amt)} ₺`).join('\n');
+      const todayStr=new Date().toLocaleDateString('tr-TR');
+      resultEl.textContent=`✓ Gemini ile ${added} kalem ${todayStr} tarihine kaydedildi.\nTakvimde tek kırmızı nokta · bütçe kategorileri güncellendi.\n\n`+rows.map(t=>`  ${t.desc}: ${fmt(t.amt)} ₺`).join('\n');
       document.getElementById('stmt-text').value='';
-      toast(`✓ ${added} işlem eklendi`);
+      toast(`✓ ${added} kalem eklendi`);
       renderDash();
-      renderQuickRecents&&renderQuickRecents();
       renderTxn&&renderTxn();
     } else {
       const fallbackRows=parseStatementFallback(text,bank);
       const added=importStatementRows(fallbackRows);
       if(added){
         save();
-        resultEl.textContent=`✓ Yerel parser ile ${added} işlem eklendi:\n`+fallbackRows.map(t=>`${t.d}  ${t.desc}: ${fmt(t.amt)} ₺`).join('\n');
+        const todayStr=new Date().toLocaleDateString('tr-TR');
+        resultEl.textContent=`✓ Yerel parser ile ${added} kalem ${todayStr} tarihine kaydedildi.\nTakvimde tek kırmızı nokta · bütçe kategorileri güncellendi.\n\n`+fallbackRows.map(t=>`  ${t.desc}: ${fmt(t.amt)} ₺`).join('\n');
         document.getElementById('stmt-text').value='';
-        toast(`✓ ${added} işlem eklendi`);
+        toast(`✓ ${added} kalem eklendi`);
         renderDash();
-        renderQuickRecents&&renderQuickRecents();
         renderTxn&&renderTxn();
       } else {
         resultEl.textContent='İşlem bulunamadı.';
@@ -2938,11 +2671,11 @@ async function parseStmt(){
     const added=importStatementRows(fallbackRows);
     if(added){
       save();
-      resultEl.textContent=`⚠ Gemini başarısız oldu (${e.message}). Yerel parser ile ${added} işlem eklendi:\n`+fallbackRows.map(t=>`${t.d}  ${t.desc}: ${fmt(t.amt)} ₺`).join('\n');
+      const todayStr=new Date().toLocaleDateString('tr-TR');
+      resultEl.textContent=`⚠ Gemini başarısız oldu (${e.message}). Yerel parser ile ${added} kalem ${todayStr} tarihine kaydedildi.\n\n`+fallbackRows.map(t=>`  ${t.desc}: ${fmt(t.amt)} ₺`).join('\n');
       document.getElementById('stmt-text').value='';
-      toast(`✓ Fallback ile ${added} işlem eklendi`);
+      toast(`✓ Fallback ile ${added} kalem eklendi`);
       renderDash();
-      renderQuickRecents&&renderQuickRecents();
       renderTxn&&renderTxn();
     } else {
       resultEl.textContent='Hata: '+e.message;
@@ -2978,18 +2711,17 @@ async function analyzeAllSpending(){
 // DATA
 // ══════════════════════════════════════════════════════════════
 function resetAll(){
-  if(!confirm('Tüm giderler, gelirler ve bütçeler silinecek. Emin misin?'))return;
+  if(!confirm('Tüm giderler, gelirler ve bütçeler silinecek. Önce otomatik yedek indirilecek. Devam?'))return;
+  // Güvenlik: önce otomatik yedek indir
+  try{
+    const backup={exportedAt:new Date().toISOString(),note:'resetAll öncesi otomatik yedek',expenses:S.userExp,incomes:S.incomes,budgets:S.budgets};
+    const b=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ay_backup_reset_'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a);a.click();a.remove();
+  }catch(e){console.warn('reset backup failed',e);}
   S.userExp=[];S.expenses=[];S.incomes=[];S.budgets={...DEF_BUD};
-  save();toast('✓ Veriler sıfırlandı');
-  renderDash();renderQuickRecents&&renderQuickRecents();renderTxn&&renderTxn();renderIncome&&renderIncome();renderBudget&&renderBudget();
-}
-function reseedDemo(){
-  if(!confirm('Demo verileri mevcut kayıtlarınıza EKLENECEK. Devam?'))return;
-  const fresh=buildSeed();
-  S.userExp=[...S.userExp,...fresh];
-  S.expenses=[...S.userExp];
-  save();toast('✓ Demo veriler eklendi');
-  renderDash();renderQuickRecents&&renderQuickRecents();renderTxn&&renderTxn();
+  save();toast('✓ Veriler sıfırlandı · yedek indirildi');
+  renderDash();renderTxn&&renderTxn();renderIncome&&renderIncome();renderBudget&&renderBudget();
 }
 function exportData(){
   const b=new Blob([JSON.stringify({expenses:S.userExp,incomes:S.incomes,budgets:S.budgets},null,2)],{type:'application/json'});
@@ -3008,8 +2740,6 @@ function importData(e){
 // ══════════════════════════════════════════════════════════════
 function setMoreTab(tab,btn){
   document.querySelectorAll('.more-panel').forEach(p=>p.style.display='block');
-  renderBudget();
-  renderTxn();
   renderCalendar();
   renderFixed();
   const target=document.getElementById('more-'+tab);
@@ -3023,21 +2753,35 @@ function go(screen,btn){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('on'));
   if(screen==='budget-shortcut'){
-    document.getElementById('s-more').classList.add('on');
+    const sb=document.getElementById('s-budget');
+    if(sb) sb.classList.add('on');
     if(btn) btn.classList.add('on');
-    setMoreTab('budget',null);
-  } else {
-    document.getElementById('s-'+screen).classList.add('on');
-    if(btn) btn.classList.add('on');
+    renderBudget();
+    window.scrollTo({top:0,behavior:'smooth'});
+    return;
   }
-  if(screen==='dash') renderDash();
+  const target=document.getElementById('s-'+screen);
+  if(target) target.classList.add('on');
+  if(btn) btn.classList.add('on');
+  if(screen==='dash'){
+    renderDash();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
   else if(screen==='quick'){
-    buildCatGrid();buildFavList();renderQuickRecents();
+    buildCatGrid();buildFavList();renderTxn();
     const d=document.getElementById('q-date');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);
-    document.getElementById('quick-date-display').textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
+    const qd=document.getElementById('quick-date-display');
+    if(qd) qd.textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
+    window.scrollTo({top:0,behavior:'smooth'});
   }
-  else if(screen==='income') renderIncome();
-  else if(screen==='more'){setMoreTab('budget',null);}
+  else if(screen==='income'){
+    renderIncome();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  else if(screen==='more'){
+    setMoreTab('calendar',null);
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
