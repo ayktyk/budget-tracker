@@ -699,6 +699,52 @@ html, body {
   transition: background .15s;
 }
 .fav-btn:hover, .fav-btn:active { background: var(--green); color: #fff; }
+.fav-actions { display:flex; align-items:center; gap:6px; }
+.fav-ic {
+  width:28px; height:28px; border-radius:8px; border:1px solid var(--border);
+  background:transparent; color:var(--text2); cursor:pointer; font-size:14px;
+  display:inline-flex; align-items:center; justify-content:center; padding:0;
+  transition:background .15s, color .15s, border-color .15s;
+}
+.fav-ic:hover { background:var(--bg-elev-2,rgba(0,0,0,.05)); color:var(--text); }
+.fav-ic-del:hover { background:#e8484820; color:#e04848; border-color:#e0484860; }
+.fav-add-btn {
+  background:transparent; border:1px solid var(--border); color:var(--text2);
+  border-radius:999px; padding:4px 11px; font-size:12px; font-weight:600;
+  cursor:pointer; transition:background .15s, color .15s, border-color .15s;
+}
+.fav-add-btn:hover, .fav-add-btn:active { background:var(--text); color:var(--bg); border-color:var(--text); }
+.fav-empty { padding:14px 0; color:var(--text3); font-size:13px; text-align:center; }
+.linky { background:none; border:0; color:var(--text); text-decoration:underline; cursor:pointer; font:inherit; padding:0; }
+
+/* Fav modal */
+.fav-modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999;
+  display:flex; align-items:center; justify-content:center; padding:16px;
+  animation:favFadeIn .15s ease-out;
+}
+@keyframes favFadeIn { from {opacity:0} to {opacity:1} }
+.fav-modal {
+  width:100%; max-width:380px; background:var(--bg); color:var(--text);
+  border:1px solid var(--border); border-radius:16px; padding:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);
+  max-height:90vh; overflow-y:auto;
+}
+.fav-modal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.fav-modal-head h3 { margin:0; font-size:16px; font-weight:700; }
+.fav-modal-close {
+  background:none; border:0; font-size:22px; line-height:1; cursor:pointer;
+  color:var(--text3); padding:4px 8px;
+}
+.fav-modal-close:hover { color:var(--text); }
+.fav-modal .qfield { margin-bottom:12px; }
+.fav-modal .qfield label { display:block; font-size:12px; font-weight:600; color:var(--text2); margin-bottom:4px; }
+.fav-modal .input { width:100%; box-sizing:border-box; }
+.fav-modal .q-grid-two { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+.fav-modal .q-grid-two .qfield { margin-bottom:0; }
+.fav-modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:6px; flex-wrap:wrap; }
+.fav-modal-actions .btn { flex:0 1 auto; min-width:90px; }
+.fav-modal-actions .btn-danger { margin-right:auto; }
 
 /* Status toast */
 .toast {
@@ -1587,7 +1633,7 @@ function buildDesignLayout(){
     </div>`;
   document.getElementById('s-quick').innerHTML = `
     <div class="screen-shell">
-      <div class="card fav-strip-card"><div class="card-h"><h3>Sık Havale</h3><span class="hint">Tek dokunuş</span></div><div class="fav-list fav-strip" id="fav-list"></div></div>
+      <div class="card fav-strip-card"><div class="card-h"><h3>Sık Havale</h3><button type="button" class="fav-add-btn" onclick="openFavForm()" aria-label="Yeni sık havale ekle">+ Yeni</button></div><div class="fav-list fav-strip" id="fav-list"></div></div>
       <div class="card quick-main-card"><div class="card-h"><h3>Hızlı Giriş</h3><span class="hint" id="quick-date-display">—</span></div><div class="amount-big-wrap"><div class="amount-big"><span class="amount-currency">₺</span><input type="text" id="q-amt" placeholder="0" inputmode="decimal" autocomplete="off"></div></div><div class="numpad" id="quick-pad"><button onclick="quickPad('1')">1</button><button onclick="quickPad('2')">2</button><button onclick="quickPad('3')">3</button><button onclick="quickPad('4')">4</button><button onclick="quickPad('5')">5</button><button onclick="quickPad('6')">6</button><button onclick="quickPad('7')">7</button><button onclick="quickPad('8')">8</button><button onclick="quickPad('9')">9</button><button onclick="quickPad(',')">,</button><button onclick="quickPad('0')">0</button><button onclick="quickPad('del')">Sil</button></div><div class="quick-fields"><div class="qfield"><label>Açıklama</label><input class="input" type="text" id="q-desc" placeholder="örn: Hebun Çorba, BİM, İbrahim Yaman..." autocomplete="off"></div><div class="q-grid-two"><div class="qfield"><label>Tarih</label><input class="input" type="date" id="q-date"></div><div class="qfield"><label>Kaynak</label><select id="q-bank" style="display:none"><option value="Havale">Havale</option><option value="Nakit">Nakit</option><option value="İşbank">İşbank</option><option value="Enpara">Enpara</option><option value="VakıfBank">VakıfBank</option></select><div class="bank-chip-row" id="q-bank-chips"></div></div></div></div><div class="cat-section"><div class="eyebrow">Kategori</div><div class="cat-grid" id="cat-grid"></div></div><button class="btn btn-primary btn-block" onclick="quickAdd()">Kaydet</button></div>
       <div class="card"><div class="card-h"><h3>İşlemler</h3><span class="hint">Tüm kayıtlar</span></div><div class="filter-row filter-row-tight" id="quick-txn-mf"></div><div class="filter-row filter-row-tight" id="quick-txn-cf"></div><div id="quick-txn-list"></div></div>
     </div>`;
@@ -1641,11 +1687,11 @@ function curMonthLabel(){
 }
 const GOAL=30000;
 const DEF_BUD={kira:8500,muhasebe:2750,spor:1500,fatura:6000,dijital:3500,market:7000,yemek:3500,eticaret:2500,ulasim:1500,saglik:0,egitim:1000,eglence:1000,giyim:1500,yatirim:3000,vergi:5000,nakit:2000,diger:0};
-const FAV=[
-  {label:'İbrahim Yaman',desc:'İbrahim Yaman — Halısaha',amt:350,cat:'spor',bank:'Havale'},
-  {label:'Metin Sağır',  desc:'Ev kirası — Metin Sağır', amt:5000,cat:'kira',bank:'Havale'},
-  {label:'Tuğay Tuna',   desc:'Ofis kirası — Tuğay Tuna',amt:7000,cat:'kira',bank:'Havale'},
-  {label:'Ahmet Korkmaz',desc:'Muhasebe — Ahmet Korkmaz',amt:2750,cat:'muhasebe',bank:'Havale'},
+const DEFAULT_FAV=[
+  {id:'fav_ibrahim',  label:'İbrahim Yaman',desc:'İbrahim Yaman — Halısaha',amt:350,cat:'spor',bank:'Havale'},
+  {id:'fav_metin',    label:'Metin Sağır',  desc:'Ev kirası — Metin Sağır', amt:5000,cat:'kira',bank:'Havale'},
+  {id:'fav_tugay',    label:'Tuğay Tuna',   desc:'Ofis kirası — Tuğay Tuna',amt:7000,cat:'kira',bank:'Havale'},
+  {id:'fav_ahmet',    label:'Ahmet Korkmaz',desc:'Muhasebe — Ahmet Korkmaz',amt:2750,cat:'muhasebe',bank:'Havale'},
 ];
 const FIXED=[
   {desc:'Ev kirası',sub:'Metin Sağır → EFT',amt:5000,note:'sabit'},
@@ -1714,6 +1760,7 @@ let S = {
   userExp:  [],
   incomes:  [],
   budgets:  {...DEF_BUD},
+  favs:     JSON.parse(JSON.stringify(DEFAULT_FAV)),
   selCat: 'yemek',
   expM: null, expC: null, incM: null, dashM: CUR_IDX, dashDay: ''
 };
@@ -1782,6 +1829,13 @@ function loadFromStorage() {
     const bu = localStorage.getItem('ay_bud');
     if (bu) S.budgets = {...DEF_BUD, ...JSON.parse(bu)};
   } catch(e) {}
+  try {
+    const fv = localStorage.getItem('ay_favs');
+    if (fv !== null) {
+      const parsed = JSON.parse(fv);
+      if (Array.isArray(parsed)) S.favs = parsed.map(f => ({...f, id: f.id || genId()}));
+    }
+  } catch(e) {}
   loadGeminiKey();
   const el = document.getElementById('saved-at');
   if (el) el.textContent = new Date().toLocaleDateString('tr-TR');
@@ -1797,6 +1851,7 @@ function save() {
     localStorage.setItem('ay_exp', JSON.stringify(S.userExp));
     localStorage.setItem('ay_inc', JSON.stringify(S.incomes));
     localStorage.setItem('ay_bud', JSON.stringify(S.budgets));
+    localStorage.setItem('ay_favs', JSON.stringify(S.favs));
     if (el) el.textContent = new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}) + ' ✓';
   } catch(e) {
     if (el) el.textContent = '⚠ hata';
@@ -2399,23 +2454,111 @@ function buildCatGrid(){
 }
 function selCat(id){S.selCat=id;buildCatGrid();}
 
+function escAttr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
 function buildFavList(){
-  document.getElementById('fav-list').innerHTML=FAV.map(f=>`
+  const list=document.getElementById('fav-list');
+  if(!list) return;
+  if(!S.favs || !S.favs.length){
+    list.innerHTML=`<div class="fav-empty">Henüz kayıt yok. <button type="button" class="linky" onclick="openFavForm()">+ Yeni ekle</button></div>`;
+    return;
+  }
+  list.innerHTML=S.favs.map(f=>`
     <div class="fav-item">
       <div class="fav-info">
-        <div class="fav-name">${f.label}</div>
-        <div class="fav-detail">${f.desc} · ${fmt(f.amt)} ₺ · ${f.bank}</div>
+        <div class="fav-name">${escAttr(f.label)}</div>
+        <div class="fav-detail">${escAttr(f.desc)} · ${fmt(f.amt)} ₺ · ${escAttr(f.bank)}</div>
       </div>
-      <button class="fav-btn" onclick='favAdd(${JSON.stringify(f)})'>Ekle</button>
+      <div class="fav-actions">
+        <button class="fav-btn" onclick="favAdd('${escAttr(f.id)}')">Ekle</button>
+        <button class="fav-ic" title="Düzenle" onclick="openFavForm('${escAttr(f.id)}')">✎</button>
+        <button class="fav-ic fav-ic-del" title="Sil" onclick="delFav('${escAttr(f.id)}')">×</button>
+      </div>
     </div>`).join('');
 }
 
-function favAdd(f){
+function favAdd(id){
+  const f=S.favs.find(x=>x.id===id);
+  if(!f){toast('Kayıt bulunamadı',true);return;}
   const newFav = {id:genId(),d:new Date().toISOString().slice(0,10),desc:f.desc,cat:f.cat,amt:f.amt,bank:f.bank};
   S.userExp.push(newFav);
   S.expenses.push(newFav);
   save();toast(`✓ ${f.label} — ${fmt(f.amt)} ₺`);
   renderTxn();renderDash();
+}
+
+function openFavForm(id){
+  const editing = id ? S.favs.find(x=>x.id===id) : null;
+  const cur = editing ? {...editing} : {id:'',label:'',desc:'',amt:'',cat:'diger',bank:'Havale'};
+  const catOpts = CATS.map(c=>`<option value="${c.id}" ${cur.cat===c.id?'selected':''}>${c.icon} ${c.label}</option>`).join('');
+  const bankOpts = ['Havale','Nakit','İşbank','Enpara','VakıfBank'].map(b=>`<option value="${b}" ${cur.bank===b?'selected':''}>${b}</option>`).join('');
+  const html = `
+    <div class="fav-modal-overlay" id="fav-modal" onclick="if(event.target===this)closeFavForm()">
+      <div class="fav-modal">
+        <div class="fav-modal-head">
+          <h3>${editing?'Sık Havaleyi Düzenle':'Yeni Sık Havale'}</h3>
+          <button class="fav-modal-close" onclick="closeFavForm()" aria-label="Kapat">×</button>
+        </div>
+        <input type="hidden" id="fv-id" value="${escAttr(cur.id)}">
+        <div class="qfield"><label>İsim / Etiket</label><input class="input" id="fv-label" type="text" placeholder="örn: İbrahim Yaman" value="${escAttr(cur.label)}"></div>
+        <div class="qfield"><label>Açıklama</label><input class="input" id="fv-desc" type="text" placeholder="Harcamaya yazılacak açıklama" value="${escAttr(cur.desc)}"></div>
+        <div class="q-grid-two">
+          <div class="qfield"><label>Tutar (₺)</label><input class="input" id="fv-amt" type="number" inputmode="decimal" placeholder="0" value="${cur.amt===''?'':cur.amt}"></div>
+          <div class="qfield"><label>Kaynak</label><select class="input" id="fv-bank">${bankOpts}</select></div>
+        </div>
+        <div class="qfield"><label>Kategori</label><select class="input" id="fv-cat">${catOpts}</select></div>
+        <div class="fav-modal-actions">
+          ${editing?`<button class="btn btn-danger" onclick="delFav('${escAttr(cur.id)}',true)">Sil</button>`:''}
+          <button class="btn btn-secondary" onclick="closeFavForm()">Vazgeç</button>
+          <button class="btn btn-primary" onclick="saveFavForm()">${editing?'Güncelle':'Ekle'}</button>
+        </div>
+      </div>
+    </div>`;
+  const host=document.createElement('div');
+  host.innerHTML=html;
+  document.body.appendChild(host.firstElementChild);
+  setTimeout(()=>{const l=document.getElementById('fv-label');if(l)l.focus();},50);
+}
+
+function closeFavForm(){
+  const m=document.getElementById('fav-modal');
+  if(m) m.remove();
+}
+
+function saveFavForm(){
+  const id=(document.getElementById('fv-id').value||'').trim();
+  const label=(document.getElementById('fv-label').value||'').trim();
+  const desc=(document.getElementById('fv-desc').value||'').trim();
+  const amt=parseFloat(document.getElementById('fv-amt').value);
+  const cat=document.getElementById('fv-cat').value;
+  const bank=document.getElementById('fv-bank').value;
+  if(!label){toast('İsim girin',true);return;}
+  if(!desc){toast('Açıklama girin',true);return;}
+  if(!amt||amt<=0){toast('Geçerli tutar girin',true);return;}
+  if(id){
+    const idx=S.favs.findIndex(x=>x.id===id);
+    if(idx>=0){
+      S.favs[idx]={...S.favs[idx],label,desc,amt,cat,bank};
+      toast('✓ Güncellendi');
+    }
+  }else{
+    S.favs.push({id:genId(),label,desc,amt,cat,bank});
+    toast('✓ Eklendi');
+  }
+  save();
+  closeFavForm();
+  buildFavList();
+}
+
+function delFav(id,fromModal){
+  const f=S.favs.find(x=>x.id===id);
+  if(!f) return;
+  if(!confirm(`"${f.label}" sık havalesini silmek istiyor musunuz?\n(Bu kayıtlı harcamaları silmez — yalnızca kısayolu kaldırır.)`)) return;
+  S.favs=S.favs.filter(x=>x.id!==id);
+  save();
+  if(fromModal) closeFavForm();
+  buildFavList();
+  toast('Silindi');
 }
 
 function quickAdd(){
