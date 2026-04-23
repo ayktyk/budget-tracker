@@ -1990,14 +1990,22 @@ async function testGeminiKey(){
   if(btn) btn.disabled=true;
   try{
     const data=await callGemini({
-      systemInstruction:'Yalnızca TEK kelime yaz: ok',
-      userText:'ping',
+      systemInstruction:'Sadece "ok" yaz. Hiçbir açıklama ekleme.',
+      userText:'Merhaba de',
       responseMimeType:'text/plain',
-      maxOutputTokens:8
+      maxOutputTokens:128,
+      disableThinking:true
     });
     const txt=(geminiText(data)||'').toLowerCase();
-    if(txt){ out.textContent='✓ Bağlantı başarılı · key geçerli'; out.className='gk-test-out ok'; toast('Gemini bağlantısı çalışıyor'); }
-    else   { out.textContent='⚠ Yanıt boş döndü — tekrar deneyin'; out.className='gk-test-out warn'; }
+    if(txt){
+      out.textContent='✓ Bağlantı başarılı · key geçerli';
+      out.className='gk-test-out ok';
+      toast('Gemini bağlantısı çalışıyor');
+    } else {
+      const reason=(data.candidates&&data.candidates[0]&&data.candidates[0].finishReason)||'bilinmiyor';
+      out.textContent='⚠ Model metin döndürmedi (finishReason: '+reason+'). Yine de key geçerli olabilir; Analiz Et ile deneyin.';
+      out.className='gk-test-out warn';
+    }
   }catch(e){
     out.textContent='✗ '+friendlyGeminiError(e);
     out.className='gk-test-out err';
@@ -2022,7 +2030,7 @@ function geminiText(data){
     .join('')
     .trim();
 }
-async function callGemini({systemInstruction,userText,responseMimeType='text/plain',responseSchema=null,maxOutputTokens=2048}){
+async function callGemini({systemInstruction,userText,responseMimeType='text/plain',responseSchema=null,maxOutputTokens=2048,disableThinking=false}){
   const apiKey=getGeminiKey();
   if(!apiKey) throw new Error('Gemini API key gerekli');
   const body={
@@ -2035,6 +2043,8 @@ async function callGemini({systemInstruction,userText,responseMimeType='text/pla
     }
   };
   if(responseSchema) body.generationConfig.responseSchema=responseSchema;
+  // Gemini 2.5 flash thinking modu — küçük prompt'larda tüm token'ı thinking'e yakabiliyor
+  if(disableThinking) body.generationConfig.thinkingConfig={thinkingBudget:0};
   const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,{
     method:'POST',
     headers:{
