@@ -3181,7 +3181,8 @@ async function parseStmt(){
       userText:text.slice(0,12000),
       responseMimeType:'application/json',
       responseSchema:statementSchema(bank),
-      maxOutputTokens:4096
+      maxOutputTokens:8192,
+      disableThinking:true
     });
     const raw=geminiText(data)||'[]';
     const parsed=JSON.parse(raw);
@@ -3270,12 +3271,21 @@ async function analyzeAllSpending(){
   out.textContent='Tüm giderler ve gelirler analiz ediliyor…';
   try{
     const data=await callGemini({
-      systemInstruction:'Sen kişisel finans analistisin. Kullanıcının son 6 aylık gider, gelir ve bütçe verisini incele. Türkçe yaz. Cevabı kısa ama somut tut. Şu başlıkları kullan: 1) Genel Durum 2) En Fazla Para Yakan Kalemler 3) Riskler 4) Gelecek Ay İçin 3 Net Öneri. Mümkün olduğunda rakam ver.',
+      systemInstruction:'Sen kişisel finans analistisin. Kullanıcının son 6 aylık gider, gelir ve bütçe verisini incele. Türkçe yaz. Somut rakam ver, gereksiz girişten kaçın. Şu 4 başlığı tam doldur:\n1) Genel Durum\n2) En Fazla Para Yakan Kalemler\n3) Riskler\n4) Gelecek Ay İçin 3 Net Öneri',
       userText:buildSpendingAnalysisInput(),
       responseMimeType:'text/plain',
-      maxOutputTokens:1800
+      maxOutputTokens:4096,
+      disableThinking:true
     });
-    out.innerHTML=renderAnalysisHtml(geminiText(data)||'');
+    const raw=geminiText(data);
+    const finish=(data.candidates&&data.candidates[0]&&data.candidates[0].finishReason)||'';
+    if(!raw){
+      out.innerHTML=`<div class="ai-sec neg"><h4>Analiz üretilemedi</h4><p>Model boş yanıt döndü (finishReason: ${finish||'bilinmiyor'}). Tekrar deneyin.</p></div>`;
+    } else {
+      let html=renderAnalysisHtml(raw);
+      if(finish==='MAX_TOKENS') html+=`<div class="ai-sec neg"><h4>Uyarı</h4><p>Cevap token limitine takıldı; analiz kısaltılmış olabilir. Daha az veriyle tekrar deneyin.</p></div>`;
+      out.innerHTML=html;
+    }
   }catch(e){
     out.innerHTML=`<div class="ai-sec neg"><h4>Hata</h4><p>${friendlyGeminiError(e)}</p></div>`;
     toast('Hata',true);
