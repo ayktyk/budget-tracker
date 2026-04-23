@@ -778,6 +778,26 @@ html, body {
 /* Bütçe sıfırla aksiyonu */
 .budget-actions { margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
 
+/* Kredi kartı takvimi */
+.card-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 0; border-bottom:1px solid var(--border); }
+.card-row:last-child { border-bottom:none; }
+.card-row-main { display:flex; align-items:center; gap:10px; min-width:0; flex:1; }
+.card-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; box-shadow:0 0 0 1px rgba(0,0,0,0.1); }
+.card-info { min-width:0; flex:1; }
+.card-name { font-size:14px; font-weight:600; color:var(--text); }
+.card-meta { font-size:11px; color:var(--text3); margin-top:2px; }
+
+/* Takvim günündeki kart noktaları */
+.card-dot-mark { background:var(--cc, #888) !important; }
+.card-dot-mark.d-cut { border:1.5px solid var(--cc, #888); background:transparent !important; }
+.card-dot-mark.d-due { background:var(--cc, #888) !important; border:1.5px solid var(--cc, #888); }
+
+/* Gün detay panelinde kart etkinlikleri */
+.day-card-events { display:flex; flex-direction:column; gap:6px; padding:10px 0; border-bottom:1px solid var(--border); margin-bottom:6px; }
+.day-card-event { display:flex; align-items:center; gap:8px; font-size:12px; }
+.day-card-event-name { font-weight:600; color:var(--text); flex:1; }
+.day-card-event-type { font-size:10px; font-weight:700; letter-spacing:.04em; color:var(--text2); text-transform:uppercase; background:rgba(0,0,0,0.06); padding:2px 6px; border-radius:999px; }
+
 /* Status toast */
 .toast {
   position: fixed;
@@ -1709,7 +1729,7 @@ function buildDesignLayout(){
     </div>`;
   document.getElementById('s-more').innerHTML = `
     <div class="screen-shell">
-      <div id="more-ekstre" class="more-panel"><div class="card"><div class="card-h"><h3>Ekstre Yükle + AI</h3><span class="hint">Gemini + fallback</span></div><details class="api-collapsible" id="gemini-details"><summary>Gemini API Key <span id="gemini-key-status" class="gk-status off">(boş)</span></summary><div class="field"><input class="input" type="password" id="gemini-key" placeholder="Gemini API Key (yalnızca cihazınızda saklanır)" oninput="saveGeminiKey(this.value)"><div class="field-note" style="margin-top:6px">⚠ Bu anahtar düz metin olarak cihazınızda saklanır. Sadece güvendiğiniz cihazlarda kullanın. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Google AI Studio'dan ücretsiz key alın</a>.</div><div class="gk-test-row"><button type="button" class="btn btn-secondary" id="gemini-test-btn" onclick="testGeminiKey()">Bağlantıyı Test Et</button><div id="gemini-test-out" class="gk-test-out"></div></div></div></details><div class="field"><label>Banka</label><select id="stmt-bank" style="display:none"><option>İşbank</option><option>Enpara</option><option>VakıfBank</option></select><div class="bank-chip-row" id="stmt-bank-chips"></div></div><div class="field"><label>Ekstre Metni</label><textarea class="input stmt-area" id="stmt-text" placeholder="Ekstre metnini buraya yapıştır"></textarea></div><button class="btn btn-primary btn-block" onclick="parseStmt()" id="parse-btn">İçe Aktar</button><div class="field-note">Kalemler <strong>bugünün tarihine</strong> kaydedilir. Önce Gemini denenir; başarısız olursa yerel parser devreye girer.</div><div id="parse-res" class="parse-result"></div></div><div class="card ai-card"><div class="card-h"><h3>Genel Harcama Analizi</h3><span class="hint">Son 6 ay</span></div><div class="field-note">Yeni veri eklemez, sadece yorum üretir.</div><button class="btn btn-secondary btn-block" onclick="analyzeAllSpending()" id="analyze-all-btn">Analiz Et</button><div id="analysis-res" class="analysis-result"></div></div></div>
+      <div id="more-ekstre" class="more-panel"><div class="card"><div class="card-h"><h3>Ekstre Yükle + AI</h3><span class="hint">Gemini + fallback</span></div><details class="api-collapsible" id="gemini-details"><summary>Gemini API Key <span id="gemini-key-status" class="gk-status off">(boş)</span></summary><div class="field"><input class="input" type="password" id="gemini-key" placeholder="Gemini API Key (yalnızca cihazınızda saklanır)" oninput="saveGeminiKey(this.value)"><div class="field-note" style="margin-top:6px">⚠ Bu anahtar düz metin olarak cihazınızda saklanır. Sadece güvendiğiniz cihazlarda kullanın. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Google AI Studio'dan ücretsiz key alın</a>.</div><div class="gk-test-row"><button type="button" class="btn btn-secondary" id="gemini-test-btn" onclick="testGeminiKey()">Bağlantıyı Test Et</button><div id="gemini-test-out" class="gk-test-out"></div></div></div></details><div class="field"><label>Banka</label><select id="stmt-bank" style="display:none"><option>İşbank</option><option>Enpara</option><option>VakıfBank</option></select><div class="bank-chip-row" id="stmt-bank-chips"></div></div><div class="field"><label>Ekstre Metni</label><textarea class="input stmt-area" id="stmt-text" placeholder="Ekstre metnini buraya yapıştır"></textarea></div><button class="btn btn-primary btn-block" onclick="parseStmt()" id="parse-btn">İçe Aktar</button><div class="field-note">Kalemler <strong>bugünün tarihine</strong> kaydedilir. Önce Gemini denenir; başarısız olursa yerel parser devreye girer.</div><div id="parse-res" class="parse-result"></div></div><div class="card"><div class="card-h"><h3>Kart Takvimi</h3><button type="button" class="fav-add-btn" onclick="openCardForm()">+ Yeni</button></div><div id="card-list"></div><div class="field-note" style="margin-top:6px">Kesim ve son ödeme günleri ana sayfadaki takvimde kartın renginde işaretlenir.</div></div><div class="card ai-card"><div class="card-h"><h3>Genel Harcama Analizi</h3><span class="hint">Son 6 ay</span></div><div class="field-note">Yeni veri eklemez, sadece yorum üretir.</div><button class="btn btn-secondary btn-block" onclick="analyzeAllSpending()" id="analyze-all-btn">Analiz Et</button><div id="analysis-res" class="analysis-result"></div></div></div>
       <div id="more-sabit" class="more-panel"><div class="card"><div class="card-h"><h3>Sabit Giderler</h3><span class="hint">Referans listesi</span></div><div id="fixed-list"></div><div class="field-note" style="margin-top:8px">Bu liste bilgi amaçlıdır. Otomatik kayıt oluşturmaz — ödediğinde Hızlı Giriş'ten veya Ekstre Yükle'den ekle.</div></div></div>
       <div id="more-data" class="more-panel"><div class="card"><div class="card-h"><h3>Veri</h3><span class="hint">Yedek / sıfırla</span></div><div class="data-actions"><button class="btn btn-primary btn-block" onclick="exportData()">JSON Yedeği İndir</button><button class="btn btn-secondary btn-block" onclick="document.getElementById('imp-f').click()">JSON Yedeği Yükle</button><input type="file" id="imp-f" accept=".json" style="display:none" onchange="importData(event)"><button class="btn btn-danger btn-block" onclick="resetAll()">Tüm Verileri Sıfırla</button></div><div id="data-st" class="field-note"></div><div class="field-note" style="margin-top:6px">Sıfırlama öncesi otomatik yedek dosyası indirilir. Yedek dosyasını tekrar yüklerseniz tüm kayıtlarınız geri gelir.</div></div></div>
       <div id="more-theme" class="more-panel"><div class="card theme-picker"><div class="card-h"><h3>Görünüm</h3><span class="hint">Anında değişir</span></div><div class="theme-row"><button data-theme-pick="cream" class="theme-chip" onclick="setTheme('cream')"><span class="sw" style="background:#f4efe6"></span>Krem Kâğıt</button><button data-theme-pick="onyx" class="theme-chip" onclick="setTheme('onyx')"><span class="sw" style="background:#0e1117"></span>Onyx & Altın</button><button data-theme-pick="marble" class="theme-chip" onclick="setTheme('marble')"><span class="sw" style="background:#ecedef"></span>Mermer</button><button data-theme-pick="midnight" class="theme-chip" onclick="setTheme('midnight')"><span class="sw" style="background:#0d1220"></span>Gece Mavisi</button></div></div></div>
@@ -1817,6 +1837,11 @@ function buildSeed(){
 // SEED verisi kaldırıldı. buildSeed() fonksiyonu dead code — referans yok.
 const SEED = [];
 
+const DEFAULT_CARDS=[
+  {id:'card_isbank',    name:'İşbank',    bank:'İşbank',    cutDay: 1,  dueDay:14, color:'#5B8DE8'},
+  {id:'card_vakif',     name:'VakıfBank', bank:'VakıfBank', cutDay: 7,  dueDay:20, color:'#3EC98A'},
+  {id:'card_enpara',    name:'Enpara',    bank:'Enpara',    cutDay:22,  dueDay: 7, color:'#8B6EE8'},
+];
 let S = {
   expenses: [],
   userExp:  [],
@@ -1825,6 +1850,7 @@ let S = {
   favs:     JSON.parse(JSON.stringify(DEFAULT_FAV)),
   customCats: [],   // kullanıcı tarafından eklenen ekstra kategoriler
   subs:     [],     // abonelikler
+  cards:    JSON.parse(JSON.stringify(DEFAULT_CARDS)), // kredi kartı ekstre kesim/son ödeme günleri
   selCat: 'yemek',
   expM: null, expC: null, incM: null, dashM: CUR_IDX, dashDay: ''
 };
@@ -1914,6 +1940,13 @@ function loadFromStorage() {
       if (Array.isArray(parsed)) S.subs = parsed.map(s => ({...s, id: s.id || genId()}));
     }
   } catch(e) {}
+  try {
+    const cd = localStorage.getItem('ay_cards');
+    if (cd !== null) {
+      const parsed = JSON.parse(cd);
+      if (Array.isArray(parsed)) S.cards = parsed.map(c => ({...c, id: c.id || genId()}));
+    }
+  } catch(e) {}
   loadGeminiKey();
   const el = document.getElementById('saved-at');
   if (el) el.textContent = new Date().toLocaleDateString('tr-TR');
@@ -1932,6 +1965,7 @@ function save() {
     localStorage.setItem('ay_favs', JSON.stringify(S.favs));
     localStorage.setItem('ay_cats_custom', JSON.stringify(S.customCats||[]));
     localStorage.setItem('ay_subs', JSON.stringify(S.subs||[]));
+    localStorage.setItem('ay_cards', JSON.stringify(S.cards||[]));
     if (el) el.textContent = new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}) + ' ✓';
   } catch(e) {
     if (el) el.textContent = '⚠ hata';
@@ -2183,25 +2217,71 @@ function parseMoneyToken(token){
   return Number.isFinite(n)?Math.abs(n):0;
 }
 function inferCategory(desc){
-  const s=normalizeTr(desc);
+  const s=' '+normalizeTr(desc)+' ';
+  // Sıra önemli: daha spesifik kurallar önce. İlk eşleşme kazanır.
   const rules=[
-    ['uyap',['uyap','avkt','avukat portali','harc']],
-    ['kira',['kira','metin sagir','tugay tuna']],
-    ['muhasebe',['muhasebe','mali musavir','ahmet korkmaz']],
-    ['spor',['halisaha','fitness','macfit','gym','spor']],
-    ['fatura',['turknet','vodafone','turk telekom','turkcell','enerjisa','igdas','iski','superonline','fatura','tt mobil']],
-    ['dijital',['apple','google','spotify','netflix','claude','openai','openrouter','youtube','microsoft 365','amazon prime','namecheap','paddle']],
-    ['market',['market','bim','a101','sok','migros','carrefour','macrocenter','gida']],
-    ['yemek',['yemek','corba','kahve','starbucks','kahvalti','restoran','cafe','firin','kebap','lahmacun']],
-    ['eticaret',['trendyol','hepsiburada','amazon','temu','n11','alisveris','ticaret']],
-    ['ulasim',['obilet','ido','tcdd','pamukkale','metro turizm','pegasus','thy','ulasim','taksi','uber','marti']],
-    ['saglik',['eczane','hastane','doktor','optik','saglik']],
-    ['egitim',['udemy','universite','kurs','egitim']],
-    ['eglence',['steam','passo','sinema','tiyatro','eglence']],
-    ['giyim',['waikiki','lcw','mudo','fenerium','giyim','boyner','defacto']],
-    ['yatirim',['funding','quant','yatirim','borsa','kripto','fon']],
-    ['vergi',['vergi','v.d.','vergi dairesi','gib']],
-    ['nakit',['nakit','atm cekim','para cekme']]
+    ['uyap',['uyap','avkt','avukat portali','adalet bakanligi','baro','mahkeme harci',' harc ']],
+    ['kira',[' kira ','metin sagir','tugay tuna','emlak']],
+    ['muhasebe',['muhasebe','mali musavir','ahmet korkmaz','smmm']],
+    ['ulasim',[
+      'istanbulkart','istanbul kart','i̇bb','ibb ulasim','bkm iett','iett','metro istanbul','metrobüs','metrobus','marmaray','akbil',
+      'bitaksi','uber','taksi','moovit','marti','scotty',
+      'hgs','ogs','kgs','otoyol','koprugecis','kopru gecis',
+      'shell','opet','petrol ofisi','po/','bp ','total ','lukoil','aygaz','akaryakit','benzin','motorin','mazot','lpg','petrol',
+      'otopark','ispark','park ','valet',
+      'pegasus','thy','turkish airlines','anadolujet','sunexpress','tav',
+      'obilet','biletall','tcdd','pamukkale','metro turizm','kamilkoc','kamil koc','ulasim','bilet tr','enuygun',
+      'cicek sepeti ulasim'
+    ]],
+    ['fatura',[
+      'turknet','vodafone','turk telekom','turkcell','turk.telekom','enerjisa','igdas','iski','aski','baski','boğazici elektrik','bogazici elektrik','baskent elektrik','akedas','cenal','cenal enerji','superonline','superbox','kablonet','tv+','tv plus','digiturk','d-smart','dsmart','fatura','tt mobil','tt fibernet','turk telekom mobil','vodafone tv'
+    ]],
+    ['dijital',[
+      'apple.com','app store','appstore','itunes','icloud','apple services',
+      'google','google play','playstore','google workspace','google cloud','google one','youtube','youtube premium','youtube music',
+      'spotify','netflix','blutv','blu tv','gain','exxen','disney','mubi','puhu tv','tod','tod tv',
+      'claude','anthropic','openai','chatgpt','openrouter','mistral','perplexity','cursor',
+      'microsoft 365','office 365','onedrive','xbox',
+      'amazon prime','prime video','adobe','canva','notion','figma','jetbrains','github','gitlab','dropbox','zoom','slack','linear',
+      'namecheap','godaddy','paddle','stripe','gumroad','patreon','substack','medium'
+    ]],
+    ['market',[
+      'migros','a101','a 101','bim','sok ','şok','carrefour','carrefoursa','macrocenter','macro center','metro gross','metro gros','tarim kredi','happy center','happycenter','bizim toptan','ucz ','onur market','file ','kipa','makro ','tansas','tansaş','pehlivanoglu market','tarim','ucuzluk','market','gida','manav','kasap','sarkuteri','bakkal','mopas','kiler','rossmann','watsons','gratis'
+    ]],
+    ['yemek',[
+      'yemeksepeti','getir yemek','trendyol yemek','yemek sepeti','foodie',
+      'starbucks','espressolab','espresso lab','caribou','kahve dunyasi','kahve dunyası','kahve','coffee','costa','cafe','kafe',
+      'burger','mcdonalds','popeyes','kfc','little caesars','dominos','pizza','papa johns','sbarro',
+      'borek','börek','simit sarayi','simit sarayı','simit','pide','lahmacun','kebap','doner','döner','tavuk','corba','çorba','kahvalti','kahvaltı',
+      'restoran','restaurant','lokanta','firin','fırın','bistro','meyhane','balik','balık','sushi','sushico','midye','koftem','köfte','mantı','manti','bueno','cigkofte','çiğköfte',
+      'hebun','özgur','ozgur','ozgür'
+    ]],
+    ['spor',[
+      'halisaha','halı saha','fitness','macfit','mac fit','mars athletic','sports international','gym','yoga','pilates','zumba','crossfit','spor ',
+      'decathlon','intersport'
+    ]],
+    ['eticaret',[
+      'trendyol','hepsiburada','amazon','temu','n11','gittigidiyor','morhipo','modanisa','pull&bear','pull and bear','zara','bershka','stradivarius','lc waikiki','lcw','defacto','koton','mavi','polo garage','u.s. polo','altinyildiz','altınyıldız','boyner','flo ','kinetix','inci ','ikea','tekzen','bauhaus','koctas','koçtaş'
+    ]],
+    ['saglik',[
+      'eczane','pharmacy','hastane','klinik','klinik.','tıp merkezi','tip merkezi','dr.','dt.','laboratuvar','labaratuvar','laboratuar','tahlil','mr.','tomografi','ortopedi','dental','cerrahi','acibadem','acıbadem','memorial','liv hospital','medipol','medicana','anadolu saglik','dunyagoz','dünyagöz','optik','medline'
+    ]],
+    ['egitim',[
+      'udemy','coursera','skillshare','edx','brilliant','okul','universite','üniversite','kurs','egitim','eğitim','akademi','dergi','kitap','d&r','dr.','idefix','kitapyurdu'
+    ]],
+    ['eglence',[
+      'steam','epic games','epicgames','playstation','sony entertainment','xbox game','nintendo','roblox','riot',
+      'passo','biletix','ticketmaster','cinemaximum','cinebonus','cinetime','atlantis sinema','sinema','tiyatro','konser','mac bilet','stadyum',
+      'lunapark','kidzania','harikalar diyari','eğlence','eglence'
+    ]],
+    ['giyim',[
+      'waikiki','lcw','mudo','fenerium','giyim','boyner','defacto','koton','mavi','pull&bear','zara','bershka','stradivarius','polo','nike','adidas','puma','under armour','new balance','flo ','kinetix','inci ayakkabi'
+    ]],
+    ['yatirim',[
+      'funding','quant','yatirim','yatırım','borsa','hisse','fon ',' fon','bist','tefas','tahvil','bono','altin','altın','gumus','gümüş','kripto','binance','btcturk','paribu','coinbase','bitfinex','okx'
+    ]],
+    ['vergi',['vergi','v.d.','vergi dairesi','gib ','motorlu tasit','mtv ','emlak vergisi','cevre temizlik','çevre temizlik']],
+    ['nakit',['nakit','atm cekim','para cekme','para çekme','nakit cekim','atm.','withdraw']]
   ];
   for(const [cat,keys] of rules){
     if(keys.some(k=>s.includes(k))) return cat;
@@ -2477,6 +2557,12 @@ function renderDashCalendar(monthKey){
   for(let i=startOffset;i>0;i--){
     html+=`<div class="cal-day other"><span class="num">${prevLast-i+1}</span><span class="dots"></span></div>`;
   }
+  // Kart kesim/son ödeme günlerini map'le (renkli noktalar için)
+  const cardMarks={}; // {day: [{color, type:'cut'|'due', name}]}
+  (S.cards||[]).forEach(c=>{
+    if(c.cutDay){ (cardMarks[c.cutDay]=cardMarks[c.cutDay]||[]).push({color:c.color||'#888',type:'cut',name:c.name||c.bank}); }
+    if(c.dueDay){ (cardMarks[c.dueDay]=cardMarks[c.dueDay]||[]).push({color:c.color||'#888',type:'due',name:c.name||c.bank}); }
+  });
   // Current month
   for(let d=1;d<=daysInMonth;d++){
     const iso=`${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
@@ -2485,8 +2571,11 @@ function renderDashCalendar(monthKey){
     const cls=['cal-day'];
     if(iso===todayIso) cls.push('today');
     if(iso===selIso) cls.push('sel');
-    const dots=(hasIn?'<span class="dot d-in"></span>':'')+(hasOut?'<span class="dot d-out"></span>':'');
-    html+=`<div class="${cls.join(' ')}" onclick="selectDay('${iso}')"><span class="num">${d}</span><span class="dots">${dots}</span></div>`;
+    let dots=(hasIn?'<span class="dot d-in"></span>':'')+(hasOut?'<span class="dot d-out"></span>':'');
+    const marks=cardMarks[d]||[];
+    const title=marks.map(m=>`${m.name} ${m.type==='cut'?'ekstre kesim':'son ödeme'}`).join(' · ');
+    const cardDots=marks.slice(0,3).map(m=>`<span class="dot card-dot-mark ${m.type==='cut'?'d-cut':'d-due'}" style="--cc:${m.color}" title="${title}"></span>`).join('');
+    html+=`<div class="${cls.join(' ')}" ${title?`title="${title}"`:''} onclick="selectDay('${iso}')"><span class="num">${d}</span><span class="dots">${dots}${cardDots}</span></div>`;
   }
   // Next month head (fill to 6 rows = 42 cells)
   const totalCells=startOffset+daysInMonth;
@@ -2518,6 +2607,13 @@ function renderDayList(){
     list.innerHTML=`<div class="day-empty">Takvimde bir güne dokunun; o günün gelir ve giderleri burada görünsün.</div>`;
     return;
   }
+  const dayOfMonth=parseInt(iso.slice(8));
+  const cardEvents=(S.cards||[]).flatMap(c=>{
+    const e=[];
+    if(c.cutDay===dayOfMonth) e.push({name:c.name||c.bank,color:c.color,type:'cut'});
+    if(c.dueDay===dayOfMonth) e.push({name:c.name||c.bank,color:c.color,type:'due'});
+    return e;
+  });
   const inc=S.incomes.filter(i=>i.d===iso);
   const exp=S.expenses.filter(e=>e.d===iso);
   const rows=[
@@ -2533,6 +2629,9 @@ function renderDayList(){
   if(inc.length) summary.push(`${inc.length} gelir (+${fmt(sumIn)} ₺)`);
   if(exp.length) summary.push(`${exp.length} gider (−${fmt(sumOut)} ₺)`);
   if(!summary.length) summary.push('kayıt yok');
+  const cardEventsHtml = cardEvents.length
+    ? `<div class="day-card-events">${cardEvents.map(ev=>`<div class="day-card-event"><span class="card-dot" style="background:${ev.color||'#888'}"></span><span class="day-card-event-name">${escAttr(ev.name)}</span><span class="day-card-event-type">${ev.type==='cut'?'ekstre kesim':'SON ÖDEME'}</span></div>`).join('')}</div>`
+    : '';
   const head=`
     <div class="day-list-head">
       <span class="day-list-title">${parseInt(d)} ${mNames[parseInt(mo)-1]}</span>
@@ -2540,7 +2639,7 @@ function renderDayList(){
     </div>`;
 
   if(!rows.length){
-    list.innerHTML=head+`<div class="day-empty">Bu gün için kayıt yok.</div>`;
+    list.innerHTML=head+cardEventsHtml+`<div class="day-empty">Bu gün için işlem kaydı yok.</div>`;
     return;
   }
 
@@ -2562,7 +2661,7 @@ function renderDayList(){
     </div>`;
   }).join('');
 
-  list.innerHTML=head+body;
+  list.innerHTML=head+cardEventsHtml+body;
 }
 
 function navDashMonth(delta){
@@ -2947,6 +3046,99 @@ function confirmSub(id){
   save(); renderSubs();
   toast('Onaylandı');
 }
+
+// ══════════════════════════════════════════════════════════════
+// KREDİ KARTI TAKVİMİ (ekstre kesim + son ödeme)
+// ══════════════════════════════════════════════════════════════
+const CARD_COLORS=['#5B8DE8','#3EC98A','#8B6EE8','#E8A83E','#E86E8B','#E05656','#3EC9C4','#8BC449','#c97d4a'];
+function renderCards(){
+  const el=document.getElementById('card-list');
+  if(!el) return;
+  const cards=S.cards||[];
+  if(!cards.length){
+    el.innerHTML=`<div class="fav-empty">Kart tanımlanmamış. <button type="button" class="linky" onclick="openCardForm()">+ Yeni ekle</button></div>`;
+    return;
+  }
+  el.innerHTML=cards.map(c=>`
+    <div class="card-row">
+      <div class="card-row-main">
+        <span class="card-dot" style="background:${escAttr(c.color||'#888')}"></span>
+        <div class="card-info">
+          <div class="card-name">${escAttr(c.name||c.bank||'Kart')}</div>
+          <div class="card-meta">Kesim: ayın ${c.cutDay||'—'}'i · Son ödeme: ayın ${c.dueDay||'—'}'i</div>
+        </div>
+      </div>
+      <div class="fav-actions">
+        <button class="fav-ic" title="Düzenle" onclick="openCardForm('${escAttr(c.id)}')">✎</button>
+        <button class="fav-ic fav-ic-del" title="Sil" onclick="delCard('${escAttr(c.id)}')">×</button>
+      </div>
+    </div>`).join('');
+}
+function openCardForm(id){
+  const editing=id?(S.cards||[]).find(x=>x.id===id):null;
+  const usedColors=new Set((S.cards||[]).map(c=>c.color));
+  const freshColor=CARD_COLORS.find(c=>!usedColors.has(c))||CARD_COLORS[0];
+  const cur=editing?{...editing}:{id:'',name:'',bank:'İşbank',cutDay:1,dueDay:14,color:freshColor};
+  const bankOpts=['İşbank','VakıfBank','Enpara','Garanti','Akbank','Yapı Kredi','QNB','Denizbank','TEB','Ziraat','Halkbank','Diğer'].map(b=>`<option value="${b}" ${cur.bank===b?'selected':''}>${b}</option>`).join('');
+  const colorRow=CARD_COLORS.map(c=>`<button type="button" class="color-pick ${cur.color===c?'on':''}" style="background:${c}" onclick="pickCardColor('${c}')" aria-label="${c}"></button>`).join('');
+  const html=`
+    <div class="fav-modal-overlay" id="card-modal" onclick="if(event.target===this)closeCardForm()">
+      <div class="fav-modal">
+        <div class="fav-modal-head">
+          <h3>${editing?'Kartı Düzenle':'Yeni Kredi Kartı'}</h3>
+          <button class="fav-modal-close" onclick="closeCardForm()" aria-label="Kapat">×</button>
+        </div>
+        <input type="hidden" id="kf-id" value="${escAttr(cur.id)}">
+        <input type="hidden" id="kf-color" value="${escAttr(cur.color)}">
+        <div class="qfield"><label>Ad</label><input class="input" id="kf-name" type="text" placeholder="örn: İşbank Maximum" value="${escAttr(cur.name)}"></div>
+        <div class="qfield"><label>Banka</label><select class="input" id="kf-bank">${bankOpts}</select></div>
+        <div class="q-grid-two">
+          <div class="qfield"><label>Ekstre kesim günü</label><input class="input" id="kf-cut" type="number" min="1" max="31" value="${cur.cutDay||1}"></div>
+          <div class="qfield"><label>Son ödeme günü</label><input class="input" id="kf-due" type="number" min="1" max="31" value="${cur.dueDay||14}"></div>
+        </div>
+        <div class="qfield"><label>Takvim rengi</label><div class="color-row">${colorRow}</div></div>
+        <div class="fav-modal-actions">
+          ${editing?`<button class="btn btn-danger" onclick="delCard('${escAttr(cur.id)}',true)">Sil</button>`:''}
+          <button class="btn btn-secondary" onclick="closeCardForm()">Vazgeç</button>
+          <button class="btn btn-primary" onclick="saveCardForm()">${editing?'Güncelle':'Ekle'}</button>
+        </div>
+      </div>
+    </div>`;
+  const host=document.createElement('div'); host.innerHTML=html; document.body.appendChild(host.firstElementChild);
+  setTimeout(()=>{const l=document.getElementById('kf-name');if(l)l.focus();},50);
+}
+function pickCardColor(c){ const i=document.getElementById('kf-color'); if(i) i.value=c; document.querySelectorAll('#card-modal .color-pick').forEach(b=>b.classList.toggle('on',b.getAttribute('aria-label')===c)); }
+function closeCardForm(){ const m=document.getElementById('card-modal'); if(m) m.remove(); }
+function saveCardForm(){
+  const id=(document.getElementById('kf-id').value||'').trim();
+  const name=(document.getElementById('kf-name').value||'').trim();
+  const bank=document.getElementById('kf-bank').value;
+  const cutDay=Math.max(1,Math.min(31,parseInt(document.getElementById('kf-cut').value)||1));
+  const dueDay=Math.max(1,Math.min(31,parseInt(document.getElementById('kf-due').value)||14));
+  const color=(document.getElementById('kf-color').value||'#888').trim();
+  if(!name){toast('Ad girin',true);return;}
+  if(id){
+    const idx=(S.cards||[]).findIndex(x=>x.id===id);
+    if(idx>=0) S.cards[idx]={...S.cards[idx],name,bank,cutDay,dueDay,color};
+    toast('✓ Güncellendi');
+  } else {
+    S.cards=S.cards||[];
+    S.cards.push({id:genId(),name,bank,cutDay,dueDay,color});
+    toast('✓ Kart eklendi');
+  }
+  save(); closeCardForm(); renderCards(); renderDash&&renderDash();
+}
+function delCard(id,fromModal){
+  const c=(S.cards||[]).find(x=>x.id===id);
+  if(!c) return;
+  if(!confirm(`"${c.name||c.bank}" kartını silmek istiyor musunuz?`)) return;
+  S.cards=(S.cards||[]).filter(x=>x.id!==id);
+  save();
+  if(fromModal) closeCardForm();
+  renderCards(); renderDash&&renderDash();
+  toast('Silindi');
+}
+
 function normalizeDesc(d){
   return String(d||'').toLocaleLowerCase('tr-TR')
     .replace(/[0-9]+/g,' ')
@@ -3177,7 +3369,28 @@ async function parseStmt(){
   resultEl.textContent='Gemini ile analiz ediliyor…';
   try{
     const data=await callGemini({
-      systemInstruction:`Türk banka ekstresi parse et. Yalnızca geçerli JSON döndür. Her kayıt {d, desc, amt, cat, bank} alanlarını içersin. Tarih YYYY-MM-DD olsun. Yalnızca gerçek gider işlemlerini döndür. İade, iptal, alacak, pozitif geri ödeme ve bakiye satırlarını atla. Kategori seçerken bu kodlardan birini kullan: ${getCats().map(c=>c.id).join(', ')}. Banka alanı daima ${bank} olsun.`,
+      systemInstruction:`Türk banka ekstresini parse eden akıllı bir finans asistanısın. Yalnızca geçerli JSON döndür; her kayıt {d, desc, amt, cat, bank} içermeli. Tarih YYYY-MM-DD olsun.
+Yalnızca GERÇEK GİDER işlemlerini al. Atla: iade, iptal, alacak, pozitif geri ödeme, bakiye, faiz, kredi kartı ödemesi, virman, hesaplar arası transfer.
+
+KATEGORİ SEÇİM KURALI (çok önemli):
+İşyeri adına bakarak iş kolunu tahmin et. Örnekler:
+- "Özgür Börek", "Hebun Çorba", "X Pide", "Starbucks", "Kahve Dünyası", "Yemeksepeti", "Getir Yemek" → yemek
+- "İstanbulkart", "İETT", "Marmaray", "BiTaksi", "Uber", "HGS", "OGS", "Shell", "BP", "Opet" → ulasim
+- "Migros", "A101", "BİM", "ŞOK", "Carrefour", "Macrocenter", kasap, manav → market
+- "Apple.com", "Google", "Spotify", "Netflix", "Claude", "OpenAI", "YouTube", "Microsoft 365" → dijital
+- "Trendyol", "Hepsiburada", "Amazon", "N11" → eticaret
+- "Türknet", "Vodafone", "Turkcell", "İGDAŞ", "İSKİ", "Enerjisa" → fatura
+- Eczane, hastane, klinik, Dr., Dt. → saglik
+- Halısaha, MacFit, Mars Athletic, spor salonu → spor
+- Sinema, tiyatro, konser, Steam, Passo → eglence
+- LCW, Zara, Nike, Adidas, Boyner, Koton → giyim veya eticaret
+- UYAP, AVKT, Avukat Portalı, harç, mahkeme → uyap
+- Kira, mülk sahibi adı → kira
+- Motorlu taşıt vergisi, MTV, GIB, vergi dairesi → vergi
+
+Sadece bu kodlardan birini kullan: ${getCats().map(c=>c.id).join(', ')}.
+EMİN DEĞİLSEN → 'diger'. Asla tahmin için zorlama yapma; iş kolu belirsizse 'diger' daha iyi.
+Banka alanı daima ${bank} olsun.`,
       userText:text.slice(0,12000),
       responseMimeType:'application/json',
       responseSchema:statementSchema(bank),
@@ -3307,7 +3520,7 @@ function resetAll(){
     document.body.appendChild(a);a.click();a.remove();
   }catch(e){console.warn('reset backup failed',e);}
   S.userExp=[];S.expenses=[];S.incomes=[];S.budgets={...DEF_BUD};
-  S.customCats=[];S.subs=[];
+  S.customCats=[];S.subs=[];S.cards=JSON.parse(JSON.stringify(DEFAULT_CARDS));
   save();toast('✓ Veriler sıfırlandı · yedek indirildi');
   renderDash();renderTxn&&renderTxn();renderIncome&&renderIncome();renderBudget&&renderBudget();
 }
@@ -3318,7 +3531,8 @@ function exportData(){
     budgets:S.budgets,
     favs:S.favs,
     customCats:S.customCats||[],
-    subs:S.subs||[]
+    subs:S.subs||[],
+    cards:S.cards||[]
   };
   const b=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='butce_'+new Date().toISOString().slice(0,10)+'.json';a.click();
@@ -3335,6 +3549,7 @@ function importData(e){
     if(Array.isArray(d.favs)) S.favs=d.favs.map(f=>({...f,id:f.id||genId()}));
     if(Array.isArray(d.customCats)) S.customCats=d.customCats.filter(c=>c&&c.id&&c.label);
     if(Array.isArray(d.subs)) S.subs=d.subs.map(s=>({...s,id:s.id||genId()}));
+    if(Array.isArray(d.cards)) S.cards=d.cards.map(c=>({...c,id:c.id||genId()}));
     save();toast('✓ Veri yüklendi');go('dash',document.getElementById('nb-dash'));
   }catch{toast('Hata: geçersiz dosya',true);}};
   r.readAsText(f);
@@ -3346,6 +3561,7 @@ function importData(e){
 function setMoreTab(tab,btn){
   document.querySelectorAll('.more-panel').forEach(p=>p.style.display='block');
   renderFixed();
+  renderCards();
   const target=document.getElementById('more-'+(tab||'ekstre'));
   if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
 }
