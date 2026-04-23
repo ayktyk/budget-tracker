@@ -1545,11 +1545,7 @@ body { overflow-x: hidden; overflow-y: hidden; position: relative; }
     <div id="s-budget" class="screen">
       <div class="screen-shell">
         <div class="card">
-          <div class="card-h"><h3>Kategoriler</h3><button type="button" class="fav-add-btn" onclick="openCatForm()">+ Yeni</button></div>
-          <div id="cat-manager"></div>
-        </div>
-        <div class="card">
-          <div class="card-h"><h3>Bütçe</h3><span class="hint">Aylık limitler</span></div>
+          <div class="card-h"><h3>Bütçe · Aylık limitler</h3><button type="button" class="fav-add-btn" onclick="openCatForm()" title="Yeni kategori ekle">+ Yeni kategori</button></div>
           <div id="budget-bars-main"></div>
           <div class="budget-actions"><button type="button" class="btn btn-secondary btn-block" onclick="resetBudgetsToDefault()">Varsayılanlara Sıfırla</button></div>
         </div>
@@ -2798,7 +2794,7 @@ function saveCatForm(){
     S.customCats.push({id:newId,label,icon,color});
     toast('✓ Kategori eklendi');
   }
-  save(); closeCatForm(); renderCatManager(); renderBudget(); buildCatGrid&&buildCatGrid();
+  save(); closeCatForm(); renderBudget(); buildCatGrid&&buildCatGrid();
 }
 function delCat(id,fromModal){
   if(isDefaultCat(id)){ toast('Varsayılan kategori silinemez',true); return; }
@@ -2817,7 +2813,7 @@ function delCat(id,fromModal){
   if(S.budgets[id]) delete S.budgets[id];
   save();
   if(fromModal) closeCatForm();
-  renderCatManager(); renderBudget(); renderTxn&&renderTxn(); renderDash&&renderDash();
+  renderBudget(); renderTxn&&renderTxn(); renderDash&&renderDash();
   toast(linked>0?`Silindi · ${linked} kayıt Diğer'e taşındı`:'Silindi');
 }
 
@@ -3083,6 +3079,8 @@ function renderBudget(){
     const lim=S.budgets[c.id]||0,avg3=catAvg3(c.id),pct=lim>0?Math.min(115,avg3/lim*100):0,l=lvl(pct);
     const bc={red:'var(--neg)',orange:'var(--warn)',yellow:'var(--warn)',green:'var(--pos)'}[l];
     const pc={red:'var(--neg)',orange:'var(--warn)',yellow:'var(--warn)',green:'var(--pos)'}[l];
+    const custom=!isDefaultCat(c.id);
+    const editBtn=custom?`<button type="button" class="fav-ic" title="Kategoriyi düzenle" onclick="openCatForm('${c.id}')" style="margin-left:4px">✎</button>`:'';
     return`<div class="budget-item">
       <div class="budget-top">
         <div class="budget-name">${monoChip(c.id,'sm')}${catMeta(c.id).label}</div>
@@ -3090,7 +3088,8 @@ function renderBudget(){
           <input class="b-input" type="number" value="${lim}" step="500" min="0" onchange="S.budgets['${c.id}']=+this.value;save();renderBudget();">
           <span style="font-size:9px;color:var(--text3)">₺</span>
           <span class="budget-pct" style="color:${pc}">${Math.round(pct)}%${pct>=100?'⚠':''}</span>
-          <button type="button" class="fav-ic fav-ic-del" title="Sıfırla" onclick="clearBudgetRow('${c.id}')" style="margin-left:4px">×</button>
+          ${editBtn}
+          <button type="button" class="fav-ic fav-ic-del" title="${custom?'Kategoriyi sil':'Bütçeyi sıfırla'}" onclick="${custom?`delCat('${c.id}')`:`clearBudgetRow('${c.id}')`}" style="margin-left:4px">×</button>
         </div>
       </div>
       <div class="bbar"><div class="bfill" style="width:${Math.min(100,pct)}%;background:${bc}"></div></div>
@@ -3101,8 +3100,7 @@ function renderBudget(){
     const el=document.getElementById(id);
     if(el) el.innerHTML=html;
   });
-  // Kategori yöneticisi + abonelikler bütçe ekranında birlikte render
-  renderCatManager();
+  // Abonelikler bütçe ekranında birlikte render
   renderSubs();
 }
 
