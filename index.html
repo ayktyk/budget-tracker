@@ -1567,8 +1567,12 @@ body { overflow-x: hidden; overflow-y: hidden; position: relative; }
         <div class="card">
           <div class="card-h"><h3>Bütçe · Aylık limitler</h3><button type="button" class="fav-add-btn" onclick="openCatForm()" title="Yeni kategori ekle">+ Yeni kategori</button></div>
           <div class="month-scroll" id="budget-month-chips" style="padding:0 0 12px;display:flex;gap:6px"></div>
+          <div id="budget-unrev-panel"></div>
           <div id="budget-bars-main"></div>
-          <div class="budget-actions"><button type="button" class="btn btn-secondary btn-block" onclick="resetBudgetsToDefault()">Varsayılanlara Sıfırla</button></div>
+          <div class="budget-actions" style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="button" class="btn btn-secondary" style="flex:1;min-width:140px" onclick="recatAllDiger()" title="Diğer kategorisindeki kalemleri otomatik kurallarla yeniden sınıflandır">Yeniden sınıflandır</button>
+            <button type="button" class="btn btn-secondary" style="flex:1;min-width:140px" onclick="resetBudgetsToDefault()">Varsayılanlara Sıfırla</button>
+          </div>
         </div>
         <div class="card">
           <div class="card-h"><h3>Abonelikler · Aylık</h3><button type="button" class="fav-add-btn" onclick="openSubForm()">+ Yeni</button></div>
@@ -2227,16 +2231,16 @@ function inferCategory(desc){
     ['muhasebe',['muhasebe','mali musavir','ahmet korkmaz','smmm']],
     ['ulasim',[
       'istanbulkart','istanbul kart','i̇bb','ibb ulasim','bkm iett','iett','metro istanbul','metrobüs','metrobus','marmaray','akbil',
-      'bitaksi','uber','taksi','moovit','marti','scotty',
-      'hgs','ogs','kgs','otoyol','koprugecis','kopru gecis',
-      'shell','opet','petrol ofisi','po/','bp ','total ','lukoil','aygaz','akaryakit','benzin','motorin','mazot','lpg','petrol',
-      'otopark','ispark','park ','valet',
-      'pegasus','thy','turkish airlines','anadolujet','sunexpress','tav',
-      'obilet','biletall','tcdd','pamukkale','metro turizm','kamilkoc','kamil koc','ulasim','bilet tr','enuygun',
-      'cicek sepeti ulasim'
+      'bitaksi','uber','taksi','moovit','marti','scotty','tag taksi','itaksi',
+      'hgs','ogs','kgs','otoyol','koprugecis','kopru gecis','osmangazi koprusu','yavuz sultan','15 temmuz koprusu','avrasya tuneli',
+      'shell','opet','petrol ofisi','po/','bp ','total ','lukoil','aygaz','akaryakit','benzin','motorin','mazot','lpg','petrol','aytemiz','gulf','tabuk','mogaz','milangaz',
+      'otopark','ispark','park ','valet','park yeri',
+      'pegasus','thy','turkish airlines','anadolujet','sunexpress','tav','airline','havalimani','havaliman',
+      'obilet','biletall','tcdd','pamukkale','metro turizm','kamilkoc','kamil koc','ulasim','bilet tr','enuygun','jet seyahat','tatil sepeti',
+      'cicek sepeti ulasim','araç','arac muayene','tuvturk','muayene','oto lastik','oto yedek'
     ]],
     ['fatura',[
-      'turknet','vodafone','turk telekom','turkcell','turk.telekom','enerjisa','igdas','iski','aski','baski','boğazici elektrik','bogazici elektrik','baskent elektrik','akedas','cenal','cenal enerji','superonline','superbox','kablonet','tv+','tv plus','digiturk','d-smart','dsmart','fatura','tt mobil','tt fibernet','turk telekom mobil','vodafone tv'
+      'turknet','vodafone','turk telekom','turkcell','turk.telekom','enerjisa','igdas','iski','aski','baski','boğazici elektrik','bogazici elektrik','baskent elektrik','akedas','cenal','cenal enerji','superonline','superbox','kablonet','tv+','tv plus','digiturk','d-smart','dsmart','fatura','tt mobil','tt fibernet','turk telekom mobil','vodafone tv','cepte','turkcell faturali','turkcell faturali hat','dogalgaz','doğalgaz','elektrik','su faturasi','su fatura','internet fatura','internet faturasi','hat tarifesi','konutgaz','aydem','epdk'
     ]],
     ['dijital',[
       'apple.com','app store','appstore','itunes','icloud','apple services',
@@ -2248,36 +2252,36 @@ function inferCategory(desc){
       'namecheap','godaddy','paddle','stripe','gumroad','patreon','substack','medium'
     ]],
     ['market',[
-      'migros','a101','a 101','bim','sok ','şok','carrefour','carrefoursa','macrocenter','macro center','metro gross','metro gros','tarim kredi','happy center','happycenter','bizim toptan','ucz ','onur market','file ','kipa','makro ','tansas','tansaş','pehlivanoglu market','tarim','ucuzluk','market','gida','manav','kasap','sarkuteri','bakkal','mopas','kiler','rossmann','watsons','gratis'
+      'migros','a101','a 101','bim','sok ','şok','carrefour','carrefoursa','macrocenter','macro center','metro gross','metro gros','tarim kredi','happy center','happycenter','bizim toptan','ucz ','onur market','file ','kipa','makro ','tansas','tansaş','pehlivanoglu market','tarim','ucuzluk','market','gida','manav','kasap','sarkuteri','bakkal','mopas','kiler','rossmann','watsons','gratis','sevgi market','5m migros','jumbo','jysk','tedi','flo park','onurlar market','sutas','pinar sut','torku','altin pirinc','migros sanal','sanal market','m migros','marketim'
     ]],
     ['yemek',[
-      'yemeksepeti','getir yemek','trendyol yemek','yemek sepeti','foodie',
-      'starbucks','espressolab','espresso lab','caribou','kahve dunyasi','kahve dunyası','kahve','coffee','costa','cafe','kafe',
-      'burger','mcdonalds','popeyes','kfc','little caesars','dominos','pizza','papa johns','sbarro',
+      'yemeksepeti','getir yemek','trendyol yemek','yemek sepeti','foodie','getir','migros yemek',
+      'starbucks','espressolab','espresso lab','caribou','kahve dunyasi','kahve dunyası','kahve','coffee','costa','cafe','kafe','tchibo','gloria jeans',
+      'burger','mcdonalds','popeyes','kfc','little caesars','dominos','pizza','papa johns','sbarro','baydoner','baydöner','cigkoftem','tavuk dunyasi','tavuk dünyası','komagene','dürümzade','doner ',
       'borek','börek','simit sarayi','simit sarayı','simit','pide','lahmacun','kebap','doner','döner','tavuk','corba','çorba','kahvalti','kahvaltı',
-      'restoran','restaurant','lokanta','firin','fırın','bistro','meyhane','balik','balık','sushi','sushico','midye','koftem','köfte','mantı','manti','bueno','cigkofte','çiğköfte',
-      'hebun','özgur','ozgur','ozgür'
+      'restoran','restaurant','lokanta','firin','fırın','bistro','meyhane','balik','balık','sushi','sushico','midye','koftem','köfte','mantı','manti','bueno','cigkofte','çiğköfte','baklava','tatlici','tatlıcı','dondurma','mado','pastane','pastacı','pastaci',
+      'hebun','özgur','ozgur','ozgür','meşhur','mehmet ',' aile '
     ]],
     ['spor',[
       'halisaha','halı saha','fitness','macfit','mac fit','mars athletic','sports international','gym','yoga','pilates','zumba','crossfit','spor ',
       'decathlon','intersport'
     ]],
     ['eticaret',[
-      'trendyol','hepsiburada','amazon','temu','n11','gittigidiyor','morhipo','modanisa','pull&bear','pull and bear','zara','bershka','stradivarius','lc waikiki','lcw','defacto','koton','mavi','polo garage','u.s. polo','altinyildiz','altınyıldız','boyner','flo ','kinetix','inci ','ikea','tekzen','bauhaus','koctas','koçtaş'
+      'trendyol','hepsiburada','amazon','temu','n11','gittigidiyor','morhipo','modanisa','pull&bear','pull and bear','zara','bershka','stradivarius','lc waikiki','lcw','defacto','koton','mavi','polo garage','u.s. polo','altinyildiz','altınyıldız','boyner','flo ','kinetix','inci ','ikea','tekzen','bauhaus','koctas','koçtaş','aliexpress','ebay','wish','pttavm','vatan bilgisayar','teknosa','media markt','mediamarkt','arcelik','arçelik','vestel','beko','samsung shop','apple store online','dyson','philips shop','xiaomi','dijital adres','epttavm','tilki','rakuten','etsy','asos','farfetch'
     ]],
     ['saglik',[
-      'eczane','pharmacy','hastane','klinik','klinik.','tıp merkezi','tip merkezi','dr.','dt.','laboratuvar','labaratuvar','laboratuar','tahlil','mr.','tomografi','ortopedi','dental','cerrahi','acibadem','acıbadem','memorial','liv hospital','medipol','medicana','anadolu saglik','dunyagoz','dünyagöz','optik','medline'
+      'eczane','pharmacy','hastane','klinik','klinik.','tıp merkezi','tip merkezi','dr.','dt.','laboratuvar','labaratuvar','laboratuar','tahlil','mr.','tomografi','ortopedi','dental','cerrahi','acibadem','acıbadem','memorial','liv hospital','medipol','medicana','anadolu saglik','dunyagoz','dünyagöz','optik','medline','medlife','pharma','ecz.','özel hastane','özel klinik','tibbi','tıbbi','poliklinik','dental klinik','aile sağlık','aile saglik','sağlık ocağı','saglik ocagi','medikal','dermatoloji','goz hastaliklari','göz hastalıkları'
     ]],
     ['egitim',[
-      'udemy','coursera','skillshare','edx','brilliant','okul','universite','üniversite','kurs','egitim','eğitim','akademi','dergi','kitap','d&r','dr.','idefix','kitapyurdu'
+      'udemy','coursera','skillshare','edx','brilliant','okul','universite','üniversite','kurs','egitim','eğitim','akademi','dergi','kitap','d&r','idefix','kitapyurdu','dershane','etüt','etut','okul aidat','okul taksiti','özel ders','ozel ders','yayinevi','yayınevi','remzi kitabevi','kitap yurdu'
     ]],
     ['eglence',[
-      'steam','epic games','epicgames','playstation','sony entertainment','xbox game','nintendo','roblox','riot',
-      'passo','biletix','ticketmaster','cinemaximum','cinebonus','cinetime','atlantis sinema','sinema','tiyatro','konser','mac bilet','stadyum',
-      'lunapark','kidzania','harikalar diyari','eğlence','eglence'
+      'steam','epic games','epicgames','playstation','sony entertainment','xbox game','nintendo','roblox','riot','twitch','blizzard','battle.net','origin','ubisoft','rockstar','gameforge',
+      'passo','biletix','ticketmaster','cinemaximum','cinebonus','cinetime','atlantis sinema','sinema','tiyatro','konser','mac bilet','stadyum','bilet ',
+      'lunapark','kidzania','harikalar diyari','eğlence','eglence','muze','müze','sergi','aquaduck','vialand','jolly joker','iksv'
     ]],
     ['giyim',[
-      'waikiki','lcw','mudo','fenerium','giyim','boyner','defacto','koton','mavi','pull&bear','zara','bershka','stradivarius','polo','nike','adidas','puma','under armour','new balance','flo ','kinetix','inci ayakkabi'
+      'waikiki','lcw','mudo','fenerium','giyim','boyner','defacto','koton','mavi','pull&bear','zara','bershka','stradivarius','polo','nike','adidas','puma','under armour','new balance','flo ','kinetix','inci ayakkabi','h&m','h ve m','massimo dutti','mango','guess','tommy hilfiger','calvin klein','ipekyol','machka','vakko','sarar','damat','intimissimi','victoria','victorias secret','penti','suwen','derimod','divarese'
     ]],
     ['yatirim',[
       'funding','quant','yatirim','yatırım','borsa','hisse','fon ',' fon','bist','tefas','tahvil','bono','altin','altın','gumus','gümüş','kripto','binance','btcturk','paribu','coinbase','bitfinex','okx'
@@ -3324,12 +3328,76 @@ function renderBudget(){
     const el=document.getElementById(id);
     if(el) el.innerHTML=html;
   });
+
+  // Seçili ayın "Diğer" kategorisindeki kalemleri panelle göster (her biri için hızlı kategori seçici)
+  const unrev = S.expenses.filter(e=>mIdx(e.d)===m && e.cat==='diger');
+  const unrevTotal = unrev.reduce((a,e)=>a+e.amt,0);
+  const unrevEl = document.getElementById('budget-unrev-panel');
+  if(unrevEl){
+    if(unrev.length){
+      const opts = getCats().filter(c=>c.id!=='diger').map(c=>`<option value="${c.id}">${catMeta(c.id).label}</option>`).join('');
+      unrevEl.innerHTML = `
+        <div style="border:1px solid var(--warn);border-radius:10px;padding:10px 12px;margin-bottom:14px;background:rgba(255,170,0,0.04)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap">
+            <div style="font-weight:600;font-size:13px;color:var(--warn)">⚠ Kategorize edilmemiş · ${unrev.length} kalem · ${fmt(unrevTotal)} ₺</div>
+            <div style="font-size:11px;color:var(--text3)">Aşağıdaki listeden her birine kategori atayın</div>
+          </div>
+          ${unrev.slice(0,40).map(t=>`
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:12px">
+              <div style="flex:1;min-width:0">
+                <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.desc}</div>
+                <div style="color:var(--text3);font-size:11px">${t.d} · ${t.bank} · <strong>${fmt(t.amt)} ₺</strong></div>
+              </div>
+              <select class="b-input" style="font-size:11px;padding:4px 6px" onchange="setTxnCat('${t.id}',this.value)">
+                <option value="">— kategori seç —</option>
+                ${opts}
+              </select>
+            </div>
+          `).join('')}
+          ${unrev.length>40?`<div style="text-align:center;padding-top:8px;color:var(--text3);font-size:11px">+${unrev.length-40} kalem daha · İşlemler ekranından düzenleyebilirsin</div>`:''}
+        </div>
+      `;
+    } else {
+      unrevEl.innerHTML='';
+    }
+  }
+
   // Abonelikler bütçe ekranında birlikte render
   renderSubs();
 }
 function setBudM(m){
   S.budM=m;
   renderBudget();
+}
+// Tek kalemin kategorisini hızlıca degistir (txn list ve "kategorize edilmemis" panelinden cagrilir)
+function setTxnCat(id,newCat){
+  if(!getCats().some(c=>c.id===newCat)) return;
+  S.userExp = S.userExp.map(e=>e.id===id?{...e,cat:newCat}:e);
+  S.expenses = S.expenses.map(e=>e.id===id?{...e,cat:newCat}:e);
+  save();
+  renderBudget();
+  renderTxn && renderTxn();
+  renderDash && renderDash();
+}
+// Sadece "diger" kategorisindeki kalemleri inferCategory ile yeniden sınıflandır
+function recatAllDiger(){
+  const total = S.expenses.filter(e=>e.cat==='diger').length;
+  if(!total){ toast('"Diğer" kategorisinde kalem yok'); return; }
+  if(!confirm(`"Diğer" kategorisindeki ${total} kalem otomatik kurallarla yeniden sınıflandırılacak. Hiçbir kayıt silinmez. Devam?`)) return;
+  let changed = 0;
+  const fix = e => {
+    if(e.cat !== 'diger') return e;
+    const next = inferCategory(e.desc);
+    if(next && next !== 'diger'){ changed++; return {...e, cat: next}; }
+    return e;
+  };
+  S.userExp = S.userExp.map(fix);
+  S.expenses = S.expenses.map(fix);
+  save();
+  renderBudget();
+  renderTxn && renderTxn();
+  renderDash && renderDash();
+  toast(changed?`✓ ${changed}/${total} kalem sınıflandırıldı`:'Yeni kural eşleşmedi · manuel düzenleyebilirsiniz');
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -3349,15 +3417,18 @@ function renderTxn(){
   if(S.expC!==null) txns=txns.filter(e=>e.cat===S.expC);
   txns.sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id));
   const totalShown=txns.reduce((a,t)=>a+t.amt,0);
+  const catOpts = getCats().map(c=>`<option value="${c.id}">${catMeta(c.id).label}</option>`).join('');
   list.innerHTML=(txns.length?`<div class="row-meta" style="display:flex;justify-content:space-between;align-items:center;padding:6px 0 10px;border-bottom:1px solid var(--line);margin-bottom:6px"><span>${txns.length} kayıt${txns.length>100?' · ilk 100':''}</span><span class="row-amt">${fmt(totalShown)} ₺</span></div>`:'')+txns.slice(0,100).map(t=>{
     const c=catMeta(t.cat);
+    const isUnrev=t.cat==='diger';
+    const selOpts = catOpts.replace(`value="${t.cat}"`,`value="${t.cat}" selected`);
     return`<div class="tx-entry list-row">
       ${monoChip(t.cat,'sm')}
       <div class="tx-info"><div class="tx-desc">${t.desc}</div><div class="tx-meta">${t.d} · ${t.bank}</div></div>
       <div class="tx-right">
         <div class="tx-amt row-amt neg">${fmt(t.amt)} ₺</div>
         <div style="display:flex;gap:4px;align-items:center;margin-top:3px">
-          <span class="pill" style="color:${c.color}">${c.label}</span>
+          <select onchange="setTxnCat('${t.id}',this.value)" title="Kategoriyi değiştir" style="font-size:10px;padding:2px 4px;border:0.5px solid ${isUnrev?'var(--warn)':'rgba(255,255,255,0.1)'};border-radius:4px;background:var(--surface);color:${isUnrev?'var(--warn)':c.color};cursor:pointer;max-width:110px">${selOpts}</select>
           <button onclick="delExp('${t.id}')" style="font-size:9px;padding:2px 7px;border:0.5px solid rgba(255,255,255,0.1);border-radius:4px;background:none;color:var(--text3);cursor:pointer;font-family:'Inter',sans-serif">sil</button>
         </div>
       </div>
