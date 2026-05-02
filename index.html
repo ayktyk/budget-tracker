@@ -1566,6 +1566,7 @@ body { overflow-x: hidden; overflow-y: hidden; position: relative; }
       <div class="screen-shell">
         <div class="card">
           <div class="card-h"><h3>Bütçe · Aylık limitler</h3><button type="button" class="fav-add-btn" onclick="openCatForm()" title="Yeni kategori ekle">+ Yeni kategori</button></div>
+          <div class="month-scroll" id="budget-month-chips" style="padding:0 0 12px;display:flex;gap:6px"></div>
           <div id="budget-bars-main"></div>
           <div class="budget-actions"><button type="button" class="btn btn-secondary btn-block" onclick="resetBudgetsToDefault()">Varsayılanlara Sıfırla</button></div>
         </div>
@@ -1852,7 +1853,7 @@ let S = {
   subs:     [],     // abonelikler
   cards:    JSON.parse(JSON.stringify(DEFAULT_CARDS)), // kredi kartı ekstre kesim/son ödeme günleri
   selCat: 'yemek',
-  expM: null, expC: null, incM: null, dashM: CUR_IDX, dashDay: ''
+  expM: null, expC: null, incM: null, dashM: CUR_IDX, dashDay: '', budM: CUR_IDX
 };
 
 const GEMINI_MODEL='gemini-2.5-flash';
@@ -1975,6 +1976,7 @@ function save() {
 const fmt=n=>Math.round(n).toLocaleString('tr-TR');
 const mIdx=d=>MK.indexOf((d||'').slice(0,7));
 const catAvg3=cat=>S.expenses.filter(e=>mIdx(e.d)>=3&&e.cat===cat).reduce((a,e)=>a+e.amt,0)/3;
+const catMonth=(cat,m)=>S.expenses.filter(e=>mIdx(e.d)===m&&e.cat===cat).reduce((a,e)=>a+e.amt,0);
 const monthP=m=>S.expenses.filter(e=>mIdx(e.d)===m&&e.cat!=='uyap').reduce((a,e)=>a+e.amt,0);
 const monthI=m=>S.incomes.filter(i=>mIdx(i.d)===m).reduce((a,i)=>a+i.amt,0);
 const lvl=p=>p>=100?'red':p>=90?'orange':p>=70?'yellow':'green';
@@ -2369,10 +2371,11 @@ function toast(msg,isErr){
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
 }
-function getAlerts(){
+function getAlerts(monthIdx){
+  const m=(monthIdx==null)?CUR_IDX:monthIdx;
   return getCats().filter(c=>S.budgets[c.id]>0&&c.id!=='uyap').map(c=>{
-    const avg3=catAvg3(c.id),lim=S.budgets[c.id],pct=avg3/lim*100;
-    return{cat:c,avg3,lim,pct,lvl:lvl(pct)};
+    const spent=catMonth(c.id,m),lim=S.budgets[c.id],pct=spent/lim*100;
+    return{cat:c,spent,lim,pct,lvl:lvl(pct),monthIdx:m};
   }).filter(a=>a.pct>=70).sort((a,b)=>b.pct-a.pct);
 }
 
@@ -2512,12 +2515,14 @@ function renderDash(){
     return`<div class="list-row"><div class="row-main"><div class="row-title">${m}</div><div class="row-meta">${g>0?'+'+fmt(g)+' ₺ gelir':'Gelir yok'}</div></div><div class="row-amt ${net>=0?'pos':'neg'}">${net>=0?'+':''}${fmt(net)} ₺</div></div>`;
   }).join('');
 
-  const als=getAlerts();
+  const alertM = (S.dashM!=null) ? S.dashM : CUR_IDX;
+  const alertMonthLabel = (alertM===CUR_IDX) ? 'Bu ay' : MN[alertM];
+  const als=getAlerts(alertM);
   const _da=document.getElementById('dash-alerts');
   if(_da) _da.innerHTML=als.slice(0,4).map(a=>`
     <div class="alert-pill ${a.lvl}">
       ${monoChip(a.cat.id,'sm')}
-      <span class="alert-text"><strong>${a.cat.label}</strong> — Son 3 ay ort. ${fmt(a.avg3)} ₺ / limit ${fmt(a.lim)} ₺</span>
+      <span class="alert-text"><strong>${a.cat.label}</strong> — ${alertMonthLabel} ${fmt(a.spent)} ₺ / limit ${fmt(a.lim)} ₺</span>
       <span class="alert-pct ${a.lvl}">${Math.round(a.pct)}%</span>
     </div>`).join('');
   renderThemeSelection();
@@ -3276,26 +3281,43 @@ function delInc(id){S.incomes=S.incomes.filter(i=>i.id!==id);save();renderIncome
 // BUDGET
 // ══════════════════════════════════════════════════════════════
 function renderBudget(){
+  // Seçili ay (varsayılan: içinde bulunulan ay)
+  const m = (S.budM!=null && S.budM>=0 && S.budM<MN.length) ? S.budM : CUR_IDX;
+  const monthLabel = MN[m];
+  const isCurrent = (m===CUR_IDX);
+  const spentLabel = isCurrent ? 'Bu ay harcanan' : `${monthLabel} harcaması`;
+
+  // Ay seçici şeritleri (en yenisi solda)
+  const mc=document.getElementById('budget-month-chips');
+  if(mc){
+    const reversedMN=MN.map((mm,i)=>({mm,i})).reverse();
+    mc.innerHTML=reversedMN.map(({mm,i})=>`<button class="m-chip ${m===i?'on':''}" onclick="setBudM(${i})">${mm}${i===CUR_IDX?' ·':''}</button>`).join('');
+  }
+
   // Hem s-budget (ayrı ekran) hem de varsa eski more-budget için render et
   const html=getCats().filter(c=>c.id!=='uyap'&&c.id!=='diger').map(c=>{
-    const lim=S.budgets[c.id]||0,avg3=catAvg3(c.id),pct=lim>0?Math.min(115,avg3/lim*100):0,l=lvl(pct);
+    const lim=S.budgets[c.id]||0;
+    const spent=catMonth(c.id,m);
+    const pct=lim>0?Math.min(115,spent/lim*100):0;
+    const l=lvl(pct);
     const bc={red:'var(--neg)',orange:'var(--warn)',yellow:'var(--warn)',green:'var(--pos)'}[l];
     const pc={red:'var(--neg)',orange:'var(--warn)',yellow:'var(--warn)',green:'var(--pos)'}[l];
     const custom=!isDefaultCat(c.id);
     const editBtn=custom?`<button type="button" class="fav-ic" title="Kategoriyi düzenle" onclick="openCatForm('${c.id}')" style="margin-left:4px">✎</button>`:'';
+    const overTl = (lim>0 && spent>lim) ? ` · +${fmt(spent-lim)} ₺ aşım` : '';
     return`<div class="budget-item">
       <div class="budget-top">
         <div class="budget-name">${monoChip(c.id,'sm')}${catMeta(c.id).label}</div>
         <div class="budget-meta">
           <input class="b-input" type="number" value="${lim}" step="500" min="0" onchange="S.budgets['${c.id}']=+this.value;save();renderBudget();">
           <span style="font-size:9px;color:var(--text3)">₺</span>
-          <span class="budget-pct" style="color:${pc}">${Math.round(pct)}%${pct>=100?'⚠':''}</span>
+          <span class="budget-pct" style="color:${pc}">${lim>0?Math.round(pct)+'%':'—'}${pct>=100?'⚠':''}</span>
           ${editBtn}
           <button type="button" class="fav-ic fav-ic-del" title="${custom?'Kategoriyi sil':'Bütçeyi sıfırla'}" onclick="${custom?`delCat('${c.id}')`:`clearBudgetRow('${c.id}')`}" style="margin-left:4px">×</button>
         </div>
       </div>
       <div class="bbar"><div class="bfill" style="width:${Math.min(100,pct)}%;background:${bc}"></div></div>
-      <div class="bsub"><span>Son 3 ay ort: ${fmt(avg3)} ₺</span><span>Limit: ${lim>0?fmt(lim):'—'} ₺</span></div>
+      <div class="bsub"><span>${spentLabel}: ${fmt(spent)} ₺${overTl}</span><span>Limit: ${lim>0?fmt(lim):'—'} ₺</span></div>
     </div>`;
   }).join('');
   ['budget-bars-main','budget-bars'].forEach(id=>{
@@ -3304,6 +3326,10 @@ function renderBudget(){
   });
   // Abonelikler bütçe ekranında birlikte render
   renderSubs();
+}
+function setBudM(m){
+  S.budM=m;
+  renderBudget();
 }
 
 // ══════════════════════════════════════════════════════════════
