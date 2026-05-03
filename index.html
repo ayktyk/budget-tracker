@@ -840,6 +840,29 @@ html, body {
 .income-desc { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .income-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
 .income-amt { font-size: 16px; font-weight: 600; color: var(--green2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.fiber-box {
+  margin: 12px 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background:
+    radial-gradient(circle at 12% 12%, rgba(48,184,117,.16), transparent 34%),
+    linear-gradient(135deg, rgba(48,184,117,.08), rgba(201,167,91,.10));
+}
+.fiber-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.fiber-title { font: 700 16px/1.2 var(--f-serif); color: var(--ink); letter-spacing: .01em; }
+.fiber-badge { padding: 5px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--pos); font: 600 11px/1 var(--f-mono); white-space: nowrap; background: var(--card); }
+.fiber-preview-value { min-height: 44px; display: flex; align-items: center; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--r-s); background: var(--card); color: var(--pos); font: 700 18px/1 var(--f-mono); font-variant-numeric: tabular-nums; }
+.fiber-summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.fiber-summary-stat { padding: 12px; border: 1px solid var(--line); border-radius: var(--r-m); background: var(--bg-elev); }
+.fiber-summary-stat .lbl { font: 600 10px/1.2 var(--f-mono); color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; }
+.fiber-summary-stat .val { margin-top: 8px; font: 700 18px/1 var(--f-mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+.fiber-summary-stat.primary .val { color: var(--pos); }
+.fiber-line { margin-top: 4px; color: var(--pos); font: 600 12px/1.35 var(--f-sans); }
+.fiber-line.muted { color: var(--ink-3); font-weight: 500; }
+@media (max-width: 520px) {
+  .fiber-summary-grid { grid-template-columns: 1fr; }
+}
 
 /* ── Transactions ── */
 .tx-entry {
@@ -1729,7 +1752,8 @@ function buildDesignLayout(){
     <div class="screen-shell">
       <div class="card income-header-card"><div class="eyebrow" id="income-period-label">Gelirler · Dönem</div><div class="hero-value income-total" id="inc-total">—</div></div>
       <div class="filter-row" id="inc-mf"></div>
-      <div class="card"><div class="card-h"><h3>Yeni Gelir</h3><span class="hint">Müvekkil akışı</span></div><div class="form-row"><div class="field"><label>Tarih</label><input class="input" type="date" id="gi-date"></div><div class="field"><label>Tutar (₺)</label><input class="input" type="number" id="gi-amt" placeholder="0" inputmode="decimal"></div></div><div class="field" style="margin-bottom:10px"><label>Müvekkil / Açıklama</label><input class="input" type="text" id="gi-desc" placeholder="Müvekkil adı, dava türü..."></div><div class="field" style="margin-bottom:10px"><label>Gelir Kategorisi</label><div class="cat-grid income-cat-grid" id="income-cat-grid"></div><select id="gi-cat" style="display:none"><option value="dava">Dava</option><option value="arabuluculuk">Arabuluculuk</option><option value="danisma">Danışma</option><option value="diger">Diğer</option></select></div><div class="field"><label>Hesap</label><div class="bank-chip-row" id="gi-bank-chips"></div><select id="gi-bank" style="display:none"><option>Enpara</option><option>İşbank</option><option>VakıfBank</option><option>Nakit</option><option>Havale</option></select></div><button class="btn btn-primary btn-block" onclick="addIncome()">Kaydet</button></div>
+      <div class="card"><div class="card-h"><h3>FIBER</h3><span class="hint">Önce kendime ödeme</span></div><div id="fiber-summary"></div></div>
+      <div class="card"><div class="card-h"><h3>Yeni Gelir</h3><span class="hint">Müvekkil akışı</span></div><div class="form-row"><div class="field"><label>Tarih</label><input class="input" type="date" id="gi-date"></div><div class="field"><label>Tutar (₺)</label><input class="input" type="number" id="gi-amt" placeholder="0" inputmode="decimal" oninput="updateFiberPreview()"></div></div><div class="field" style="margin-bottom:10px"><label>Müvekkil / Açıklama</label><input class="input" type="text" id="gi-desc" placeholder="Müvekkil adı, dava türü..."></div><div class="field" style="margin-bottom:10px"><label>Gelir Kategorisi</label><div class="cat-grid income-cat-grid" id="income-cat-grid"></div><select id="gi-cat" style="display:none"><option value="dava">Dava</option><option value="arabuluculuk">Arabuluculuk</option><option value="danisma">Danışma</option><option value="diger">Diğer</option></select></div><div class="fiber-box"><div class="fiber-title-row"><div><div class="eyebrow">FIBER</div><div class="fiber-title">Arkad kuralı</div></div><span class="fiber-badge">min %10</span></div><div class="form-row"><div class="field"><label>FIBER oranı (%)</label><input class="input" type="number" id="gi-fiber-pct" value="10" min="10" max="100" step="1" inputmode="decimal" oninput="updateFiberPreview()"></div><div class="field"><label>FIBER tutarı</label><div class="fiber-preview-value" id="gi-fiber-preview">0 ₺</div></div></div><div class="field-note">Gelir kaydedilince bu tutar sadece gelir içinde takip edilir; gider veya bütçe kaydı oluşturmaz.</div></div><div class="field"><label>Hesap</label><div class="bank-chip-row" id="gi-bank-chips"></div><select id="gi-bank" style="display:none"><option>Enpara</option><option>İşbank</option><option>VakıfBank</option><option>Nakit</option><option>Havale</option></select></div><button class="btn btn-primary btn-block" onclick="addIncome()">Kaydet</button></div>
       <div class="card"><div class="card-h"><h3>Gelir Geçmişi</h3><span class="hint">Filtreli liste</span></div><div id="inc-list"></div></div>
     </div>`;
   document.getElementById('s-more').innerHTML = `
@@ -1773,6 +1797,7 @@ function curMonthLabel(){
   return MONTH_LONG[now.getMonth()]+' '+now.getFullYear();
 }
 const GOAL=30000;
+const DEFAULT_FIBER_PCT=10;
 const DEF_BUD={kira:8500,muhasebe:2750,spor:1500,fatura:6000,dijital:3500,market:7000,yemek:3500,eticaret:2500,ulasim:1500,saglik:0,egitim:1000,eglence:1000,giyim:1500,yatirim:3000,vergi:5000,nakit:2000,diger:0};
 const DEFAULT_FAV=[
   {id:'fav_ibrahim',  label:'İbrahim Yaman',desc:'İbrahim Yaman — Halısaha',amt:350,cat:'spor',bank:'Havale'},
@@ -1983,6 +2008,24 @@ const catAvg3=cat=>S.expenses.filter(e=>mIdx(e.d)>=3&&e.cat===cat).reduce((a,e)=
 const catMonth=(cat,m)=>S.expenses.filter(e=>mIdx(e.d)===m&&e.cat===cat).reduce((a,e)=>a+e.amt,0);
 const monthP=m=>S.expenses.filter(e=>mIdx(e.d)===m&&e.cat!=='uyap').reduce((a,e)=>a+e.amt,0);
 const monthI=m=>S.incomes.filter(i=>mIdx(i.d)===m).reduce((a,i)=>a+i.amt,0);
+const cleanPct=v=>{
+  const n=parseFloat(String(v??'').replace(',','.'));
+  if(!Number.isFinite(n)) return DEFAULT_FIBER_PCT;
+  return Math.min(100, Math.max(DEFAULT_FIBER_PCT, n));
+};
+const calcFiberAmt=(amt,pct)=>Math.round(((+amt||0)*cleanPct(pct)/100)*100)/100;
+const incomeFiberAmt=i=>{
+  if(!i) return 0;
+  const saved=+i.fiberAmt;
+  if(Number.isFinite(saved) && saved>0) return saved;
+  if(i.fiberPct!==undefined) return calcFiberAmt(i.amt,i.fiberPct);
+  return 0;
+};
+const incomeFiberPct=i=>{
+  if(!i || i.fiberPct===undefined) return null;
+  return cleanPct(i.fiberPct);
+};
+const fmtPct=p=>Number.isInteger(+p)?String(+p):(+p).toLocaleString('tr-TR',{maximumFractionDigits:2});
 const lvl=p=>p>=100?'red':p>=90?'orange':p>=70?'yellow':'green';
 
 function loadGeminiKey(){
@@ -2124,6 +2167,7 @@ function buildSpendingAnalysisInput(){
   const incomes=[...S.incomes];
   const totalExp=expenses.reduce((a,e)=>a+e.amt,0);
   const totalInc=incomes.reduce((a,i)=>a+i.amt,0);
+  const totalFiber=incomes.reduce((a,i)=>a+incomeFiberAmt(i),0);
   const byCategory=getCats().map(c=>({
     id:c.id,
     label:c.label,
@@ -2150,6 +2194,8 @@ function buildSpendingAnalysisInput(){
     summary:{
       totalExpenses:totalExp,
       totalIncomes:totalInc,
+      totalFiber,
+      fiberRate:totalInc>0?totalFiber/totalInc*100:0,
       net:totalInc-totalExp,
       goal:GOAL
     },
@@ -2167,6 +2213,15 @@ function renderChoiceChips(targetId, options, current, onPick){
   const el=document.getElementById(targetId);
   if(!el) return;
   el.innerHTML=options.map(o=>`<button class="bank-chip ${current===o.value?'on':''}" onclick="${onPick.replace('__VAL__', o.value)}">${o.label}</button>`).join('');
+}
+function updateFiberPreview(){
+  const amtEl=document.getElementById('gi-amt');
+  const pctEl=document.getElementById('gi-fiber-pct');
+  const out=document.getElementById('gi-fiber-preview');
+  if(pctEl && !pctEl.value) pctEl.value=DEFAULT_FIBER_PCT;
+  const pct=cleanPct(pctEl?.value);
+  const amt=parseFloat(String(amtEl?.value||'').replace(',','.'))||0;
+  if(out) out.textContent=`${fmt(calcFiberAmt(amt,pct))} ₺`;
 }
 function pickQuickBank(v){ setSelectValue('q-bank',v); buildCatGrid(); }
 function pickIncomeBank(v){ setSelectValue('gi-bank',v); renderIncome(); }
@@ -2657,11 +2712,15 @@ function renderDayList(){
     const meta=catMeta(r.cat);
     const label=meta.label||r.cat;
     const delFn=isIn?`delInc('${r.id}')`:`delExp('${r.id}')`;
+    const fAmt=isIn?incomeFiberAmt(r):0;
+    const fPct=isIn?incomeFiberPct(r):null;
+    const fiberNote=(isIn&&fAmt>0)?`<div class="fiber-line">FIBER: %${fmtPct(fPct||DEFAULT_FIBER_PCT)} · ${fmt(fAmt)} ₺</div>`:'';
     return `<div class="day-row list-row">
       ${monoChip(r.cat,'sm')}
       <div class="day-row-body">
         <div class="day-row-desc">${String(r.desc||label).replace(/</g,'&lt;')}</div>
         <div class="day-row-cat">${label}${r.bank?' · '+r.bank:''}</div>
+        ${fiberNote}
       </div>
       <div class="day-row-right">
         <div class="day-row-amt ${isIn?'in':'out'}">${isIn?'+':'−'}${fmt(r.amt)} ₺</div>
@@ -3248,9 +3307,21 @@ function renderIncome(){
   if(S.incM!==null) incs=incs.filter(i=>mIdx(i.d)===S.incM);
   incs.sort((a,b)=>b.d.localeCompare(a.d));
   const tot=incs.reduce((a,i)=>a+i.amt,0);
+  const fiberTotal=incs.reduce((a,i)=>a+incomeFiberAmt(i),0);
+  const fiberRate=tot>0?(fiberTotal/tot*100):0;
   document.getElementById('inc-total').textContent=fmt(tot)+' ₺';
   const period=document.getElementById('income-period-label');
   if(period) period.textContent=`Gelirler · ${S.incM===null?'Tümü':MN[S.incM]}`;
+  const fiberSummary=document.getElementById('fiber-summary');
+  if(fiberSummary){
+    fiberSummary.innerHTML=`
+      <div class="fiber-summary-grid">
+        <div class="fiber-summary-stat"><div class="lbl">Gelir</div><div class="val">${tot>0?fmt(tot)+' ₺':'—'}</div></div>
+        <div class="fiber-summary-stat primary"><div class="lbl">FIBER</div><div class="val">${fiberTotal>0?fmt(fiberTotal)+' ₺':'—'}</div></div>
+        <div class="fiber-summary-stat"><div class="lbl">Oran</div><div class="val">${fiberTotal>0?'%'+fmtPct(fiberRate):'min %10'}</div></div>
+      </div>
+      <div class="field-note" style="margin-top:8px">Seçili dönemde gelirlerden önce kendine ayrılan FIBER toplamı.</div>`;
+  }
   const catGrid=document.getElementById('income-cat-grid');
   if(catGrid){
     catGrid.innerHTML=ICATS.map(c=>`<div class="income-cat ${document.getElementById('gi-cat').value===c.id?'on':''}" onclick="setSelectValue('gi-cat','${c.id}');renderIncome();">${monoChip(c.id,'sm')}<span class="income-cat-label">${catMeta(c.id).label}</span></div>`).join('');
@@ -3260,23 +3331,35 @@ function renderIncome(){
   ], document.getElementById('gi-bank').value, "pickIncomeBank('__VAL__')");
   document.getElementById('inc-list').innerHTML=incs.length?incs.map(i=>{
     const c=catMeta(i.cat);
+    const fAmt=incomeFiberAmt(i);
+    const fPct=incomeFiberPct(i);
+    const fLine=fAmt>0
+      ? `<div class="fiber-line">FIBER: %${fmtPct(fPct||DEFAULT_FIBER_PCT)} · ${fmt(fAmt)} ₺</div>`
+      : `<div class="fiber-line muted">FIBER: eski kayıtta takip yok</div>`;
     return`<div class="income-entry income-row">
       ${monoChip(i.cat,'sm')}
-      <div class="income-info"><div class="income-desc">${i.desc}</div><div class="income-meta">${i.d} · ${i.bank} · <span style="color:${c.color}">${c.label}</span></div></div>
+      <div class="income-info"><div class="income-desc">${i.desc}</div><div class="income-meta">${i.d} · ${i.bank} · <span style="color:${c.color}">${c.label}</span></div>${fLine}</div>
       <div style="text-align:right">
         <div class="income-amt row-amt pos">+${fmt(i.amt)} ₺</div>
         <button onclick="delInc('${i.id}')" style="font-size:9px;padding:2px 7px;border:0.5px solid rgba(255,255,255,0.1);border-radius:4px;background:none;color:var(--text3);cursor:pointer;font-family:'Inter',sans-serif;margin-top:3px">sil</button>
       </div>
     </div>`;
   }).join(''):`<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Henüz gelir kaydı yok</div>`;
+  updateFiberPreview();
 }
 function setIM(m){S.incM=m;renderIncome();}
 function addIncome(){
-  const d=document.getElementById('gi-date').value,amt=parseFloat(document.getElementById('gi-amt').value),desc=document.getElementById('gi-desc').value.trim(),cat=document.getElementById('gi-cat').value,bank=document.getElementById('gi-bank').value;
+  const d=document.getElementById('gi-date').value,amt=parseFloat(String(document.getElementById('gi-amt').value).replace(',','.')),desc=document.getElementById('gi-desc').value.trim(),cat=document.getElementById('gi-cat').value,bank=document.getElementById('gi-bank').value;
   if(!d||!amt||!desc){toast('Tüm alanları doldurun',true);return;}
-  S.incomes.push({id:genId(),d,desc,amt,cat,bank});
-  save();toast(`✓ +${fmt(amt)} ₺ gelir kaydedildi`);
+  const pct=cleanPct(document.getElementById('gi-fiber-pct')?.value);
+  const fiberAmt=calcFiberAmt(amt,pct);
+  const pctEl=document.getElementById('gi-fiber-pct');
+  if(pctEl) pctEl.value=pct;
+  S.incomes.push({id:genId(),d,desc,amt,cat,bank,fiberPct:pct,fiberAmt});
+  save();toast(`✓ +${fmt(amt)} ₺ gelir · FIBER ${fmt(fiberAmt)} ₺`);
   document.getElementById('gi-date').value='';document.getElementById('gi-amt').value='';document.getElementById('gi-desc').value='';
+  if(pctEl) pctEl.value=DEFAULT_FIBER_PCT;
+  updateFiberPreview();
   renderIncome();renderDash();
 }
 function delInc(id){S.incomes=S.incomes.filter(i=>i.id!==id);save();renderIncome();renderDash();}
