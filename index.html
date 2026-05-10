@@ -1375,6 +1375,37 @@ body { font-family: var(--font-body); }
   --accent-ring: rgba(132,177,154,0.28); --shadow-1:0 1px 2px rgba(0,0,0,0.45), 0 4px 16px rgba(0,0,0,0.28); --shadow-2:0 10px 30px rgba(0,0,0,0.55);
   color-scheme: dark;
 }
+[data-theme="papyrus"] {
+  --bg:#ede0bf; --bg-elev:#f4e9cd; --card:#f7eed4; --ink:#3a2a14; --ink-2:#5e4626; --ink-3:#8a7048;
+  --line: rgba(58,42,20,0.10); --line-2: rgba(58,42,20,0.18);
+  --pos:#8a6320; --pos-soft:#ecdba6;
+  --neg:#a13a2a; --neg-soft:#f0d9d0;
+  --warn:#c97a1a; --warn-soft:#f3dcb4;
+  --uyap:#5b4a78; --uyap-soft:#e2dbe9;
+  --accent-ring: rgba(180,134,44,0.30);
+  --shadow-1: 0 1px 0 rgba(58,42,20,0.04), 0 6px 18px rgba(124,86,32,0.10);
+  --shadow-2: 0 12px 32px rgba(124,86,32,0.18);
+  color-scheme: light;
+}
+[data-theme="papyrus"] body {
+  background:
+    radial-gradient(1200px 800px at 20% 0%, rgba(255,235,180,0.45), transparent 60%),
+    radial-gradient(900px 700px at 100% 100%, rgba(212,176,108,0.22), transparent 55%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 0.36   0 0 0 0 0.26   0 0 0 0 0.12   0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+    var(--bg);
+  background-blend-mode: normal, normal, multiply, normal;
+}
+[data-theme="papyrus"] .card {
+  border-color: #d4c08a;
+  box-shadow: var(--shadow-1), inset 0 0 0 1px rgba(255,245,210,0.5), inset 0 -1px 0 rgba(58,42,20,0.06);
+}
+/* ── Double-tap zoom engelleme: pinch-zoom korunur, sadece çift dokunma yakınlaşması kapatılır ── */
+button, input, textarea, select, a,
+.cal-day, .cat-tile, .chip, .nav-item, .nav-fab,
+.bank-chip, .theme-chip, .menu-dots, .numpad button,
+.day-row, .list-row, [onclick] {
+  touch-action: manipulation;
+}
 html, body {
   background: var(--bg);
   color: var(--ink);
@@ -1413,6 +1444,31 @@ body { overflow-x: hidden; overflow-y: hidden; position: relative; }
 .spark-stick > span { position:absolute; inset:auto 0 0; border-radius:inherit; background:var(--neg); }
 .spark-col.active .spark-stick > span { background:var(--ink); }
 .spark-label { font:500 11px/1 var(--f-mono); color:var(--ink-3); }
+/* ── Findeks ── */
+.findeks-form { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+.findeks-summary { display:flex; align-items:flex-end; gap:14px; padding:14px; border-radius:var(--r-m); background:var(--bg-elev); margin-bottom:12px; flex-wrap:wrap; }
+.findeks-summary .fk-current { font:400 44px/1 var(--f-serif); color:var(--ink); font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+.findeks-summary .fk-current.empty { color:var(--ink-3); font-size:22px; }
+.findeks-summary .fk-meta { display:flex; flex-direction:column; gap:4px; font:500 12px/1.4 var(--f-sans); color:var(--ink-3); flex:1; min-width:140px; }
+.findeks-summary .fk-meta .fk-band { font:600 12px/1 var(--f-sans); padding:4px 10px; border-radius:999px; background:var(--card); border:1px solid var(--line-2); align-self:flex-start; color:var(--ink); }
+.findeks-summary .fk-meta .fk-delta.pos { color:var(--pos); }
+.findeks-summary .fk-meta .fk-delta.neg { color:var(--neg); }
+.findeks-spark { display:grid; grid-template-columns:repeat(12,1fr); gap:6px; align-items:end; min-height:90px; padding:10px 4px 0; margin-bottom:14px; }
+.findeks-spark .fk-col { display:flex; flex-direction:column; align-items:center; gap:6px; min-width:0; }
+.findeks-spark .fk-stick { width:100%; max-width:18px; border-radius:6px 6px 4px 4px; background:var(--bg-elev); min-height:8px; position:relative; overflow:hidden; }
+.findeks-spark .fk-stick > span { position:absolute; inset:auto 0 0; border-radius:inherit; background:var(--pos); }
+.findeks-spark .fk-stick.warn > span { background:var(--warn); }
+.findeks-spark .fk-stick.bad > span { background:var(--neg); }
+.findeks-spark .fk-col.active .fk-stick > span { box-shadow:0 0 0 2px var(--accent-ring); }
+.findeks-spark .fk-lbl { font:500 9px/1 var(--f-mono); color:var(--ink-3); white-space:nowrap; }
+.findeks-list .list-row { align-items:center; }
+.findeks-list .fk-score { font:500 18px/1 var(--f-mono); font-variant-numeric:tabular-nums; }
+.findeks-list .fk-score.good { color:var(--pos); }
+.findeks-list .fk-score.warn { color:var(--warn); }
+.findeks-list .fk-score.bad { color:var(--neg); }
+.findeks-list .fk-del { background:transparent; border:0; color:var(--ink-3); font:500 12px/1 var(--f-sans); cursor:pointer; padding:6px 8px; border-radius:8px; }
+.findeks-list .fk-del:hover { color:var(--neg); background:var(--neg-soft); }
+.findeks-empty { padding:18px; text-align:center; color:var(--ink-3); font:500 13px/1.5 var(--f-sans); border:1px dashed var(--line-2); border-radius:var(--r-m); }
 .month-scroll, .filter-row, .bank-chip-row { display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; max-width:100%; }
 .month-scroll::-webkit-scrollbar, .filter-row::-webkit-scrollbar, .bank-chip-row::-webkit-scrollbar { display:none; }
 .chip, .m-chip, .f-chip, .bank-chip, .theme-chip { padding:8px 14px; border-radius:22px; border:1px solid var(--line-2); background:var(--bg-elev); font:500 13px/1 var(--f-sans); color:var(--ink); cursor:pointer; }
@@ -1760,8 +1816,9 @@ function buildDesignLayout(){
     <div class="screen-shell">
       <div id="more-ekstre" class="more-panel"><div class="card"><div class="card-h"><h3>Ekstre Yükle + AI</h3><span class="hint">Gemini + fallback</span></div><details class="api-collapsible" id="gemini-details"><summary>Gemini API Key <span id="gemini-key-status" class="gk-status off">(boş)</span></summary><div class="field"><input class="input" type="password" id="gemini-key" placeholder="Gemini API Key (yalnızca cihazınızda saklanır)" oninput="saveGeminiKey(this.value)"><div class="field-note" style="margin-top:6px">⚠ Bu anahtar düz metin olarak cihazınızda saklanır. Sadece güvendiğiniz cihazlarda kullanın. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Google AI Studio'dan ücretsiz key alın</a>.</div><div class="gk-test-row"><button type="button" class="btn btn-secondary" id="gemini-test-btn" onclick="testGeminiKey()">Bağlantıyı Test Et</button><div id="gemini-test-out" class="gk-test-out"></div></div></div></details><div class="field"><label>Banka</label><select id="stmt-bank" style="display:none"><option>İşbank</option><option>Enpara</option><option>VakıfBank</option></select><div class="bank-chip-row" id="stmt-bank-chips"></div></div><div class="field"><label>Ekstre Metni</label><textarea class="input stmt-area" id="stmt-text" placeholder="Ekstre metnini buraya yapıştır"></textarea></div><button class="btn btn-primary btn-block" onclick="parseStmt()" id="parse-btn">İçe Aktar</button><div class="field-note">Kalemler <strong>bugünün tarihine</strong> kaydedilir. Önce Gemini denenir; başarısız olursa yerel parser devreye girer.</div><div id="parse-res" class="parse-result"></div></div><div class="card"><div class="card-h"><h3>Kart Takvimi</h3><button type="button" class="fav-add-btn" onclick="openCardForm()">+ Yeni</button></div><div id="card-list"></div><div class="field-note" style="margin-top:6px">Kesim ve son ödeme günleri ana sayfadaki takvimde kartın renginde işaretlenir.</div></div><div class="card ai-card"><div class="card-h"><h3>Genel Harcama Analizi</h3><span class="hint">Son 6 ay</span></div><div class="field-note">Yeni veri eklemez, sadece yorum üretir.</div><button class="btn btn-secondary btn-block" onclick="analyzeAllSpending()" id="analyze-all-btn">Analiz Et</button><div id="analysis-res" class="analysis-result"></div></div></div>
       <div id="more-sabit" class="more-panel"><div class="card"><div class="card-h"><h3>Sabit Giderler</h3><span class="hint">Referans listesi</span></div><div id="fixed-list"></div><div class="field-note" style="margin-top:8px">Bu liste bilgi amaçlıdır. Otomatik kayıt oluşturmaz — ödediğinde Hızlı Giriş'ten veya Ekstre Yükle'den ekle.</div></div></div>
+      <div id="more-findeks" class="more-panel"><div class="card"><div class="card-h"><h3>Findeks Puanı</h3><span class="hint">Aylık manuel kayıt</span></div><div class="findeks-form"><div class="form-row"><div class="field"><label>Tarih</label><input class="input" type="date" id="fk-date"></div><div class="field"><label>Skor (0–1900)</label><input class="input" type="number" id="fk-score" placeholder="örn: 1500" min="0" max="1900" step="1" inputmode="numeric"></div></div><div class="field"><label>Not (opsiyonel)</label><input class="input" type="text" id="fk-note" placeholder="örn: Kredi başvurusu öncesi"></div><button class="btn btn-primary btn-block" onclick="addFindeks()">Kaydet</button></div><div id="findeks-summary" class="findeks-summary"></div><div id="findeks-spark" class="findeks-spark"></div><div id="findeks-list" class="findeks-list"></div><div class="field-note" style="margin-top:8px">Findeks puanı 0–1900 arası bir kredi notudur. 1500+ iyi, 1700+ çok iyi sayılır. Aynı ay için birden çok kayıt yapabilirsiniz; trend grafiği son 12 kayıttan oluşur.</div></div></div>
       <div id="more-data" class="more-panel"><div class="card"><div class="card-h"><h3>Veri</h3><span class="hint">Yedek / sıfırla</span></div><div class="data-actions"><button class="btn btn-primary btn-block" onclick="exportData()">JSON Yedeği İndir</button><button class="btn btn-secondary btn-block" onclick="document.getElementById('imp-f').click()">JSON Yedeği Yükle</button><input type="file" id="imp-f" accept=".json" style="display:none" onchange="importData(event)"><button class="btn btn-danger btn-block" onclick="resetAll()">Tüm Verileri Sıfırla</button></div><div id="data-st" class="field-note"></div><div class="field-note" style="margin-top:6px">Sıfırlama öncesi otomatik yedek dosyası indirilir. Yedek dosyasını tekrar yüklerseniz tüm kayıtlarınız geri gelir.</div></div></div>
-      <div id="more-theme" class="more-panel"><div class="card theme-picker"><div class="card-h"><h3>Görünüm</h3><span class="hint">Anında değişir</span></div><div class="theme-row"><button data-theme-pick="cream" class="theme-chip" onclick="setTheme('cream')"><span class="sw" style="background:#f4efe6"></span>Krem Kâğıt</button><button data-theme-pick="onyx" class="theme-chip" onclick="setTheme('onyx')"><span class="sw" style="background:#0e1117"></span>Onyx & Altın</button><button data-theme-pick="marble" class="theme-chip" onclick="setTheme('marble')"><span class="sw" style="background:#ecedef"></span>Mermer</button><button data-theme-pick="midnight" class="theme-chip" onclick="setTheme('midnight')"><span class="sw" style="background:#0d1220"></span>Gece Mavisi</button></div></div></div>
+      <div id="more-theme" class="more-panel"><div class="card theme-picker"><div class="card-h"><h3>Görünüm</h3><span class="hint">Anında değişir</span></div><div class="theme-row"><button data-theme-pick="cream" class="theme-chip" onclick="setTheme('cream')"><span class="sw" style="background:#f4efe6"></span>Krem Kâğıt</button><button data-theme-pick="onyx" class="theme-chip" onclick="setTheme('onyx')"><span class="sw" style="background:#0e1117"></span>Onyx & Altın</button><button data-theme-pick="marble" class="theme-chip" onclick="setTheme('marble')"><span class="sw" style="background:#ecedef"></span>Mermer</button><button data-theme-pick="midnight" class="theme-chip" onclick="setTheme('midnight')"><span class="sw" style="background:#0d1220"></span>Gece Mavisi</button><button data-theme-pick="papyrus" class="theme-chip" onclick="setTheme('papyrus')"><span class="sw" style="background:#ede0bf"></span>Sarı Papirüs</button></div></div></div>
     </div>`;
   document.querySelector('.nav').innerHTML = `<button class="nav-item on" onclick="go('dash',this)" id="nb-dash"><span class="nav-glyph">A</span><span>Ana</span></button><button class="nav-item" onclick="go('income',this)" id="nb-income"><span class="nav-glyph">G</span><span>Gelir</span></button><div class="nav-center"><button class="nav-fab" onclick="go('quick',null)" aria-label="Hızlı giriş">+</button></div><button class="nav-item" onclick="go('budget-shortcut',this)" id="nb-budget"><span class="nav-glyph">B</span><span>Bütçe</span></button><button class="nav-item" onclick="go('more',this)" id="nb-more"><span class="nav-glyph">D</span><span>Detay</span></button>`;
 }
@@ -1881,6 +1938,7 @@ let S = {
   customCats: [],   // kullanıcı tarafından eklenen ekstra kategoriler
   subs:     [],     // abonelikler
   cards:    JSON.parse(JSON.stringify(DEFAULT_CARDS)), // kredi kartı ekstre kesim/son ödeme günleri
+  findeks:  [],     // aylık findeks puanı kayıtları [{id, date, score, note}]
   selCat: 'yemek',
   expM: null, expC: null, incM: null, dashM: CUR_IDX, dashDay: '', budM: CUR_IDX
 };
@@ -1977,6 +2035,15 @@ function loadFromStorage() {
       if (Array.isArray(parsed)) S.cards = parsed.map(c => ({...c, id: c.id || genId()}));
     }
   } catch(e) {}
+  try {
+    const fk = localStorage.getItem('ay_findeks');
+    if (fk !== null) {
+      const parsed = JSON.parse(fk);
+      if (Array.isArray(parsed)) S.findeks = parsed
+        .filter(x => x && x.date && Number.isFinite(+x.score))
+        .map(x => ({ id: x.id || genId(), date: String(x.date).slice(0,10), score: +x.score, note: String(x.note||'') }));
+    }
+  } catch(e) {}
   loadGeminiKey();
   const el = document.getElementById('saved-at');
   if (el) el.textContent = new Date().toLocaleDateString('tr-TR');
@@ -1996,6 +2063,7 @@ function save() {
     localStorage.setItem('ay_cats_custom', JSON.stringify(S.customCats||[]));
     localStorage.setItem('ay_subs', JSON.stringify(S.subs||[]));
     localStorage.setItem('ay_cards', JSON.stringify(S.cards||[]));
+    localStorage.setItem('ay_findeks', JSON.stringify(S.findeks||[]));
     if (el) el.textContent = new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}) + ' ✓';
   } catch(e) {
     if (el) el.textContent = '⚠ hata';
@@ -2654,13 +2722,7 @@ function selectDay(iso){
   const wasSame = S.dashDay===iso;
   S.dashDay = wasSame ? '' : iso;
   renderDash();
-  // Aynı güne tekrar dokunulduysa toggle kapatma — scroll etme
-  if(!wasSame){
-    setTimeout(()=>{
-      const el=document.querySelector('.day-detail-card');
-      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
-    },50);
-  }
+  // Sayfa kaydırılmaz: kullanıcı takvimi görmeye devam etsin, day-list takvimin hemen altında değişir
 }
 
 function renderDayList(){
@@ -2745,8 +2807,9 @@ function navDashMonth(delta){
 // THEME PICKER
 // ══════════════════════════════════════════════════════════════
 function setTheme(name){
-  name=LEGACY_THEME_MAP[name]||name;
-  const valid=['cream','onyx','marble','midnight'];
+  // Papyrus yeni eklendi; LEGACY_THEME_MAP'e dokunmuyoruz, valid listede direkt yer alıyor
+  if(name!=='papyrus') name=LEGACY_THEME_MAP[name]||name;
+  const valid=['cream','onyx','marble','midnight','papyrus'];
   if(!valid.includes(name)) name='cream';
   document.documentElement.setAttribute('data-theme',name);
   try{ localStorage.setItem('ay_theme',name); }catch(_){}
@@ -2765,7 +2828,9 @@ function closeThemePicker(ev){
 function loadTheme(){
   let t='cream';
   try{ t=localStorage.getItem('ay_theme')||'cream'; }catch(_){}
-  t=LEGACY_THEME_MAP[t]||'cream';
+  if(t!=='papyrus') t=LEGACY_THEME_MAP[t]||'cream';
+  const valid=['cream','onyx','marble','midnight','papyrus'];
+  if(!valid.includes(t)) t='cream';
   document.documentElement.setAttribute('data-theme',t);
   const bg=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
   const meta=document.getElementById('meta-theme');
@@ -3655,8 +3720,10 @@ async function analyzeAllSpending(){
   const btn=document.getElementById('analyze-all-btn');
   const out=document.getElementById('analysis-res');
   if(!getGeminiKey()){
-    out.innerHTML=`<div class="ai-sec neg"><h4>API key gerekli</h4><p>Analiz için Gemini API key eklemelisiniz. Yukarıdaki "Gemini API Key" alanına yapıştırın ve "Bağlantıyı Test Et" ile doğrulayın.</p></div>`;
-    toast('API key gerekli',true);
+    // Key yoksa: cihazda hesaplanan offline analiz — kullanıcı verisi dışarı çıkmaz
+    out.innerHTML=analyzeSpendingLocalHtml();
+    try{ out.scrollIntoView({behavior:'smooth',block:'center'}); }catch(_){}
+    toast('Cihazda lokal analiz hazır');
     return;
   }
   btn.disabled=true;
@@ -3687,6 +3754,114 @@ async function analyzeAllSpending(){
   btn.textContent='Analiz Et';
 }
 
+// ── Lokal (offline) analiz: Gemini key yoksa ya da kullanıcı veriyi dışarı vermek istemiyorsa ──
+function analyzeSpendingLocalHtml(){
+  // Genel toplamlar (son 6 ay penceresi MN üzerinden)
+  const monthExp=MN.map((_,i)=>monthP(i));
+  const monthInc=MN.map((_,i)=>monthI(i));
+  const totalExp=monthExp.reduce((a,b)=>a+b,0);
+  const totalInc=monthInc.reduce((a,b)=>a+b,0);
+  const net=totalInc-totalExp;
+  const activeMonths=monthExp.filter(v=>v>0).length||1;
+  const avgExp=totalExp/activeMonths;
+  const curIdx=(typeof CUR_IDX==='number')?CUR_IDX:(MN.length-1);
+  const curExp=monthExp[curIdx]||0;
+  const curInc=monthInc[curIdx]||0;
+  const curNet=curInc-curExp;
+  const prevExp=(curIdx>0)?monthExp[curIdx-1]:0;
+  const momPct=prevExp>0?Math.round((curExp-prevExp)/prevExp*100):null;
+
+  // Kategori bazlı (son 6 ay) — uyap dahil tüm kategoriler
+  const cats=getCats().map(c=>{
+    const total=MN.reduce((a,_,i)=>a+catMonth(c.id,i),0);
+    const last3=catAvg3(c.id)||0;
+    const budget=S.budgets[c.id]||0;
+    return {id:c.id,label:c.label||c.id,total,last3,budget,pct:budget>0?total/budget*100:0};
+  }).filter(c=>c.total>0||c.budget>0);
+  const top5=cats.filter(c=>c.total>0).sort((a,b)=>b.total-a.total).slice(0,5);
+
+  // Riskler
+  const risks=[];
+  cats.forEach(c=>{
+    if(c.budget>0){
+      // Aylık bütçe → 6 ay = 6×budget. %70 üstü uyarı
+      const expected6=c.budget*MN.length;
+      if(expected6>0 && c.total/expected6*100>=70){
+        const pct=Math.round(c.total/expected6*100);
+        risks.push({sev:pct>=100?'high':'med',text:`<strong>${c.label}</strong> · 6 aylık bütçeye göre <strong>%${pct}</strong> kullanıldı (₺${fmt(c.total)} / ₺${fmt(expected6)})`});
+      }
+    }
+  });
+  if(momPct!==null && momPct>=30){
+    risks.push({sev:'high',text:`Bu ay gideriniz geçen aya göre <strong>%${momPct}</strong> arttı (₺${fmt(prevExp)} → ₺${fmt(curExp)})`});
+  }
+  if(curNet<0){
+    risks.push({sev:'high',text:`Bu ayın net bakiyesi negatif: <strong>−₺${fmt(Math.abs(curNet))}</strong> (gelir ₺${fmt(curInc)}, gider ₺${fmt(curExp)})`});
+  }
+  // Son 3 ayın 2'si negatifse
+  let negMonths=0;
+  for(let i=Math.max(0,MN.length-3);i<MN.length;i++){
+    if((monthInc[i]-monthExp[i])<0) negMonths++;
+  }
+  if(negMonths>=2){
+    risks.push({sev:'med',text:`Son 3 ayın <strong>${negMonths}</strong> ayında gideriniz gelirinizi aştı`});
+  }
+  // FIBER kontrolü
+  let totalFiber=0;
+  try{
+    totalFiber=(S.incomes||[]).reduce((a,i)=>a+(typeof incomeFiberAmt==='function'?incomeFiberAmt(i):0),0);
+  }catch(_){}
+  const fiberRate=totalInc>0?totalFiber/totalInc*100:0;
+  if(totalInc>0 && fiberRate<10){
+    risks.push({sev:'med',text:`FIBER oranınız <strong>%${fiberRate.toFixed(1)}</strong> — hedef minimum %10 (kendine ödeme)`});
+  }
+
+  // Öneriler
+  const tips=[];
+  if(top5.length){
+    const t1=top5[0];
+    const save10=Math.round(t1.total*0.10);
+    tips.push(`<strong>${t1.label}</strong> kategorisinde 6 ayda ₺${fmt(t1.total)} harcanmış. <strong>%10 azaltma</strong> ≈ ₺${fmt(save10)} tasarruf demek.`);
+  }
+  const noBudgetBig=cats.find(c=>c.budget===0 && c.total>0 && c.id!=='uyap');
+  if(noBudgetBig){
+    const monthlyAvg=Math.round(noBudgetBig.total/MN.length);
+    tips.push(`<strong>${noBudgetBig.label}</strong> için bütçe limiti yok. Aylık ortalama ₺${fmt(monthlyAvg)} — bu rakamı limit olarak Bütçe ekranından atayabilirsiniz.`);
+  }
+  if(curNet<0){
+    tips.push(`Bu ay açıkta. En yüksek 2 kategoriden (${top5.slice(0,2).map(c=>c.label).join(' & ')||'—'}) küçük kesintiler net'i pozitife çevirebilir.`);
+  } else if(totalInc>0 && fiberRate<10){
+    tips.push(`Her gelirde otomatik <strong>%10 FIBER</strong> kuralını koyarsanız, mevcut tempoda 6 ayda ₺${fmt(totalInc*0.10)} biriktirebilirsiniz.`);
+  } else if(top5.length>=3){
+    tips.push(`En büyük 3 kategori (${top5.slice(0,3).map(c=>c.label).join(', ')}) toplam giderin <strong>%${Math.round((top5.slice(0,3).reduce((a,c)=>a+c.total,0))/Math.max(totalExp,1)*100)}</strong>'ini oluşturuyor — odaklanılacak alan burası.`);
+  }
+  while(tips.length<3 && tips.length<top5.length+1){
+    if(top5[tips.length-1]) tips.push(`<strong>${top5[tips.length-1].label}</strong>: ortalama aylık ₺${fmt(top5[tips.length-1].total/MN.length)} — alternatifleri keşfedin.`);
+    else break;
+  }
+
+  // HTML üret
+  const fmtMoney=n=>`₺${fmt(n)}`;
+  const monoOrPlaceholder=(id)=>{ try{ return typeof monoChip==='function'?monoChip(id,'sm'):''; }catch(_){ return '';} };
+  const top5Html=top5.length
+    ? top5.map(c=>`<div class="list-row"><div class="row-main"><div class="row-title">${c.label}</div><div class="row-meta">Son 6 ay</div></div><div class="row-amt neg">${fmtMoney(c.total)}</div></div>`).join('')
+    : '<p style="color:var(--ink-3)">Veri yok — hızlı giriş veya ekstre yükleyerek başlayın.</p>';
+  const risksHtml=risks.length
+    ? `<ul style="margin:0;padding-left:18px;line-height:1.65">${risks.map(r=>`<li>${r.text}</li>`).join('')}</ul>`
+    : '<p>Belirgin bir risk tespit edilmedi. İyi gidiyorsunuz.</p>';
+  const tipsHtml=tips.length
+    ? `<ul style="margin:0;padding-left:18px;line-height:1.65">${tips.map(t=>`<li>${t}</li>`).join('')}</ul>`
+    : '<p>Daha fazla veri girildikçe öneriler kişiselleşecek.</p>';
+
+  const headerNote=`<div class="ai-sec" style="background:var(--bg-elev);border-style:dashed"><p style="margin:0"><strong>Cihazda lokal analiz</strong> — Gemini API key girilmediği için bu rapor hesaplama tabanlıdır. Verileriniz dışarı çıkmadı. Daha derin yorum için yukarıdan key ekleyebilirsiniz.</p></div>`;
+
+  return headerNote
+    + `<div class="ai-sec"><h4>Genel Durum</h4><p>Son 6 ayda toplam <strong>${fmtMoney(totalInc)}</strong> gelir, <strong>${fmtMoney(totalExp)}</strong> gider. Net: <strong style="color:${net>=0?'var(--pos)':'var(--neg)'}">${net>=0?'+':''}${fmtMoney(net)}</strong>. Aylık ortalama gider ≈ <strong>${fmtMoney(avgExp)}</strong>. Bu ay net: <strong style="color:${curNet>=0?'var(--pos)':'var(--neg)'}">${curNet>=0?'+':''}${fmtMoney(curNet)}</strong>${momPct!==null?` (gider ${momPct>=0?'+':''}${momPct}% ay-ay)`:''}.</p></div>`
+    + `<div class="ai-sec"><h4>En Fazla Para Yakan Kalemler</h4>${top5Html}</div>`
+    + `<div class="ai-sec neg"><h4>Riskler</h4>${risksHtml}</div>`
+    + `<div class="ai-sec pos"><h4>3 Net Öneri</h4>${tipsHtml}</div>`;
+}
+
 // ══════════════════════════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════════════════════════
@@ -3694,15 +3869,16 @@ function resetAll(){
   if(!confirm('Tüm giderler, gelirler ve bütçeler silinecek. Önce otomatik yedek indirilecek. Devam?'))return;
   // Güvenlik: önce otomatik yedek indir
   try{
-    const backup={exportedAt:new Date().toISOString(),note:'resetAll öncesi otomatik yedek',expenses:S.userExp,incomes:S.incomes,budgets:S.budgets};
+    const backup={exportedAt:new Date().toISOString(),note:'resetAll öncesi otomatik yedek',expenses:S.userExp,incomes:S.incomes,budgets:S.budgets,favs:S.favs,customCats:S.customCats||[],subs:S.subs||[],cards:S.cards||[],findeks:S.findeks||[]};
     const b=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ay_backup_reset_'+new Date().toISOString().slice(0,10)+'.json';
     document.body.appendChild(a);a.click();a.remove();
   }catch(e){console.warn('reset backup failed',e);}
   S.userExp=[];S.expenses=[];S.incomes=[];S.budgets={...DEF_BUD};
   S.customCats=[];S.subs=[];S.cards=JSON.parse(JSON.stringify(DEFAULT_CARDS));
+  S.findeks=[];
   save();toast('✓ Veriler sıfırlandı · yedek indirildi');
-  renderDash();renderTxn&&renderTxn();renderIncome&&renderIncome();renderBudget&&renderBudget();
+  renderDash();renderTxn&&renderTxn();renderIncome&&renderIncome();renderBudget&&renderBudget();renderFindeks&&renderFindeks();
 }
 function exportData(){
   const payload={
@@ -3712,7 +3888,8 @@ function exportData(){
     favs:S.favs,
     customCats:S.customCats||[],
     subs:S.subs||[],
-    cards:S.cards||[]
+    cards:S.cards||[],
+    findeks:S.findeks||[]
   };
   const b=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='butce_'+new Date().toISOString().slice(0,10)+'.json';a.click();
@@ -3730,10 +3907,100 @@ function importData(e){
     if(Array.isArray(d.customCats)) S.customCats=d.customCats.filter(c=>c&&c.id&&c.label);
     if(Array.isArray(d.subs)) S.subs=d.subs.map(s=>({...s,id:s.id||genId()}));
     if(Array.isArray(d.cards)) S.cards=d.cards.map(c=>({...c,id:c.id||genId()}));
+    if(Array.isArray(d.findeks)) S.findeks=d.findeks.filter(f=>f&&f.date&&Number.isFinite(+f.score)).map(f=>({id:f.id||genId(),date:String(f.date).slice(0,10),score:+f.score,note:String(f.note||'')}));
     save();toast('✓ Veri yüklendi');go('dash',document.getElementById('nb-dash'));
   }catch{toast('Hata: geçersiz dosya',true);}};
   r.readAsText(f);
 }
+
+// ══════════════════════════════════════════════════════════════
+// FINDEKS — Aylık kredi puanı kaydı (manuel)
+// ══════════════════════════════════════════════════════════════
+function fkBand(score){
+  const s=Number(score)||0;
+  if(s>=1700) return {label:'Çok İyi', cls:'good'};
+  if(s>=1500) return {label:'İyi', cls:'good'};
+  if(s>=1300) return {label:'Orta', cls:'warn'};
+  if(s>=1000) return {label:'Az Riskli', cls:'warn'};
+  return {label:'Riskli', cls:'bad'};
+}
+function addFindeks(){
+  const dEl=document.getElementById('fk-date');
+  const sEl=document.getElementById('fk-score');
+  const nEl=document.getElementById('fk-note');
+  if(!dEl||!sEl) return;
+  const date=String(dEl.value||'').slice(0,10);
+  const score=parseInt(String(sEl.value||'').replace(/[^\d-]/g,''),10);
+  const note=String(nEl?.value||'').trim();
+  if(!date){ toast('Tarih seçin',true); return; }
+  if(!Number.isFinite(score)||score<0||score>1900){ toast('Skor 0–1900 arası olmalı',true); return; }
+  S.findeks=S.findeks||[];
+  S.findeks.push({id:genId(), date, score, note});
+  save();
+  if(sEl) sEl.value='';
+  if(nEl) nEl.value='';
+  renderFindeks();
+  toast('✓ Findeks kaydı eklendi');
+}
+function delFindeks(id){
+  if(!confirm('Bu Findeks kaydını silmek istiyor musunuz?')) return;
+  S.findeks=(S.findeks||[]).filter(f=>f.id!==id);
+  save();
+  renderFindeks();
+  toast('✓ Kayıt silindi');
+}
+function renderFindeks(){
+  const dateEl=document.getElementById('fk-date');
+  if(dateEl && !dateEl.value) dateEl.value=new Date().toISOString().slice(0,10);
+  const list=document.getElementById('findeks-list');
+  const sumEl=document.getElementById('findeks-summary');
+  const sparkEl=document.getElementById('findeks-spark');
+  if(!list||!sumEl||!sparkEl) return;
+
+  const items=[...(S.findeks||[])].sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.id).localeCompare(String(a.id)));
+  if(!items.length){
+    sumEl.innerHTML=`<div class="fk-current empty">— Henüz kayıt yok —</div><div class="fk-meta"><span>İlk kaydınızı yukarıdaki formdan ekleyin.</span></div>`;
+    sparkEl.innerHTML='';
+    list.innerHTML=`<div class="findeks-empty">Henüz Findeks kaydı yok. İlk kaydı eklemek için yukarıdaki formu doldurun.</div>`;
+    return;
+  }
+  const last=items[0];
+  const prev=items[1];
+  const band=fkBand(last.score);
+  const delta=prev?(last.score-prev.score):0;
+  const deltaTxt=prev
+    ? (delta>0?`+${delta} (önceki kayda göre)`:delta<0?`${delta} (önceki kayda göre)`:`Değişim yok`)
+    : 'İlk kayıt';
+  const deltaCls=delta>0?'pos':delta<0?'neg':'';
+  const dateLabel=new Date(last.date+'T00:00:00').toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+  sumEl.innerHTML=`
+    <div class="fk-current">${last.score}</div>
+    <div class="fk-meta">
+      <span class="fk-band">${band.label}</span>
+      <span>Son kayıt · ${dateLabel}</span>
+      <span class="fk-delta ${deltaCls}">${deltaTxt}</span>
+    </div>`;
+
+  // Sparkbar: son 12 kayıt, eski → yeni
+  const last12=items.slice(0,12).reverse();
+  const max=Math.max(...last12.map(f=>f.score),1);
+  sparkEl.innerHTML=last12.map((f,i)=>{
+    const b=fkBand(f.score);
+    const h=Math.max(8, Math.round(f.score/max*100));
+    const isLast=i===last12.length-1;
+    const lbl=String(f.date).slice(5,7)+'/'+String(f.date).slice(8,10);
+    return `<div class="fk-col ${isLast?'active':''}" title="${f.date} · ${f.score}"><div class="fk-stick ${b.cls}"><span style="height:${h}%"></span></div><div class="fk-lbl">${lbl}</div></div>`;
+  }).join('');
+
+  // Liste
+  list.innerHTML=items.map(f=>{
+    const b=fkBand(f.score);
+    const dt=new Date(f.date+'T00:00:00').toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'});
+    const noteHtml=f.note?`<div class="row-meta">${escapeHtml(f.note)}</div>`:'';
+    return `<div class="list-row"><div class="row-main"><div class="row-title">${dt}</div><div class="row-meta">${b.label}</div>${noteHtml}</div><div class="fk-score ${b.cls}">${f.score}</div><button type="button" class="fk-del" onclick="delFindeks('${f.id}')" aria-label="Sil">Sil</button></div>`;
+  }).join('');
+}
+function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 // ══════════════════════════════════════════════════════════════
 // MORE SUB-TABS
@@ -3742,6 +4009,7 @@ function setMoreTab(tab,btn){
   document.querySelectorAll('.more-panel').forEach(p=>p.style.display='block');
   renderFixed();
   renderCards();
+  renderFindeks();
   const target=document.getElementById('more-'+(tab||'ekstre'));
   if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
 }
