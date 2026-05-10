@@ -1501,7 +1501,15 @@ body { overflow-x: hidden; overflow-y: hidden; position: relative; }
 .btn-secondary, .action-btn.secondary { background:transparent; color:var(--ink); border-color:var(--line-2); }
 .btn-ghost { background:transparent; color:var(--ink-2); border-color:var(--line-2); }
 .btn-danger { background:var(--neg-soft); color:var(--neg); }
-.input, .field input, .field select, .field textarea, .qfield input { width:100%; padding:14px 16px; border-radius:var(--r-m); border:1px solid var(--line-2); background:var(--bg-elev); font:400 15px/1.3 var(--f-sans); color:var(--ink); box-shadow:none; min-width:0; max-width:100%; }
+.input, .field input, .field select, .field textarea, .qfield input { width:100%; padding:14px 16px; border-radius:var(--r-m); border:1px solid var(--line-2); background:var(--bg-elev); font:400 16px/1.3 var(--f-sans); color:var(--ink); box-shadow:none; min-width:0; max-width:100%; }
+/* iOS Safari odakta zoom yapmasin diye tum form alanlarinda min 16px */
+input, select, textarea { font-size: 16px; }
+/* Inline font-size override'lari da iOS zoom'u tetiklemesin: mobilde zorla 16px */
+@media (max-width: 768px) {
+  input:not([type=checkbox]):not([type=radio]):not([type=range]),
+  select,
+  textarea { font-size: 16px !important; }
+}
 .input:focus, .field input:focus, .field select:focus, .field textarea:focus, .qfield input:focus { outline:none; border-color:var(--ink); box-shadow:0 0 0 3px var(--accent-ring); }
 /* Grid item icerigi parent'i tasirmasin (PWA date input intrinsic width sorunu) */
 .form-row, .form-row > .field, .field { min-width: 0; }
@@ -1793,7 +1801,7 @@ function buildDesignLayout(){
       <div class="hero-card">
         <div class="eyebrow" id="dash-kicker">NET BAKİYE · AY</div>
         <div class="hero-value" id="bal-net">—</div>
-        <div class="hero-metrics"><span>Gelir <strong id="bal-inc">—</strong></span><span>·</span><span>Gider <strong id="bal-exp">—</strong></span><span>·</span><span class="uyap-badge">Mesleki <strong id="bal-uyap">—</strong></span></div>
+        <div class="hero-metrics"><span>Gelir <strong id="bal-inc">—</strong></span><span>·</span><span>Gider <strong id="bal-exp">—</strong></span></div>
         <div class="goal-wrap-hero"><div class="goal-track"><div class="goal-fill-hero" id="goal-fill"></div></div><div class="goal-meta-row"><span id="goal-status">—</span><span id="goal-target">₺30.000 hedef</span></div></div>
       </div>
       <div class="card dash-calendar-card"><div class="card-h"><h3>Takvim</h3><div class="cal-head-nav"><button class="cal-nav btn-ghost" onclick="navDashMonth(-1)">‹</button><div class="cal-month" id="dash-cal-month">—</div><button class="cal-nav btn-ghost" onclick="navDashMonth(1)">›</button></div></div><div class="cal-dow"><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span></div><div class="cal-grid dash-grid" id="dash-cal-grid"></div></div>
@@ -3571,7 +3579,7 @@ function renderBudget(){
       ? `<button type="button" class="btn btn-ghost" style="font-size:11px;padding:4px 10px;min-width:0" onclick="setMonthLimit(null)" title="Otomatik moda dön (kategori toplamı)">Sıfırla</button>`
       : '';
     mlEl.innerHTML=`
-      <div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px;background:var(--surface,transparent)">
+      <div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px;background:var(--card);color:var(--ink)">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
           <div style="font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px">Aylık Toplam Limit ${badge}</div>
           ${resetBtn}
@@ -3637,7 +3645,7 @@ function renderBudget(){
                 <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.desc}</div>
                 <div style="color:var(--text3);font-size:11px">${t.d} · ${t.bank} · <strong>${fmt(t.amt)} ₺</strong></div>
               </div>
-              <select class="b-input" style="font-size:11px;padding:4px 6px" onchange="setTxnCat('${t.id}',this.value)">
+              <select class="b-input" style="padding:6px 8px" onchange="setTxnCat('${t.id}',this.value)">
                 <option value="">— kategori seç —</option>
                 ${opts}
               </select>
