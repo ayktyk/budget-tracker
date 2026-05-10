@@ -896,10 +896,11 @@ html, body {
 .budget-meta { display: flex; align-items: center; gap: 8px; }
 .budget-pct { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text2); }
 .b-input {
-  width: 90px;
+  width: 96px;
   text-align: right;
-  font-size: 13px;
-  padding: 6px 10px;
+  font-size: 16px; /* iOS focus-zoom engellemek için 16px alti olmamali */
+  line-height: 1.15;
+  padding: 5px 9px;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--rs);
@@ -1425,6 +1426,8 @@ body { overflow-x: hidden; overflow-y: hidden; position: relative; }
 .card-h h3 { margin:0; font: 400 20px/1 var(--f-serif); color:var(--ink); }
 .hint, .eyebrow, .saved-at { font: 500 11px/1 var(--f-sans); color: var(--ink-3); letter-spacing:.14em; text-transform:uppercase; }
 .brand-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:2px; }
+.brand-bar-minimal { min-height:36px; margin-bottom:6px; }
+.brand-bar-minimal .brand-lockup { min-height:36px; }
 .brand-lockup { display:flex; align-items:center; gap:12px; }
 .brand-mark { width:42px; height:42px; border-radius:14px; background:var(--ink); color:var(--bg); display:grid; place-items:center; font:400 24px/1 var(--f-serif); }
 .brand-title { font:400 40px/1 var(--f-serif); color:var(--ink); letter-spacing:-.03em; }
@@ -1498,8 +1501,10 @@ body { overflow-x: hidden; overflow-y: hidden; position: relative; }
 .btn-secondary, .action-btn.secondary { background:transparent; color:var(--ink); border-color:var(--line-2); }
 .btn-ghost { background:transparent; color:var(--ink-2); border-color:var(--line-2); }
 .btn-danger { background:var(--neg-soft); color:var(--neg); }
-.input, .field input, .field select, .field textarea, .qfield input { width:100%; padding:14px 16px; border-radius:var(--r-m); border:1px solid var(--line-2); background:var(--bg-elev); font:400 15px/1.3 var(--f-sans); color:var(--ink); box-shadow:none; }
+.input, .field input, .field select, .field textarea, .qfield input { width:100%; padding:14px 16px; border-radius:var(--r-m); border:1px solid var(--line-2); background:var(--bg-elev); font:400 15px/1.3 var(--f-sans); color:var(--ink); box-shadow:none; min-width:0; max-width:100%; }
 .input:focus, .field input:focus, .field select:focus, .field textarea:focus, .qfield input:focus { outline:none; border-color:var(--ink); box-shadow:0 0 0 3px var(--accent-ring); }
+/* Grid item icerigi parent'i tasirmasin (PWA date input intrinsic width sorunu) */
+.form-row, .form-row > .field, .field { min-width: 0; }
 .amount-big-wrap { padding:10px 0 6px; }
 .amount-big { display:flex; align-items:flex-end; justify-content:center; gap:6px; font:400 72px/1 var(--f-serif); color:var(--ink); letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
 .amount-currency { font-size:42px; transform:translateY(-8px); color:var(--ink-3); }
@@ -1652,6 +1657,7 @@ body { overflow-x: hidden; overflow-y: hidden; position: relative; }
         <div class="card">
           <div class="card-h"><h3>Bütçe · Aylık limitler</h3><button type="button" class="fav-add-btn" onclick="openCatForm()" title="Yeni kategori ekle">+ Yeni kategori</button></div>
           <div class="month-scroll" id="budget-month-chips" style="padding:0 0 12px;display:flex;gap:6px"></div>
+          <div id="budget-monthlim-card"></div>
           <div id="budget-unrev-panel"></div>
           <div id="budget-bars-main"></div>
           <div class="budget-actions" style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1784,14 +1790,14 @@ function buildDesignLayout(){
   if(oldBanner) oldBanner.remove();
   document.getElementById('s-dash').innerHTML = `
     <div class="screen-shell">
-      <div class="brand-bar">
-        <div class="brand-lockup">${monoChip('diger')}<div><div class="eyebrow" id="dash-hello">Bütçem</div><div class="brand-title" id="dash-sub">Ay · —</div></div></div>
+      <div class="brand-bar brand-bar-minimal">
+        <div class="brand-lockup"></div>
         <button class="menu-dots" onclick="go('more',document.getElementById('nb-more'))" aria-label="Detaylara git"><span></span><span></span><span></span></button>
       </div>
       <div class="hero-card">
         <div class="eyebrow" id="dash-kicker">NET BAKİYE · AY</div>
         <div class="hero-value" id="bal-net">—</div>
-        <div class="hero-metrics"><span>Gelir <strong id="bal-inc">—</strong></span><span>·</span><span>Kişisel Gider <strong id="bal-exp">—</strong></span><span>·</span><span class="uyap-badge">Mesleki <strong id="bal-uyap">—</strong></span></div>
+        <div class="hero-metrics"><span>Gelir <strong id="bal-inc">—</strong></span><span>·</span><span>Gider <strong id="bal-exp">—</strong></span><span>·</span><span class="uyap-badge">Mesleki <strong id="bal-uyap">—</strong></span></div>
         <div class="goal-wrap-hero"><div class="goal-track"><div class="goal-fill-hero" id="goal-fill"></div></div><div class="goal-meta-row"><span id="goal-status">—</span><span id="goal-target">₺30.000 hedef</span></div></div>
       </div>
       <div class="card dash-calendar-card"><div class="card-h"><h3>Takvim</h3><div class="cal-head-nav"><button class="cal-nav btn-ghost" onclick="navDashMonth(-1)">‹</button><div class="cal-month" id="dash-cal-month">—</div><button class="cal-nav btn-ghost" onclick="navDashMonth(1)">›</button></div></div><div class="cal-dow"><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span></div><div class="cal-grid dash-grid" id="dash-cal-grid"></div></div>
@@ -1946,7 +1952,8 @@ let S = {
   cards:    JSON.parse(JSON.stringify(DEFAULT_CARDS)), // kredi kartı ekstre kesim/son ödeme günleri
   findeks:  [],     // aylık findeks puanı kayıtları [{id, date, score, note}]
   selCat: 'yemek',
-  expM: null, expC: null, incM: null, dashM: CUR_IDX, dashDay: '', budM: CUR_IDX
+  expM: null, expC: null, incM: null, dashM: CUR_IDX, dashDay: '', budM: CUR_IDX,
+  monthLimit: null  // null = otomatik (kategori toplami), number = manuel override
 };
 
 const GEMINI_MODEL='gemini-2.5-flash';
@@ -2050,6 +2057,13 @@ function loadFromStorage() {
         .map(x => ({ id: x.id || genId(), date: String(x.date).slice(0,10), score: +x.score, note: String(x.note||'') }));
     }
   } catch(e) {}
+  try {
+    const ml = localStorage.getItem('ay_monthlim');
+    if (ml !== null && ml !== '') {
+      const n = +ml;
+      if (Number.isFinite(n) && n > 0) S.monthLimit = n;
+    }
+  } catch(e) {}
   loadGeminiKey();
   const el = document.getElementById('saved-at');
   if (el) el.textContent = new Date().toLocaleDateString('tr-TR');
@@ -2070,6 +2084,11 @@ function save() {
     localStorage.setItem('ay_subs', JSON.stringify(S.subs||[]));
     localStorage.setItem('ay_cards', JSON.stringify(S.cards||[]));
     localStorage.setItem('ay_findeks', JSON.stringify(S.findeks||[]));
+    if (S.monthLimit==null) {
+      localStorage.removeItem('ay_monthlim');
+    } else {
+      localStorage.setItem('ay_monthlim', String(+S.monthLimit));
+    }
     if (el) el.textContent = new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}) + ' ✓';
   } catch(e) {
     if (el) el.textContent = '⚠ hata';
@@ -2662,7 +2681,7 @@ function renderDash(){
   const dmetrics=document.getElementById('dash-metrics');
   if(dmetrics) dmetrics.innerHTML=`
     <div class="card">
-      <div class="eyebrow">Kişisel Gider</div>
+      <div class="eyebrow">Gider</div>
       <div class="row-amt ${curG>GOAL?'neg':''}" style="font-size:24px;margin-top:8px">${fmt(curG)} ₺</div>
       <div class="row-meta">${displayM!==null?MN[displayM]:'6 ay ortalaması'}</div>
     </div>
@@ -3537,6 +3556,41 @@ function renderBudget(){
     mc.innerHTML=reversedMN.map(({mm,i})=>`<button class="m-chip ${m===i?'on':''}" onclick="setBudM(${i})">${mm}${i===CUR_IDX?' ·':''}</button>`).join('');
   }
 
+  // Aylık Toplam Limit kartı (otomatik = kategori toplamı, manuel = override)
+  const mlEl=document.getElementById('budget-monthlim-card');
+  if(mlEl){
+    const catSum=Object.entries(S.budgets||{}).reduce((a,[k,v])=>(k==='uyap'?a:a+(+v||0)),0);
+    const isManual=(S.monthLimit!=null);
+    const effLim=isManual?+S.monthLimit:catSum;
+    const monthSpent=S.expenses.filter(e=>mIdx(e.d)===m&&e.cat!=='uyap').reduce((a,e)=>a+e.amt,0);
+    const mlPct=effLim>0?Math.min(115,monthSpent/effLim*100):0;
+    const mlL=lvl(mlPct);
+    const mlBc={red:'var(--neg)',orange:'var(--warn)',yellow:'var(--warn)',green:'var(--pos)'}[mlL];
+    const mlPc={red:'var(--neg)',orange:'var(--warn)',yellow:'var(--warn)',green:'var(--pos)'}[mlL];
+    const overTxt=(effLim>0&&monthSpent>effLim)?` · +${fmt(monthSpent-effLim)} ₺ aşım`:'';
+    const badge=isManual
+      ? `<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,170,0,0.14);color:var(--warn);letter-spacing:.04em">MANUEL</span>`
+      : `<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(0,160,80,0.14);color:var(--pos);letter-spacing:.04em">OTOMATİK</span>`;
+    const resetBtn=isManual
+      ? `<button type="button" class="btn btn-ghost" style="font-size:11px;padding:4px 10px;min-width:0" onclick="setMonthLimit(null)" title="Otomatik moda dön (kategori toplamı)">Sıfırla</button>`
+      : '';
+    mlEl.innerHTML=`
+      <div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px;background:var(--surface,transparent)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+          <div style="font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px">Aylık Toplam Limit ${badge}</div>
+          ${resetBtn}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+          <input class="b-input" type="number" min="0" step="500" value="${effLim}" style="width:130px" onchange="setMonthLimit(this.value)" aria-label="Aylık limit">
+          <span style="font-size:11px;color:var(--text3)">₺ / ay</span>
+          <span class="budget-pct" style="color:${mlPc};margin-left:auto">${effLim>0?Math.round(mlPct)+'%':'—'}${mlPct>=100?' ⚠':''}</span>
+        </div>
+        <div class="bbar" style="margin-bottom:6px"><div class="bfill" style="width:${Math.min(100,mlPct)}%;background:${mlBc}"></div></div>
+        <div class="bsub"><span>${spentLabel}: ${fmt(monthSpent)} ₺${overTxt}</span><span>Kategori toplamı: ${fmt(catSum)} ₺</span></div>
+        ${isManual&&effLim!==catSum?`<div style="margin-top:6px;font-size:11px;color:var(--text3)">Manuel limit kategori toplamından ${effLim>catSum?'+':''}${fmt(effLim-catSum)} ₺ farklı.</div>`:''}
+      </div>`;
+  }
+
   // Hem s-budget (ayrı ekran) hem de varsa eski more-budget için render et
   const html=getCats().filter(c=>c.id!=='uyap'&&c.id!=='diger').map(c=>{
     const lim=S.budgets[c.id]||0;
@@ -3606,6 +3660,18 @@ function renderBudget(){
 }
 function setBudM(m){
   S.budM=m;
+  renderBudget();
+}
+// Aylık toplam limit: null veya boş = otomatik (kategori toplamı), sayı = manuel override
+function setMonthLimit(val){
+  if(val===null||val===undefined||val===''||val==='null'){
+    S.monthLimit=null;
+  } else {
+    const n=+val;
+    if(Number.isFinite(n)&&n>0) S.monthLimit=n;
+    else S.monthLimit=null;
+  }
+  save();
   renderBudget();
 }
 // Tek kalemin kategorisini hızlıca degistir (txn list ve "kategorize edilmemis" panelinden cagrilir)
@@ -4012,14 +4078,14 @@ function resetAll(){
   if(!confirm('Tüm giderler, gelirler ve bütçeler silinecek. Önce otomatik yedek indirilecek. Devam?'))return;
   // Güvenlik: önce otomatik yedek indir
   try{
-    const backup={exportedAt:new Date().toISOString(),note:'resetAll öncesi otomatik yedek',expenses:S.userExp,incomes:S.incomes,budgets:S.budgets,favs:S.favs,customCats:S.customCats||[],subs:S.subs||[],cards:S.cards||[],findeks:S.findeks||[]};
+    const backup={exportedAt:new Date().toISOString(),note:'resetAll öncesi otomatik yedek',expenses:S.userExp,incomes:S.incomes,budgets:S.budgets,favs:S.favs,customCats:S.customCats||[],subs:S.subs||[],cards:S.cards||[],findeks:S.findeks||[],monthLimit:S.monthLimit};
     const b=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ay_backup_reset_'+new Date().toISOString().slice(0,10)+'.json';
     document.body.appendChild(a);a.click();a.remove();
   }catch(e){console.warn('reset backup failed',e);}
   S.userExp=[];S.expenses=[];S.incomes=[];S.budgets={...DEF_BUD};
   S.customCats=[];S.subs=[];S.cards=JSON.parse(JSON.stringify(DEFAULT_CARDS));
-  S.findeks=[];
+  S.findeks=[];S.monthLimit=null;
   save();toast('✓ Veriler sıfırlandı · yedek indirildi');
   renderDash();renderTxn&&renderTxn();renderIncome&&renderIncome();renderBudget&&renderBudget();renderFindeks&&renderFindeks();
 }
@@ -4032,7 +4098,8 @@ function exportData(){
     customCats:S.customCats||[],
     subs:S.subs||[],
     cards:S.cards||[],
-    findeks:S.findeks||[]
+    findeks:S.findeks||[],
+    monthLimit:S.monthLimit
   };
   const b=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='butce_'+new Date().toISOString().slice(0,10)+'.json';a.click();
@@ -4051,6 +4118,8 @@ function importData(e){
     if(Array.isArray(d.subs)) S.subs=d.subs.map(s=>({...s,id:s.id||genId()}));
     if(Array.isArray(d.cards)) S.cards=d.cards.map(c=>({...c,id:c.id||genId()}));
     if(Array.isArray(d.findeks)) S.findeks=d.findeks.filter(f=>f&&f.date&&Number.isFinite(+f.score)).map(f=>({id:f.id||genId(),date:String(f.date).slice(0,10),score:+f.score,note:String(f.note||'')}));
+    if(d.monthLimit===null||d.monthLimit===undefined){ S.monthLimit=null; }
+    else { const _ml=+d.monthLimit; S.monthLimit=(Number.isFinite(_ml)&&_ml>0)?_ml:null; }
     save();toast('✓ Veri yüklendi');go('dash',document.getElementById('nb-dash'));
   }catch{toast('Hata: geçersiz dosya',true);}};
   r.readAsText(f);
