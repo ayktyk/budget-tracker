@@ -1563,6 +1563,12 @@ body { overflow-x: hidden; overflow-y: hidden; position: relative; }
 .ai-sec.pos { background:var(--pos-soft); border-color:transparent; }
 .ai-sec h4 { margin:0 0 8px; font:400 18px/1 var(--f-serif); color:var(--ink); }
 .ai-sec p, .ai-sec li { font:400 14px/1.5 var(--f-sans); color:var(--ink-2); }
+.ai-period { margin:0 0 18px; padding:14px 0 0; border-top:1px dashed var(--line-2); }
+.ai-period:first-of-type { border-top:none; padding-top:0; }
+.ai-period-title { display:inline-block; margin:0 0 12px; padding:6px 14px; font:500 14px/1.2 var(--f-sans); letter-spacing:.08em; text-transform:uppercase; color:var(--ink); background:var(--bg-elev); border:1px solid var(--line-2); border-radius:999px; }
+.ai-period.p1 .ai-period-title { background:var(--pos-soft); border-color:transparent; color:var(--pos); }
+.ai-period.p3 .ai-period-title { background:var(--uyap-soft); border-color:transparent; color:var(--uyap); }
+.ai-period.p6 .ai-period-title { background:var(--neg-soft); border-color:transparent; color:var(--neg); }
 .data-actions { display:flex; flex-direction:column; gap:10px; }
 .upcoming-list, #calendar-flow { margin-top:14px; }
 .nav { position:fixed; left:50%; transform:translateX(-50%); bottom:14px; width:min(488px, calc(100% - 28px)); background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow-2); padding:8px; border-radius:999px; display:flex; align-items:center; justify-content:space-between; }
@@ -1814,7 +1820,7 @@ function buildDesignLayout(){
     </div>`;
   document.getElementById('s-more').innerHTML = `
     <div class="screen-shell">
-      <div id="more-ekstre" class="more-panel"><div class="card"><div class="card-h"><h3>Ekstre Yükle + AI</h3><span class="hint">Gemini + fallback</span></div><details class="api-collapsible" id="gemini-details"><summary>Gemini API Key <span id="gemini-key-status" class="gk-status off">(boş)</span></summary><div class="field"><input class="input" type="password" id="gemini-key" placeholder="Gemini API Key (yalnızca cihazınızda saklanır)" oninput="saveGeminiKey(this.value)"><div class="field-note" style="margin-top:6px">⚠ Bu anahtar düz metin olarak cihazınızda saklanır. Sadece güvendiğiniz cihazlarda kullanın. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Google AI Studio'dan ücretsiz key alın</a>.</div><div class="gk-test-row"><button type="button" class="btn btn-secondary" id="gemini-test-btn" onclick="testGeminiKey()">Bağlantıyı Test Et</button><div id="gemini-test-out" class="gk-test-out"></div></div></div></details><div class="field"><label>Banka</label><select id="stmt-bank" style="display:none"><option>İşbank</option><option>Enpara</option><option>VakıfBank</option></select><div class="bank-chip-row" id="stmt-bank-chips"></div></div><div class="field"><label>Ekstre Metni</label><textarea class="input stmt-area" id="stmt-text" placeholder="Ekstre metnini buraya yapıştır"></textarea></div><button class="btn btn-primary btn-block" onclick="parseStmt()" id="parse-btn">İçe Aktar</button><div class="field-note">Kalemler <strong>bugünün tarihine</strong> kaydedilir. Önce Gemini denenir; başarısız olursa yerel parser devreye girer.</div><div id="parse-res" class="parse-result"></div></div><div class="card"><div class="card-h"><h3>Kart Takvimi</h3><button type="button" class="fav-add-btn" onclick="openCardForm()">+ Yeni</button></div><div id="card-list"></div><div class="field-note" style="margin-top:6px">Kesim ve son ödeme günleri ana sayfadaki takvimde kartın renginde işaretlenir.</div></div><div class="card ai-card"><div class="card-h"><h3>Genel Harcama Analizi</h3><span class="hint">Son 6 ay</span></div><div class="field-note">Yeni veri eklemez, sadece yorum üretir.</div><button class="btn btn-secondary btn-block" onclick="analyzeAllSpending()" id="analyze-all-btn">Analiz Et</button><div id="analysis-res" class="analysis-result"></div></div></div>
+      <div id="more-ekstre" class="more-panel"><div class="card"><div class="card-h"><h3>Ekstre Yükle + AI</h3><span class="hint">Gemini + fallback</span></div><details class="api-collapsible" id="gemini-details"><summary>Gemini API Key <span id="gemini-key-status" class="gk-status off">(boş)</span></summary><div class="field"><input class="input" type="password" id="gemini-key" placeholder="Gemini API Key (yalnızca cihazınızda saklanır)" oninput="saveGeminiKey(this.value)"><div class="field-note" style="margin-top:6px">⚠ Bu anahtar düz metin olarak cihazınızda saklanır. Sadece güvendiğiniz cihazlarda kullanın. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Google AI Studio'dan ücretsiz key alın</a>.</div><div class="gk-test-row"><button type="button" class="btn btn-secondary" id="gemini-test-btn" onclick="testGeminiKey()">Bağlantıyı Test Et</button><div id="gemini-test-out" class="gk-test-out"></div></div></div></details><div class="field"><label>Banka</label><select id="stmt-bank" style="display:none"><option>İşbank</option><option>Enpara</option><option>VakıfBank</option></select><div class="bank-chip-row" id="stmt-bank-chips"></div></div><div class="field"><label>Ekstre Metni</label><textarea class="input stmt-area" id="stmt-text" placeholder="Ekstre metnini buraya yapıştır"></textarea></div><button class="btn btn-primary btn-block" onclick="parseStmt()" id="parse-btn">İçe Aktar</button><div class="field-note">Kalemler <strong>bugünün tarihine</strong> kaydedilir. Önce Gemini denenir; başarısız olursa yerel parser devreye girer.</div><div id="parse-res" class="parse-result"></div></div><div class="card"><div class="card-h"><h3>Kart Takvimi</h3><button type="button" class="fav-add-btn" onclick="openCardForm()">+ Yeni</button></div><div id="card-list"></div><div class="field-note" style="margin-top:6px">Kesim ve son ödeme günleri ana sayfadaki takvimde kartın renginde işaretlenir.</div></div><div class="card ai-card"><div class="card-h"><h3>Genel Harcama Analizi</h3><span class="hint">1 / 3 / 6 ay</span></div><div class="field-note">Tüm girdileri okuyarak 1 aylık · 3 aylık · 6 aylık ayrı ayrı analiz üretir. Gemini key varsa AI yorumu, yoksa cihazda lokal hesaplama. Yeni veri eklemez.</div><button class="btn btn-secondary btn-block" onclick="analyzeAllSpending()" id="analyze-all-btn">Analiz Et</button><div id="analysis-res" class="analysis-result"></div></div></div>
       <div id="more-sabit" class="more-panel"><div class="card"><div class="card-h"><h3>Sabit Giderler</h3><span class="hint">Referans listesi</span></div><div id="fixed-list"></div><div class="field-note" style="margin-top:8px">Bu liste bilgi amaçlıdır. Otomatik kayıt oluşturmaz — ödediğinde Hızlı Giriş'ten veya Ekstre Yükle'den ekle.</div></div></div>
       <div id="more-findeks" class="more-panel"><div class="card"><div class="card-h"><h3>Findeks Puanı</h3><span class="hint">Aylık manuel kayıt</span></div><div class="findeks-form"><div class="form-row"><div class="field"><label>Tarih</label><input class="input" type="date" id="fk-date"></div><div class="field"><label>Skor (0–1900)</label><input class="input" type="number" id="fk-score" placeholder="örn: 1500" min="0" max="1900" step="1" inputmode="numeric"></div></div><div class="field"><label>Not (opsiyonel)</label><input class="input" type="text" id="fk-note" placeholder="örn: Kredi başvurusu öncesi"></div><button class="btn btn-primary btn-block" onclick="addFindeks()">Kaydet</button></div><div id="findeks-summary" class="findeks-summary"></div><div id="findeks-spark" class="findeks-spark"></div><div id="findeks-list" class="findeks-list"></div><div class="field-note" style="margin-top:8px">Findeks puanı 0–1900 arası bir kredi notudur. 1500+ iyi, 1700+ çok iyi sayılır. Aynı ay için birden çok kayıt yapabilirsiniz; trend grafiği son 12 kayıttan oluşur.</div></div></div>
       <div id="more-data" class="more-panel"><div class="card"><div class="card-h"><h3>Veri</h3><span class="hint">Yedek / sıfırla</span></div><div class="data-actions"><button class="btn btn-primary btn-block" onclick="exportData()">JSON Yedeği İndir</button><button class="btn btn-secondary btn-block" onclick="document.getElementById('imp-f').click()">JSON Yedeği Yükle</button><input type="file" id="imp-f" accept=".json" style="display:none" onchange="importData(event)"><button class="btn btn-danger btn-block" onclick="resetAll()">Tüm Verileri Sıfırla</button></div><div id="data-st" class="field-note"></div><div class="field-note" style="margin-top:6px">Sıfırlama öncesi otomatik yedek dosyası indirilir. Yedek dosyasını tekrar yüklerseniz tüm kayıtlarınız geri gelir.</div></div></div>
@@ -2250,13 +2256,71 @@ function buildSpendingAnalysisInput(){
     net:monthI(i)-monthP(i),
     uyap:S.expenses.filter(e=>mIdx(e.d)===i&&e.cat==='uyap').reduce((a,e)=>a+e.amt,0)
   }));
+
+  // Dönem özetleri (1 ay / 3 ay / 6 ay) — pencere içi MN tabanlı
+  const periodSummary=(idxs,label)=>{
+    const valid=idxs.filter(i=>i>=0&&i<MN.length);
+    const monthsLbl=valid.map(i=>MN[i]);
+    const exp=valid.reduce((a,i)=>a+monthP(i),0);
+    const inc=valid.reduce((a,i)=>a+monthI(i),0);
+    const uyap=valid.reduce((a,i)=>a+S.expenses.filter(e=>mIdx(e.d)===i&&e.cat==='uyap').reduce((s,e)=>s+e.amt,0),0);
+    const cats=getCats().map(c=>({
+      id:c.id,
+      label:c.label,
+      total: valid.reduce((a,i)=>a+catMonth(c.id,i),0),
+      budget: S.budgets[c.id]||0
+    })).filter(x=>x.total>0).sort((a,b)=>b.total-a.total);
+    return {
+      label,
+      months: monthsLbl,
+      monthCount: valid.length,
+      totalIncomes: inc,
+      totalExpenses: exp,
+      net: inc-exp,
+      uyapTotal: uyap,
+      avgMonthlyIncome: valid.length?inc/valid.length:0,
+      avgMonthlyExpense: valid.length?exp/valid.length:0,
+      topCategories: cats.slice(0,8),
+      categoryBudgetUsage: cats.filter(c=>c.budget>0).map(c=>({
+        label:c.label,
+        spent:c.total,
+        monthlyBudget:c.budget,
+        expectedForPeriod:c.budget*valid.length,
+        usagePct: c.budget>0?Math.round(c.total/(c.budget*valid.length)*100):0
+      }))
+    };
+  };
+  const cur=(typeof CUR_IDX==='number')?CUR_IDX:(MN.length-1);
+  const periods={
+    "1_aylik": periodSummary([cur],'Bu ay (son 1 ay)'),
+    "3_aylik": periodSummary([cur-2,cur-1,cur],'Son 3 ay'),
+    "6_aylik": periodSummary([0,1,2,3,4,5].filter(i=>i<MN.length),'Son 6 ay')
+  };
+
+  // Tüm geçmiş — 6 aylık pencere dışındaki kayıtlar dahil olmak üzere ay-yıl bazlı toplam
+  const allByMonth={};
+  expenses.forEach(e=>{
+    const k=String(e.d||'').slice(0,7);
+    if(!k) return;
+    if(!allByMonth[k]) allByMonth[k]={month:k,expenses:0,incomes:0,uyap:0};
+    allByMonth[k].expenses+=e.amt;
+    if(e.cat==='uyap') allByMonth[k].uyap+=e.amt;
+  });
+  incomes.forEach(i=>{
+    const k=String(i.d||'').slice(0,7);
+    if(!k) return;
+    if(!allByMonth[k]) allByMonth[k]={month:k,expenses:0,incomes:0,uyap:0};
+    allByMonth[k].incomes+=i.amt;
+  });
+  const allMonthlyHistory=Object.values(allByMonth).sort((a,b)=>a.month.localeCompare(b.month));
+
   const topExpenses=[...expenses]
     .sort((a,b)=>b.amt-a.amt)
     .slice(0,30)
     .map(e=>({date:e.d,desc:e.desc,amount:e.amt,category:e.cat,bank:e.bank}));
   const recentExpenses=[...expenses]
     .sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id))
-    .slice(0,60)
+    .slice(0,80)
     .map(e=>({date:e.d,desc:e.desc,amount:e.amt,category:e.cat,bank:e.bank}));
   return JSON.stringify({
     summary:{
@@ -2265,8 +2329,12 @@ function buildSpendingAnalysisInput(){
       totalFiber,
       fiberRate:totalInc>0?totalFiber/totalInc*100:0,
       net:totalInc-totalExp,
-      goal:GOAL
+      goal:GOAL,
+      totalRecordsExpenses: expenses.length,
+      totalRecordsIncomes: incomes.length
     },
+    periods,
+    allMonthlyHistory,
     budgets:byCategory,
     monthly:byMonth,
     topExpenses,
@@ -2475,20 +2543,43 @@ function importStatementRows(rows){
   });
   return added;
 }
+function renderSubsection(sec){
+  const m=sec.match(/^(\d\))\s*([^\n]+)\n?([\s\S]*)$/);
+  const title=m?m[2]:sec.split('\n')[0];
+  const body=(m?m[3]:sec.split('\n').slice(1).join('\n')).trim();
+  const cls=/Risk/i.test(title)?'ai-sec neg':/Öner|Aksiyon|Strateji/i.test(title)?'ai-sec pos':'ai-sec';
+  const items=body.split(/\n+/).filter(Boolean);
+  if(items.length>1 && items.every(it=>/^[-*•]\s/.test(it))){
+    return `<div class="${cls}"><h4>${title}</h4><ul>${items.map(i=>`<li>${i.replace(/^[-*•]\s*/,'')}</li>`).join('')}</ul></div>`;
+  }
+  if(items.length>1){
+    return `<div class="${cls}"><h4>${title}</h4>${items.map(i=>`<p>${i.replace(/^[-*•]\s*/,'')}</p>`).join('')}</div>`;
+  }
+  return `<div class="${cls}"><h4>${title}</h4><p>${body.replace(/\n/g,'<br>')}</p></div>`;
+}
 function renderAnalysisHtml(text){
   const safe=String(text||'').trim();
   if(!safe) return 'Analiz üretilemedi.';
+  // 3 dönemli format: ## başlıklarına göre dönem böl
+  const hasPeriods = /(^|\n)##\s/.test(safe);
+  if(hasPeriods){
+    const periodSections = safe.split(/\n(?=##\s)/).map(s=>s.trim()).filter(Boolean);
+    return periodSections.map(period=>{
+      const headerMatch = period.match(/^##\s*([^\n]+)\n?([\s\S]*)$/);
+      const periodTitle = headerMatch ? headerMatch[1].trim() : 'Analiz';
+      const periodBody = (headerMatch ? headerMatch[2] : period).trim();
+      const subs = periodBody.split(/\n(?=\d\)\s)/).map(s=>s.trim()).filter(Boolean);
+      const inner = subs.length
+        ? subs.map(renderSubsection).join('')
+        : `<div class="ai-sec"><p>${periodBody.replace(/\n/g,'<br>')}</p></div>`;
+      const periodCls = /1\s*ay/i.test(periodTitle)?'p1':/3\s*ay/i.test(periodTitle)?'p3':/6\s*ay/i.test(periodTitle)?'p6':'';
+      return `<div class="ai-period ${periodCls}"><h3 class="ai-period-title">${periodTitle}</h3>${inner}</div>`;
+    }).join('');
+  }
+  // Eski tek-bölümlü format (geriye uyumluluk + lokal analiz)
   const sections = safe.split(/\n(?=\d\)\s)/).map(s=>s.trim()).filter(Boolean);
   if(sections.length<2) return `<div class="ai-sec"><h4>Analiz</h4><p>${safe.replace(/\n/g,'<br>')}</p></div>`;
-  return sections.map(sec=>{
-    const m=sec.match(/^(\d\))\s*([^\n]+)\n?([\s\S]*)$/);
-    const title=m?m[2]:sec.split('\n')[0];
-    const body=(m?m[3]:sec.split('\n').slice(1).join('\n')).trim();
-    const cls=/Risk/i.test(title)?'ai-sec neg':/Öner|Aksiyon/i.test(title)?'ai-sec pos':'ai-sec';
-    const items=body.split(/\n+/).filter(Boolean);
-    if(items.length>1) return `<div class="${cls}"><h4>${title}</h4><ul>${items.map(i=>`<li>${i.replace(/^[-*•]\s*/,'')}</li>`).join('')}</ul></div>`;
-    return `<div class="${cls}"><h4>${title}</h4><p>${body.replace(/\n/g,'<br>')}</p></div>`;
-  }).join('');
+  return sections.map(renderSubsection).join('');
 }
 
 function toast(msg,isErr){
@@ -3727,14 +3818,61 @@ async function analyzeAllSpending(){
     return;
   }
   btn.disabled=true;
-  btn.textContent='Gemini analiz ediyor…';
-  out.textContent='Tüm giderler ve gelirler analiz ediliyor…';
+  btn.textContent='Gemini 3 dönem analiz ediyor…';
+  out.textContent='1 aylık · 3 aylık · 6 aylık dönemler analiz ediliyor…';
   try{
     const data=await callGemini({
-      systemInstruction:'Sen kişisel finans analistisin. Kullanıcının son 6 aylık gider, gelir ve bütçe verisini incele. Türkçe yaz. Somut rakam ver, gereksiz girişten kaçın. Şu 4 başlığı tam doldur:\n1) Genel Durum\n2) En Fazla Para Yakan Kalemler\n3) Riskler\n4) Gelecek Ay İçin 3 Net Öneri',
+      systemInstruction:`Sen kişisel finans analistisin. Sana verilen JSON üç dönem özeti içeriyor: 1 aylık (bu ay), 3 aylık (son 3 ay), 6 aylık (son 6 ay). Ayrıca tüm geçmişin ay-yıl bazlı toplamları, bütçeler, top harcamalar ve son 80 işlem var.
+
+GÖREV: Her üç dönem için ayrı ayrı analiz üret. Türkçe yaz, somut rakam ver, dolgu cümleden kaçın.
+
+ÇIKTI FORMATI (kesinlikle bu sırayla, bu başlıklarla):
+
+## 1 AYLIK ANALİZ
+1) Genel Durum
+[1-2 paragraf: gelir, gider, net, ay-ay değişim]
+2) En Fazla Para Yakan Kalemler
+- Kategori adı: ₺tutar (kısa yorum)
+- ...
+3) Riskler
+- Riskli durum 1
+- ...
+4) Gelecek Ay İçin 3 Öneri
+- Öneri 1
+- Öneri 2
+- Öneri 3
+
+## 3 AYLIK ANALİZ
+1) Genel Durum
+...
+2) En Fazla Para Yakan Kalemler
+...
+3) Riskler
+...
+4) 3 Öneri
+...
+
+## 6 AYLIK ANALİZ
+1) Genel Durum
+...
+2) En Fazla Para Yakan Kalemler
+...
+3) Riskler
+...
+4) 3 Stratejik Öneri
+...
+
+KURALLAR:
+- Üç dönemin de tüm 4 başlığını eksiksiz doldur
+- Her dönem için somut TL rakamı kullan (₺ sembolü ile)
+- 1 aylık için bu ayı, 3 aylık için son 3 ayı, 6 aylık için son 6 ayı kapsayan yorum yap
+- Dönemler arası farkı işaret et (örn: "3 aylıkta artış var ama 6 aylıkta stabil")
+- UYAP kategorisi mesleki gider, kişisel bütçeden ayrı değerlendir
+- Bütçe limit aşımı varsa Riskler'de belirt
+- FIBER (kendine ödeme) oranı düşükse Önerilerde değin`,
       userText:buildSpendingAnalysisInput(),
       responseMimeType:'text/plain',
-      maxOutputTokens:4096,
+      maxOutputTokens:8192,
       disableThinking:true
     });
     const raw=geminiText(data);
@@ -3754,112 +3892,117 @@ async function analyzeAllSpending(){
   btn.textContent='Analiz Et';
 }
 
-// ── Lokal (offline) analiz: Gemini key yoksa ya da kullanıcı veriyi dışarı vermek istemiyorsa ──
+// ── Lokal (offline) analiz: Gemini key yoksa cihazda 3 dönem (1ay/3ay/6ay) hesapla ──
 function analyzeSpendingLocalHtml(){
-  // Genel toplamlar (son 6 ay penceresi MN üzerinden)
+  const cur=(typeof CUR_IDX==='number')?CUR_IDX:(MN.length-1);
+  const fmtTl=n=>`₺${fmt(Math.round(n))}`;
+
+  // Tüm 6 ay penceresi
   const monthExp=MN.map((_,i)=>monthP(i));
   const monthInc=MN.map((_,i)=>monthI(i));
-  const totalExp=monthExp.reduce((a,b)=>a+b,0);
-  const totalInc=monthInc.reduce((a,b)=>a+b,0);
-  const net=totalInc-totalExp;
-  const activeMonths=monthExp.filter(v=>v>0).length||1;
-  const avgExp=totalExp/activeMonths;
-  const curIdx=(typeof CUR_IDX==='number')?CUR_IDX:(MN.length-1);
-  const curExp=monthExp[curIdx]||0;
-  const curInc=monthInc[curIdx]||0;
-  const curNet=curInc-curExp;
-  const prevExp=(curIdx>0)?monthExp[curIdx-1]:0;
-  const momPct=prevExp>0?Math.round((curExp-prevExp)/prevExp*100):null;
+  const totalIncAll=monthInc.reduce((a,b)=>a+b,0);
+  let totalFiber=0;
+  try{ totalFiber=(S.incomes||[]).reduce((a,i)=>a+(typeof incomeFiberAmt==='function'?incomeFiberAmt(i):0),0); }catch(_){}
+  const fiberRate=totalIncAll>0?totalFiber/totalIncAll*100:0;
 
-  // Kategori bazlı (son 6 ay) — uyap dahil tüm kategoriler
-  const cats=getCats().map(c=>{
-    const total=MN.reduce((a,_,i)=>a+catMonth(c.id,i),0);
-    const last3=catAvg3(c.id)||0;
-    const budget=S.budgets[c.id]||0;
-    return {id:c.id,label:c.label||c.id,total,last3,budget,pct:budget>0?total/budget*100:0};
-  }).filter(c=>c.total>0||c.budget>0);
-  const top5=cats.filter(c=>c.total>0).sort((a,b)=>b.total-a.total).slice(0,5);
+  function periodReport(idxs, label, cls, detail){
+    const valid=idxs.filter(i=>i>=0&&i<MN.length);
+    const exp=valid.reduce((a,i)=>a+monthP(i),0);
+    const inc=valid.reduce((a,i)=>a+monthI(i),0);
+    const net=inc-exp;
+    const avgExp=valid.length?exp/valid.length:0;
 
-  // Riskler
-  const risks=[];
-  cats.forEach(c=>{
-    if(c.budget>0){
-      // Aylık bütçe → 6 ay = 6×budget. %70 üstü uyarı
-      const expected6=c.budget*MN.length;
-      if(expected6>0 && c.total/expected6*100>=70){
-        const pct=Math.round(c.total/expected6*100);
-        risks.push({sev:pct>=100?'high':'med',text:`<strong>${c.label}</strong> · 6 aylık bütçeye göre <strong>%${pct}</strong> kullanıldı (₺${fmt(c.total)} / ₺${fmt(expected6)})`});
+    // Kategori toplamları (bu dönem)
+    const cats=getCats().map(c=>{
+      const total=valid.reduce((a,i)=>a+catMonth(c.id,i),0);
+      return {id:c.id,label:c.label||c.id,total,budget:S.budgets[c.id]||0};
+    }).filter(c=>c.total>0||c.budget>0);
+    const top=cats.filter(c=>c.total>0).sort((a,b)=>b.total-a.total).slice(0, detail?5:3);
+
+    // Riskler
+    const risks=[];
+    cats.forEach(c=>{
+      if(c.budget>0 && c.total>0){
+        const expected=c.budget*valid.length;
+        if(expected>0 && c.total/expected*100>=70){
+          const pct=Math.round(c.total/expected*100);
+          risks.push(`<strong>${c.label}</strong> · bütçeye göre <strong>%${pct}</strong> kullanım (${fmtTl(c.total)} / ${fmtTl(expected)})`);
+        }
+      }
+    });
+    if(net<0) risks.push(`Net negatif: <strong style="color:var(--neg)">−${fmtTl(Math.abs(net))}</strong> (gelir ${fmtTl(inc)}, gider ${fmtTl(exp)})`);
+    if(detail){
+      // 3 ve 6 ay detayında negatif ay sayısı
+      let negMonths=0;
+      valid.forEach(i=>{ if((monthInc[i]-monthExp[i])<0) negMonths++; });
+      if(negMonths>=Math.ceil(valid.length/2)){
+        risks.push(`${valid.length} ayın <strong>${negMonths}</strong> ayında gider geliri aştı`);
+      }
+      if(fiberRate<10 && totalIncAll>0){
+        risks.push(`FIBER oranı düşük: <strong>%${fiberRate.toFixed(1)}</strong> — hedef minimum %10`);
       }
     }
-  });
-  if(momPct!==null && momPct>=30){
-    risks.push({sev:'high',text:`Bu ay gideriniz geçen aya göre <strong>%${momPct}</strong> arttı (₺${fmt(prevExp)} → ₺${fmt(curExp)})`});
-  }
-  if(curNet<0){
-    risks.push({sev:'high',text:`Bu ayın net bakiyesi negatif: <strong>−₺${fmt(Math.abs(curNet))}</strong> (gelir ₺${fmt(curInc)}, gider ₺${fmt(curExp)})`});
-  }
-  // Son 3 ayın 2'si negatifse
-  let negMonths=0;
-  for(let i=Math.max(0,MN.length-3);i<MN.length;i++){
-    if((monthInc[i]-monthExp[i])<0) negMonths++;
-  }
-  if(negMonths>=2){
-    risks.push({sev:'med',text:`Son 3 ayın <strong>${negMonths}</strong> ayında gideriniz gelirinizi aştı`});
-  }
-  // FIBER kontrolü
-  let totalFiber=0;
-  try{
-    totalFiber=(S.incomes||[]).reduce((a,i)=>a+(typeof incomeFiberAmt==='function'?incomeFiberAmt(i):0),0);
-  }catch(_){}
-  const fiberRate=totalInc>0?totalFiber/totalInc*100:0;
-  if(totalInc>0 && fiberRate<10){
-    risks.push({sev:'med',text:`FIBER oranınız <strong>%${fiberRate.toFixed(1)}</strong> — hedef minimum %10 (kendine ödeme)`});
+    // 1 aylık dönemde önceki aya kıyas
+    if(!detail && valid.length===1){
+      const i=valid[0];
+      const prev=i>0?monthExp[i-1]:0;
+      if(prev>0){
+        const pct=Math.round((exp-prev)/prev*100);
+        if(pct>=30) risks.push(`Geçen aya göre gider <strong>%${pct}</strong> arttı (${fmtTl(prev)} → ${fmtTl(exp)})`);
+        else if(pct<=-15) risks.push(`Geçen aya göre gider %${Math.abs(pct)} azaldı — iyi gidiyor`);
+      }
+    }
+
+    // Öneriler
+    const tips=[];
+    if(top[0]){
+      const save=Math.round(top[0].total*0.10);
+      tips.push(`<strong>${top[0].label}</strong>'da %10 kesinti ≈ <strong>${fmtTl(save)}</strong> tasarruf`);
+    }
+    if(top[1] && detail){
+      const monthly=Math.round(top[1].total/Math.max(valid.length,1));
+      tips.push(`<strong>${top[1].label}</strong>: bu dönemde aylık ortalama ${fmtTl(monthly)}`);
+    }
+    if(net<0){
+      tips.push('Açığı kapatmak için en yüksek 2 kategoriden minik kesintiler');
+    } else if(detail && fiberRate<10 && totalIncAll>0){
+      tips.push(`Her gelirde otomatik <strong>%10 FIBER</strong> uygulanırsa 6 ayda ${fmtTl(totalIncAll*0.10)} birikim`);
+    } else if(top.length>=3 && detail){
+      const top3Sum=top.slice(0,3).reduce((a,c)=>a+c.total,0);
+      const top3Pct=Math.round(top3Sum/Math.max(exp,1)*100);
+      tips.push(`En büyük 3 kategori giderin <strong>%${top3Pct}</strong>'ini oluşturuyor — odak alanı`);
+    }
+    if(!detail && tips.length<2 && top[1]){
+      tips.push(`<strong>${top[1].label}</strong> da dikkat edilmesi gereken kalem`);
+    }
+
+    const topHtml=top.length
+      ? `<ul>${top.map(c=>`<li><strong>${c.label}</strong>: ${fmtTl(c.total)}</li>`).join('')}</ul>`
+      : '<p>Bu dönemde kayıt yok.</p>';
+    const risksHtml=risks.length
+      ? `<ul>${risks.map(r=>`<li>${r}</li>`).join('')}</ul>`
+      : '<p>Belirgin risk yok.</p>';
+    const tipsHtml=tips.length
+      ? `<ul>${tips.slice(0,3).map(t=>`<li>${t}</li>`).join('')}</ul>`
+      : '<p>Yeterli veri yok — daha fazla giriş ekleyin.</p>';
+
+    const netCol=net>=0?'var(--pos)':'var(--neg)';
+    const avgLine=valid.length>1?` · Ort. aylık gider <strong>${fmtTl(avgExp)}</strong>`:'';
+    return `<div class="ai-period ${cls}">
+      <h3 class="ai-period-title">${label}</h3>
+      <div class="ai-sec"><h4>Genel Durum</h4><p>Gelir <strong>${fmtTl(inc)}</strong> · Gider <strong>${fmtTl(exp)}</strong> · Net <strong style="color:${netCol}">${net>=0?'+':''}${fmtTl(net)}</strong>${avgLine}</p></div>
+      <div class="ai-sec"><h4>En Çok Yakan Kalemler</h4>${topHtml}</div>
+      <div class="ai-sec neg"><h4>Riskler</h4>${risksHtml}</div>
+      <div class="ai-sec pos"><h4>Öneriler</h4>${tipsHtml}</div>
+    </div>`;
   }
 
-  // Öneriler
-  const tips=[];
-  if(top5.length){
-    const t1=top5[0];
-    const save10=Math.round(t1.total*0.10);
-    tips.push(`<strong>${t1.label}</strong> kategorisinde 6 ayda ₺${fmt(t1.total)} harcanmış. <strong>%10 azaltma</strong> ≈ ₺${fmt(save10)} tasarruf demek.`);
-  }
-  const noBudgetBig=cats.find(c=>c.budget===0 && c.total>0 && c.id!=='uyap');
-  if(noBudgetBig){
-    const monthlyAvg=Math.round(noBudgetBig.total/MN.length);
-    tips.push(`<strong>${noBudgetBig.label}</strong> için bütçe limiti yok. Aylık ortalama ₺${fmt(monthlyAvg)} — bu rakamı limit olarak Bütçe ekranından atayabilirsiniz.`);
-  }
-  if(curNet<0){
-    tips.push(`Bu ay açıkta. En yüksek 2 kategoriden (${top5.slice(0,2).map(c=>c.label).join(' & ')||'—'}) küçük kesintiler net'i pozitife çevirebilir.`);
-  } else if(totalInc>0 && fiberRate<10){
-    tips.push(`Her gelirde otomatik <strong>%10 FIBER</strong> kuralını koyarsanız, mevcut tempoda 6 ayda ₺${fmt(totalInc*0.10)} biriktirebilirsiniz.`);
-  } else if(top5.length>=3){
-    tips.push(`En büyük 3 kategori (${top5.slice(0,3).map(c=>c.label).join(', ')}) toplam giderin <strong>%${Math.round((top5.slice(0,3).reduce((a,c)=>a+c.total,0))/Math.max(totalExp,1)*100)}</strong>'ini oluşturuyor — odaklanılacak alan burası.`);
-  }
-  while(tips.length<3 && tips.length<top5.length+1){
-    if(top5[tips.length-1]) tips.push(`<strong>${top5[tips.length-1].label}</strong>: ortalama aylık ₺${fmt(top5[tips.length-1].total/MN.length)} — alternatifleri keşfedin.`);
-    else break;
-  }
-
-  // HTML üret
-  const fmtMoney=n=>`₺${fmt(n)}`;
-  const monoOrPlaceholder=(id)=>{ try{ return typeof monoChip==='function'?monoChip(id,'sm'):''; }catch(_){ return '';} };
-  const top5Html=top5.length
-    ? top5.map(c=>`<div class="list-row"><div class="row-main"><div class="row-title">${c.label}</div><div class="row-meta">Son 6 ay</div></div><div class="row-amt neg">${fmtMoney(c.total)}</div></div>`).join('')
-    : '<p style="color:var(--ink-3)">Veri yok — hızlı giriş veya ekstre yükleyerek başlayın.</p>';
-  const risksHtml=risks.length
-    ? `<ul style="margin:0;padding-left:18px;line-height:1.65">${risks.map(r=>`<li>${r.text}</li>`).join('')}</ul>`
-    : '<p>Belirgin bir risk tespit edilmedi. İyi gidiyorsunuz.</p>';
-  const tipsHtml=tips.length
-    ? `<ul style="margin:0;padding-left:18px;line-height:1.65">${tips.map(t=>`<li>${t}</li>`).join('')}</ul>`
-    : '<p>Daha fazla veri girildikçe öneriler kişiselleşecek.</p>';
-
-  const headerNote=`<div class="ai-sec" style="background:var(--bg-elev);border-style:dashed"><p style="margin:0"><strong>Cihazda lokal analiz</strong> — Gemini API key girilmediği için bu rapor hesaplama tabanlıdır. Verileriniz dışarı çıkmadı. Daha derin yorum için yukarıdan key ekleyebilirsiniz.</p></div>`;
+  const headerNote=`<div class="ai-sec" style="background:var(--bg-elev);border-style:dashed"><p style="margin:0"><strong>Cihazda lokal analiz</strong> — Gemini API key girilmediği için bu rapor cihazınızda hesaplandı. Verileriniz dışarı çıkmadı. Daha derin AI yorumu için yukarıdan key ekleyebilirsiniz.</p></div>`;
 
   return headerNote
-    + `<div class="ai-sec"><h4>Genel Durum</h4><p>Son 6 ayda toplam <strong>${fmtMoney(totalInc)}</strong> gelir, <strong>${fmtMoney(totalExp)}</strong> gider. Net: <strong style="color:${net>=0?'var(--pos)':'var(--neg)'}">${net>=0?'+':''}${fmtMoney(net)}</strong>. Aylık ortalama gider ≈ <strong>${fmtMoney(avgExp)}</strong>. Bu ay net: <strong style="color:${curNet>=0?'var(--pos)':'var(--neg)'}">${curNet>=0?'+':''}${fmtMoney(curNet)}</strong>${momPct!==null?` (gider ${momPct>=0?'+':''}${momPct}% ay-ay)`:''}.</p></div>`
-    + `<div class="ai-sec"><h4>En Fazla Para Yakan Kalemler</h4>${top5Html}</div>`
-    + `<div class="ai-sec neg"><h4>Riskler</h4>${risksHtml}</div>`
-    + `<div class="ai-sec pos"><h4>3 Net Öneri</h4>${tipsHtml}</div>`;
+    + periodReport([cur], '1 Aylık Analiz', 'p1', false)
+    + periodReport([cur-2,cur-1,cur], '3 Aylık Analiz', 'p3', true)
+    + periodReport([0,1,2,3,4,5].filter(i=>i<MN.length), '6 Aylık Analiz', 'p6', true);
 }
 
 // ══════════════════════════════════════════════════════════════
