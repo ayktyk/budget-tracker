@@ -2,6 +2,10 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
+<!-- İçerik Güvenlik Politikası: dış script yalnız cdnjs (Chart.js), bağlantı yalnız Gemini API.
+     'unsafe-inline' uygulamanın inline onclick/style yapısı için zorunlu; connect-src kısıtı,
+     olası bir XSS'in localStorage'daki Gemini anahtarını/veriyi dışarı sızdırmasını engeller. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://generativelanguage.googleapis.com; object-src 'none'; base-uri 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Bütçe · AY</title>
 <meta name="theme-color" content="#f4efe6" id="meta-theme">
@@ -16,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
@@ -1510,6 +1514,13 @@ input, select, textarea { font-size: 16px; }
   select,
   textarea { font-size: 16px !important; }
 }
+/* Hizli Giris tutar alani (#q-amt): yukaridaki mobil 16px !important kuralini ID ozgulluguyle
+   gecersiz kilar; clamp alt siniri 40px >=16px oldugu icin iOS odak-zoom yine tetiklenmez.
+   Numpad ile yazildigi icin zaten yumusak klavye acmaz. */
+#q-amt { font-size: clamp(40px, 12vw, 64px) !important; }
+/* Liste içi 'sil' butonu: görünür + ≥34px dokunma hedefi (eski 9px görünmez butonun yerine) */
+.row-del { font:500 12px/1 var(--f-sans, inherit); min-height:34px; padding:7px 14px; border:1px solid var(--line-2,#ccc); border-radius:8px; background:transparent; color:var(--neg,#c0392b); cursor:pointer; }
+.row-del:active { transform:scale(.96); }
 .input:focus, .field input:focus, .field select:focus, .field textarea:focus, .qfield input:focus { outline:none; border-color:var(--ink); box-shadow:0 0 0 3px var(--accent-ring); }
 /* Grid item icerigi parent'i tasirmasin (PWA date input intrinsic width sorunu) */
 .form-row, .form-row > .field, .field { min-width: 0; }
@@ -1746,6 +1757,10 @@ const ICATS=[
 const cmap=Object.fromEntries([...CATS,...ICATS].map(c=>[c.id,c]));
 // Kullanıcı custom kategorileri + default'ları birlikte döndüren helper'lar
 function getCats(){ return [...CATS, ...((S && S.customCats)||[])]; }
+// Picker/listeleme yüzeyleri için görünür kategoriler (silinen varsayılanlar hariç).
+// DİKKAT: doğrulama/AI/uniqueness/aggregation site'leri getCats() kullanmalı, bunu DEĞİL —
+// aksi halde silinmiş bir kategoriye işaret eden gelen kayıt sessizce 'diger'e düşer.
+function getVisibleCats(){ const hid=new Set((S&&S.deletedDefaults)||[]); return getCats().filter(c=>!hid.has(c.id)); }
 function getCatMeta(id){
   if(CAT_META[id]) return CAT_META[id];
   const custom=((S && S.customCats)||[]).find(c=>c.id===id);
@@ -1789,7 +1804,8 @@ const LEGACY_THEME_MAP={beyaz:'cream',obsidian:'onyx',midnight:'midnight',champa
 function catMeta(id){ return getCatMeta(id); }
 function monoChip(id,size=''){
   const meta=catMeta(id);
-  return `<span class="mono-chip ${size}" style="--dot:${meta.color}"><span class="dot" style="background:${meta.color}"></span><span class="m">${meta.mono}</span></span>`;
+  const _c=escAttr(meta.color);
+  return `<span class="mono-chip ${size}" style="--dot:${_c}"><span class="dot" style="background:${_c}"></span><span class="m">${escAttr(meta.mono)}</span></span>`;
 }
 function buildDesignLayout(){
   const app=document.querySelector('.app');
@@ -1890,6 +1906,13 @@ const FIXED=[
 ];
 
 function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+// Turkce sayi girisini guvenle sayiya cevirir: "12,50"->12.5, "1.234,56"->1234.56, "12.50"->12.5.
+// Virgul varsa nokta binlik ayraci sayilir; yoksa nokta ondalik birakilir (numpad ciktisiyla uyumlu).
+function parseTrNum(v){
+  let s=String(v==null?'':v).trim();
+  if(s.indexOf(',')>-1) s=s.replace(/\./g,'').replace(',','.');
+  return parseFloat(s);
+}
 
 // ── Seed data ──
 function buildSeed(){
@@ -1952,6 +1975,7 @@ let S = {
   budgets:  {...DEF_BUD},
   favs:     JSON.parse(JSON.stringify(DEFAULT_FAV)),
   customCats: [],   // kullanıcı tarafından eklenen ekstra kategoriler
+  deletedDefaults: [], // silinen varsayılan kategori id'leri — kayıtlar 'diger'e taşınır, kategori kalıcı gizlenir
   subs:     [],     // abonelikler
   cards:    JSON.parse(JSON.stringify(DEFAULT_CARDS)), // kredi kartı ekstre kesim/son ödeme günleri
   findeks:  [],     // aylık findeks puanı kayıtları [{id, date, score, note}]
@@ -1977,9 +2001,12 @@ function migrateV2() {
       incomes:  incRaw ? JSON.parse(incRaw) : [],
       budgets:  budRaw ? JSON.parse(budRaw) : {},
     };
-    // Sadece gerçekten veri varsa yedek dosyası indir
+    // Sadece gerçekten veri varsa yedekle
     if ((backup.expenses && backup.expenses.length) || (backup.incomes && backup.incomes.length)) {
-      const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+      const json = JSON.stringify(backup, null, 2);
+      // Cihaz-içi kalıcı güvenlik kopyası — indirme engellenirse kurtarma için. Var olanı ezme.
+      try { if (localStorage.getItem('ay_backup_v2') === null) localStorage.setItem('ay_backup_v2', json); } catch(_) {}
+      const blob = new Blob([json], {type:'application/json'});
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement('a');
       a.href     = url;
@@ -1992,9 +2019,10 @@ function migrateV2() {
   } catch(e) {
     console.warn('migrateV2 backup failed:', e);
   }
-  // Eski kayıtları temizle, budget/tema/gemini key korunur
-  localStorage.removeItem('ay_exp');
-  localStorage.removeItem('ay_inc');
+  // ÖNEMLİ (veri kaybı düzeltmesi): ay_exp / ay_inc ARTIK SİLİNMİYOR.
+  // SEED zaten boş; bu anahtarları silmek gerçek kullanıcı verisini yok etme riskiydi
+  // (üstelik removeItem'lar eskiden try/catch dışındaydı). Veriyi koruyoruz; loadFromStorage
+  // zaten yeni modele okuyor. Eski demo verisini temizlemek isteyen Detaylar > Veri > Sıfırla'yı kullanır.
   localStorage.removeItem('ay_seed_migrated');
   localStorage.setItem('ay_migrated_v2', '1');
 }
@@ -2038,6 +2066,15 @@ function loadFromStorage() {
       if (Array.isArray(parsed)) S.customCats = parsed.filter(c=>c && c.id && c.label);
     }
   } catch(e) {}
+  try {
+    const dd = localStorage.getItem('ay_cats_deleted');
+    if (dd !== null) {
+      const parsed = JSON.parse(dd);
+      if (Array.isArray(parsed)) S.deletedDefaults = parsed.filter(x=>typeof x==='string');
+    }
+  } catch(e) { S.deletedDefaults = S.deletedDefaults || []; }
+  // Not: silinen varsayılanların bütçe limiti KORUNUR (geri getirince geri dönsün). Görünür yüzeylerde
+  // getVisibleCats ile gizlenir; aylık toplam limit (catSum) deletedDefaults'u dışlar.
   try {
     const sb = localStorage.getItem('ay_subs');
     if (sb !== null) {
@@ -2085,6 +2122,7 @@ function save() {
     localStorage.setItem('ay_bud', JSON.stringify(S.budgets));
     localStorage.setItem('ay_favs', JSON.stringify(S.favs));
     localStorage.setItem('ay_cats_custom', JSON.stringify(S.customCats||[]));
+    localStorage.setItem('ay_cats_deleted', JSON.stringify(S.deletedDefaults||[]));
     localStorage.setItem('ay_subs', JSON.stringify(S.subs||[]));
     localStorage.setItem('ay_cards', JSON.stringify(S.cards||[]));
     localStorage.setItem('ay_findeks', JSON.stringify(S.findeks||[]));
@@ -2106,7 +2144,7 @@ const catMonth=(cat,m)=>S.expenses.filter(e=>mIdx(e.d)===m&&e.cat===cat).reduce(
 const monthP=m=>S.expenses.filter(e=>mIdx(e.d)===m&&e.cat!=='uyap').reduce((a,e)=>a+e.amt,0);
 const monthI=m=>S.incomes.filter(i=>mIdx(i.d)===m).reduce((a,i)=>a+i.amt,0);
 const cleanPct=v=>{
-  const n=parseFloat(String(v??'').replace(',','.'));
+  const n=parseTrNum(v);
   if(!Number.isFinite(n)) return DEFAULT_FIBER_PCT;
   return Math.min(100, Math.max(DEFAULT_FIBER_PCT, n));
 };
@@ -2379,7 +2417,7 @@ function updateFiberPreview(){
   const out=document.getElementById('gi-fiber-preview');
   if(pctEl && !pctEl.value) pctEl.value=DEFAULT_FIBER_PCT;
   const pct=cleanPct(pctEl?.value);
-  const amt=parseFloat(String(amtEl?.value||'').replace(',','.'))||0;
+  const amt=parseTrNum(amtEl?.value)||0;
   if(out) out.textContent=`${fmt(calcFiberAmt(amt,pct))} ₺`;
 }
 function pickQuickBank(v){ setSelectValue('q-bank',v); buildCatGrid(); }
@@ -2567,18 +2605,20 @@ function importStatementRows(rows){
   return added;
 }
 function renderSubsection(sec){
+  // Gemini (model) çıktısı GÜVENİLMEZ kabul edilir — başlık/gövde/maddeler escAttr ile kaçışlanır.
   const m=sec.match(/^(\d\))\s*([^\n]+)\n?([\s\S]*)$/);
-  const title=m?m[2]:sec.split('\n')[0];
+  const titleRaw=m?m[2]:sec.split('\n')[0];
   const body=(m?m[3]:sec.split('\n').slice(1).join('\n')).trim();
-  const cls=/Risk/i.test(title)?'ai-sec neg':/Öner|Aksiyon|Strateji/i.test(title)?'ai-sec pos':'ai-sec';
+  const cls=/Risk/i.test(titleRaw)?'ai-sec neg':/Öner|Aksiyon|Strateji/i.test(titleRaw)?'ai-sec pos':'ai-sec';
+  const title=escAttr(titleRaw);
   const items=body.split(/\n+/).filter(Boolean);
   if(items.length>1 && items.every(it=>/^[-*•]\s/.test(it))){
-    return `<div class="${cls}"><h4>${title}</h4><ul>${items.map(i=>`<li>${i.replace(/^[-*•]\s*/,'')}</li>`).join('')}</ul></div>`;
+    return `<div class="${cls}"><h4>${title}</h4><ul>${items.map(i=>`<li>${escAttr(i.replace(/^[-*•]\s*/,''))}</li>`).join('')}</ul></div>`;
   }
   if(items.length>1){
-    return `<div class="${cls}"><h4>${title}</h4>${items.map(i=>`<p>${i.replace(/^[-*•]\s*/,'')}</p>`).join('')}</div>`;
+    return `<div class="${cls}"><h4>${title}</h4>${items.map(i=>`<p>${escAttr(i.replace(/^[-*•]\s*/,''))}</p>`).join('')}</div>`;
   }
-  return `<div class="${cls}"><h4>${title}</h4><p>${body.replace(/\n/g,'<br>')}</p></div>`;
+  return `<div class="${cls}"><h4>${title}</h4><p>${escAttr(body).replace(/\n/g,'<br>')}</p></div>`;
 }
 function renderAnalysisHtml(text){
   const safe=String(text||'').trim();
@@ -2594,14 +2634,14 @@ function renderAnalysisHtml(text){
       const subs = periodBody.split(/\n(?=\d\)\s)/).map(s=>s.trim()).filter(Boolean);
       const inner = subs.length
         ? subs.map(renderSubsection).join('')
-        : `<div class="ai-sec"><p>${periodBody.replace(/\n/g,'<br>')}</p></div>`;
+        : `<div class="ai-sec"><p>${escAttr(periodBody).replace(/\n/g,'<br>')}</p></div>`;
       const periodCls = /1\s*ay/i.test(periodTitle)?'p1':/3\s*ay/i.test(periodTitle)?'p3':/6\s*ay/i.test(periodTitle)?'p6':'';
-      return `<div class="ai-period ${periodCls}"><h3 class="ai-period-title">${periodTitle}</h3>${inner}</div>`;
+      return `<div class="ai-period ${periodCls}"><h3 class="ai-period-title">${escAttr(periodTitle)}</h3>${inner}</div>`;
     }).join('');
   }
   // Eski tek-bölümlü format (geriye uyumluluk + lokal analiz)
   const sections = safe.split(/\n(?=\d\)\s)/).map(s=>s.trim()).filter(Boolean);
-  if(sections.length<2) return `<div class="ai-sec"><h4>Analiz</h4><p>${safe.replace(/\n/g,'<br>')}</p></div>`;
+  if(sections.length<2) return `<div class="ai-sec"><h4>Analiz</h4><p>${escAttr(safe).replace(/\n/g,'<br>')}</p></div>`;
   return sections.map(renderSubsection).join('');
 }
 
@@ -2614,7 +2654,7 @@ function toast(msg,isErr){
 }
 function getAlerts(monthIdx){
   const m=(monthIdx==null)?CUR_IDX:monthIdx;
-  return getCats().filter(c=>S.budgets[c.id]>0&&c.id!=='uyap').map(c=>{
+  return getVisibleCats().filter(c=>S.budgets[c.id]>0&&c.id!=='uyap').map(c=>{
     const spent=catMonth(c.id,m),lim=S.budgets[c.id],pct=spent/lim*100;
     return{cat:c,spent,lim,pct,lvl:lvl(pct),monthIdx:m};
   }).filter(a=>a.pct>=70).sort((a,b)=>b.pct-a.pct);
@@ -2894,8 +2934,8 @@ function renderDayList(){
     return `<div class="day-row list-row">
       ${monoChip(r.cat,'sm')}
       <div class="day-row-body">
-        <div class="day-row-desc">${String(r.desc||label).replace(/</g,'&lt;')}</div>
-        <div class="day-row-cat">${label}${r.bank?' · '+r.bank:''}</div>
+        <div class="day-row-desc">${escAttr(r.desc||label)}</div>
+        <div class="day-row-cat">${escAttr(label)}${r.bank?' · '+escAttr(r.bank):''}</div>
         ${fiberNote}
       </div>
       <div class="day-row-right">
@@ -2955,7 +2995,7 @@ function loadTheme(){
 // QUICK ENTRY
 // ══════════════════════════════════════════════════════════════
 function buildCatGrid(){
-  document.getElementById('cat-grid').innerHTML=getCats().map(c=>`
+  document.getElementById('cat-grid').innerHTML=getVisibleCats().map(c=>`
     <div class="cat-tile ${c.id===S.selCat?'on':''}" onclick="selCat('${c.id}')"
       style="${c.id===S.selCat?`border-color:var(--ink);box-shadow:0 0 0 2px var(--accent-ring);`:''}">
       ${monoChip(c.id)}
@@ -3003,7 +3043,7 @@ function favAdd(id){
 function openFavForm(id){
   const editing = id ? S.favs.find(x=>x.id===id) : null;
   const cur = editing ? {...editing} : {id:'',label:'',desc:'',amt:'',cat:'diger',bank:'Havale'};
-  const catOpts = getCats().map(c=>`<option value="${c.id}" ${cur.cat===c.id?'selected':''}>${(c.icon||'•')} ${c.label}</option>`).join('');
+  const catOpts = getVisibleCats().map(c=>`<option value="${c.id}" ${cur.cat===c.id?'selected':''}>${(c.icon||'•')} ${c.label}</option>`).join('');
   const bankOpts = ['Havale','Nakit','İşbank','Enpara','VakıfBank'].map(b=>`<option value="${b}" ${cur.bank===b?'selected':''}>${b}</option>`).join('');
   const html = `
     <div class="fav-modal-overlay" id="fav-modal" onclick="if(event.target===this)closeFavForm()">
@@ -3042,7 +3082,7 @@ function saveFavForm(){
   const id=(document.getElementById('fv-id').value||'').trim();
   const label=(document.getElementById('fv-label').value||'').trim();
   const desc=(document.getElementById('fv-desc').value||'').trim();
-  const amt=parseFloat(document.getElementById('fv-amt').value);
+  const amt=parseTrNum(document.getElementById('fv-amt').value);
   const cat=document.getElementById('fv-cat').value;
   const bank=document.getElementById('fv-bank').value;
   if(!label){toast('İsim girin',true);return;}
@@ -3153,24 +3193,42 @@ function saveCatForm(){
   save(); closeCatForm(); renderBudget(); buildCatGrid&&buildCatGrid();
 }
 function delCat(id,fromModal){
-  if(isDefaultCat(id)){ toast('Varsayılan kategori silinemez',true); return; }
-  const c=(S.customCats||[]).find(x=>x.id===id);
-  if(!c) return;
+  if(id==='diger'){ toast('"Diğer" kategorisi silinemez',true); return; }
+  const isDef=isDefaultCat(id);
+  const label=catMeta(id).label;
+  if(!isDef && !(S.customCats||[]).some(x=>x.id===id)) return; // bilinmeyen id
   const linked=S.expenses.filter(e=>e.cat===id).length;
   const msg=linked>0
-    ? `"${c.label}" kategorisi silinecek. ${linked} kayıt "Diğer" kategorisine taşınacak. Devam?`
-    : `"${c.label}" kategorisini silmek istiyor musunuz?`;
+    ? `"${label}" kategorisi silinecek. ${linked} kayıt "Diğer" kategorisine taşınacak (kayıtlar silinmez). Devam?`
+    : `"${label}" kategorisini silmek istiyor musunuz? (Geçmiş kayıtlar korunur.)`;
   if(!confirm(msg)) return;
   if(linked>0){
+    // Kayıtlar SİLİNMEZ — yalnızca kategori etiketi 'diger' olur (kullanıcının seçtiği davranış).
     S.userExp=S.userExp.map(e=>e.cat===id?{...e,cat:'diger'}:e);
     S.expenses=S.expenses.map(e=>e.cat===id?{...e,cat:'diger'}:e);
   }
-  S.customCats=(S.customCats||[]).filter(x=>x.id!==id);
-  if(S.budgets[id]) delete S.budgets[id];
+  if(isDef){
+    // Varsayılan kategori gizlenir; bütçe limiti KORUNUR (geri getirince geri dönsün).
+    // catSum deletedDefaults'u dışladığı için gizliyken aylık toplam limite eklenmez.
+    S.deletedDefaults=[...new Set([...(S.deletedDefaults||[]), id])];
+  } else {
+    // Özel kategori tamamen kalkar → yetim bütçe anahtarı kalmasın diye silinir.
+    S.customCats=(S.customCats||[]).filter(x=>x.id!==id);
+    if(id in S.budgets) delete S.budgets[id];
+  }
+  if(S.selCat===id){ const v=getVisibleCats().filter(c=>c.id!=='uyap'); S.selCat=(v[0]||{id:'diger'}).id; }
   save();
   if(fromModal) closeCatForm();
-  renderBudget(); renderTxn&&renderTxn(); renderDash&&renderDash();
+  renderBudget(); renderTxn&&renderTxn(); renderDash&&renderDash(); buildCatGrid&&buildCatGrid();
   toast(linked>0?`Silindi · ${linked} kayıt Diğer'e taşındı`:'Silindi');
+}
+// Silinen (gizlenen) varsayılan kategoriyi geri getirir. Geçmişte 'diger'e taşınan kayıtlar 'diger'de kalır.
+function restoreCat(id){
+  S.deletedDefaults=(S.deletedDefaults||[]).filter(x=>x!==id);
+  if(isDefaultCat(id) && !(id in S.budgets)) S.budgets[id]=DEF_BUD[id]||0;
+  save();
+  renderBudget(); buildCatGrid&&buildCatGrid(); renderDash&&renderDash();
+  toast('Kategori geri getirildi');
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -3218,7 +3276,7 @@ function renderSubs(){
 function openSubForm(id){
   const editing=id?(S.subs||[]).find(x=>x.id===id):null;
   const cur=editing?{...editing}:{id:'',name:'',amt:'',cat:'dijital',bank:'Enpara',dayOfMonth:1,active:true,source:'manual'};
-  const catOpts=getCats().map(c=>`<option value="${c.id}" ${cur.cat===c.id?'selected':''}>${c.icon||'•'} ${c.label}</option>`).join('');
+  const catOpts=getVisibleCats().map(c=>`<option value="${c.id}" ${cur.cat===c.id?'selected':''}>${c.icon||'•'} ${c.label}</option>`).join('');
   const bankOpts=['Havale','Nakit','İşbank','Enpara','VakıfBank'].map(b=>`<option value="${b}" ${cur.bank===b?'selected':''}>${b}</option>`).join('');
   const html=`
     <div class="fav-modal-overlay" id="sub-modal" onclick="if(event.target===this)closeSubForm()">
@@ -3252,7 +3310,7 @@ function closeSubForm(){ const m=document.getElementById('sub-modal'); if(m) m.r
 function saveSubForm(){
   const id=(document.getElementById('sf-id').value||'').trim();
   const name=(document.getElementById('sf-name').value||'').trim();
-  const amt=parseFloat(document.getElementById('sf-amt').value);
+  const amt=parseTrNum(document.getElementById('sf-amt').value);
   const day=Math.max(1,Math.min(31,parseInt(document.getElementById('sf-day').value)||1));
   const cat=document.getElementById('sf-cat').value;
   const bank=document.getElementById('sf-bank').value;
@@ -3440,7 +3498,7 @@ function detectSubscriptions(){
 }
 
 function quickAdd(){
-  const amt=parseFloat(document.getElementById('q-amt').value);
+  const amt=parseTrNum(document.getElementById('q-amt').value);
   const d=document.getElementById('q-date').value;
   const desc=document.getElementById('q-desc').value.trim();
   const bank=document.getElementById('q-bank').value;
@@ -3464,11 +3522,13 @@ function renderQuickRecents(){
   const recent=[...S.expenses].sort((a,b)=>b.id.localeCompare(a.id)).slice(0,8);
   el.innerHTML=recent.length?recent.map(t=>{
     const c=catMeta(t.cat);
-    return`<div class="tx-entry list-row">${monoChip(t.cat,'sm')}<div class="tx-info"><div class="tx-desc">${t.desc}</div><div class="tx-meta">${t.d} · ${t.bank}</div></div><div class="tx-right"><div class="tx-amt row-amt neg">${fmt(t.amt)} ₺</div><button onclick="delExp('${t.id}')" style="font-size:9px;padding:2px 7px;border:0.5px solid rgba(255,255,255,0.1);border-radius:4px;background:none;color:var(--text3);cursor:pointer;font-family:'Inter',sans-serif;margin-top:3px">sil</button></div></div>`;
+    return`<div class="tx-entry list-row">${monoChip(t.cat,'sm')}<div class="tx-info"><div class="tx-desc">${escAttr(t.desc)}</div><div class="tx-meta">${escAttr(t.d)} · ${escAttr(t.bank)}</div></div><div class="tx-right"><div class="tx-amt row-amt neg">${fmt(t.amt)} ₺</div><button onclick="delExp('${t.id}')" class="row-del" style="margin-top:3px">sil</button></div></div>`;
   }).join(''):`<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">Henüz giriş yok</div>`;
 }
 
 function delExp(id){
+  const t=(S.expenses||[]).find(e=>e.id===id);
+  if(!confirm(`Bu gider kaydı silinsin mi?${t?`\n${t.desc||''} · ${fmt(t.amt)} ₺ · ${t.d||''}`:''}`)) return;
   S.userExp=S.userExp.filter(e=>e.id!==id);
   S.expenses=S.expenses.filter(e=>e.id!==id);
   save();renderTxn();renderDash();
@@ -3517,10 +3577,10 @@ function renderIncome(){
       : `<div class="fiber-line muted">FIBER: eski kayıtta takip yok</div>`;
     return`<div class="income-entry income-row">
       ${monoChip(i.cat,'sm')}
-      <div class="income-info"><div class="income-desc">${i.desc}</div><div class="income-meta">${i.d} · ${i.bank} · <span style="color:${c.color}">${c.label}</span></div>${fLine}</div>
+      <div class="income-info"><div class="income-desc">${escAttr(i.desc)}</div><div class="income-meta">${escAttr(i.d)} · ${escAttr(i.bank)} · <span style="color:${escAttr(c.color)}">${escAttr(c.label)}</span></div>${fLine}</div>
       <div style="text-align:right">
         <div class="income-amt row-amt pos">+${fmt(i.amt)} ₺</div>
-        <button onclick="delInc('${i.id}')" style="font-size:9px;padding:2px 7px;border:0.5px solid rgba(255,255,255,0.1);border-radius:4px;background:none;color:var(--text3);cursor:pointer;font-family:'Inter',sans-serif;margin-top:3px">sil</button>
+        <button onclick="delInc('${i.id}')" class="row-del" style="margin-top:3px">sil</button>
       </div>
     </div>`;
   }).join(''):`<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Henüz gelir kaydı yok</div>`;
@@ -3528,7 +3588,7 @@ function renderIncome(){
 }
 function setIM(m){S.incM=m;renderIncome();}
 function addIncome(){
-  const d=document.getElementById('gi-date').value,amt=parseFloat(String(document.getElementById('gi-amt').value).replace(',','.')),desc=document.getElementById('gi-desc').value.trim(),cat=document.getElementById('gi-cat').value,bank=document.getElementById('gi-bank').value;
+  const d=document.getElementById('gi-date').value,amt=parseTrNum(document.getElementById('gi-amt').value),desc=document.getElementById('gi-desc').value.trim(),cat=document.getElementById('gi-cat').value,bank=document.getElementById('gi-bank').value;
   if(!d||!amt||!desc){toast('Tüm alanları doldurun',true);return;}
   const pct=cleanPct(document.getElementById('gi-fiber-pct')?.value);
   const fiberAmt=calcFiberAmt(amt,pct);
@@ -3541,7 +3601,11 @@ function addIncome(){
   updateFiberPreview();
   renderIncome();renderDash();
 }
-function delInc(id){S.incomes=S.incomes.filter(i=>i.id!==id);save();renderIncome();renderDash();}
+function delInc(id){
+  const x=(S.incomes||[]).find(i=>i.id===id);
+  if(!confirm(`Bu gelir kaydı silinsin mi?${x?`\n${x.desc||''} · ${fmt(x.amt)} ₺ · ${x.d||''}`:''}`)) return;
+  S.incomes=S.incomes.filter(i=>i.id!==id);save();renderIncome();renderDash();
+}
 
 // ══════════════════════════════════════════════════════════════
 // BUDGET
@@ -3563,7 +3627,7 @@ function renderBudget(){
   // Aylık Toplam Limit kartı (otomatik = kategori toplamı, manuel = override)
   const mlEl=document.getElementById('budget-monthlim-card');
   if(mlEl){
-    const catSum=Object.entries(S.budgets||{}).reduce((a,[k,v])=>(k==='uyap'?a:a+(+v||0)),0);
+    const catSum=Object.entries(S.budgets||{}).reduce((a,[k,v])=>((k==='uyap'||(S.deletedDefaults||[]).includes(k))?a:a+(+v||0)),0);
     const isManual=(S.monthLimit!=null);
     const effLim=isManual?+S.monthLimit:catSum;
     const monthSpent=S.expenses.filter(e=>mIdx(e.d)===m&&e.cat!=='uyap').reduce((a,e)=>a+e.amt,0);
@@ -3596,7 +3660,7 @@ function renderBudget(){
   }
 
   // Hem s-budget (ayrı ekran) hem de varsa eski more-budget için render et
-  const html=getCats().filter(c=>c.id!=='uyap'&&c.id!=='diger').map(c=>{
+  const html=getVisibleCats().filter(c=>c.id!=='uyap'&&c.id!=='diger').map(c=>{
     const lim=S.budgets[c.id]||0;
     const spent=catMonth(c.id,m);
     const pct=lim>0?Math.min(115,spent/lim*100):0;
@@ -3614,16 +3678,27 @@ function renderBudget(){
           <span style="font-size:9px;color:var(--text3)">₺</span>
           <span class="budget-pct" style="color:${pc}">${lim>0?Math.round(pct)+'%':'—'}${pct>=100?'⚠':''}</span>
           ${editBtn}
-          <button type="button" class="fav-ic fav-ic-del" title="${custom?'Kategoriyi sil':'Bütçeyi sıfırla'}" onclick="${custom?`delCat('${c.id}')`:`clearBudgetRow('${c.id}')`}" style="margin-left:4px">×</button>
+          <button type="button" class="fav-ic fav-ic-del" title="Kategoriyi sil" onclick="delCat('${c.id}')" style="margin-left:4px">×</button>
         </div>
       </div>
       <div class="bbar"><div class="bfill" style="width:${Math.min(100,pct)}%;background:${bc}"></div></div>
       <div class="bsub"><span>${spentLabel}: ${fmt(spent)} ₺${overTl}</span><span>Limit: ${lim>0?fmt(lim):'—'} ₺</span></div>
     </div>`;
   }).join('');
+  // Silinmiş (gizlenmiş) varsayılan kategoriler — geri getirme paneli
+  const delIds=(S.deletedDefaults||[]);
+  const deletedHtml = delIds.length ? `
+    <div style="border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin-top:10px">
+      <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:6px">Silinmiş kategoriler (${delIds.length})</div>
+      ${delIds.map(did=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0">
+        <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2)">${monoChip(did,'sm')}${escAttr(catMeta(did).label)}</span>
+        <button type="button" class="btn btn-ghost" style="font-size:11px;padding:4px 10px;min-width:0" onclick="restoreCat('${escAttr(did)}')">Geri getir</button>
+      </div>`).join('')}
+      <div style="font-size:11px;color:var(--text3);margin-top:6px">Geçmiş harcamalar "Diğer"de korunur. Bir kategorinin bütçesini sıfırlamak için limite 0 yazın.</div>
+    </div>` : '';
   ['budget-bars-main','budget-bars'].forEach(id=>{
     const el=document.getElementById(id);
-    if(el) el.innerHTML=html;
+    if(el) el.innerHTML=html+deletedHtml;
   });
 
   // Seçili ayın "Diğer" kategorisindeki kalemleri panelle göster (her biri için hızlı kategori seçici)
@@ -3632,7 +3707,7 @@ function renderBudget(){
   const unrevEl = document.getElementById('budget-unrev-panel');
   if(unrevEl){
     if(unrev.length){
-      const opts = getCats().filter(c=>c.id!=='diger').map(c=>`<option value="${c.id}">${catMeta(c.id).label}</option>`).join('');
+      const opts = getVisibleCats().filter(c=>c.id!=='diger').map(c=>`<option value="${c.id}">${catMeta(c.id).label}</option>`).join('');
       unrevEl.innerHTML = `
         <div style="border:1px solid var(--warn);border-radius:10px;padding:10px 12px;margin-bottom:14px;background:rgba(255,170,0,0.04)">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap">
@@ -3642,8 +3717,8 @@ function renderBudget(){
           ${unrev.slice(0,40).map(t=>`
             <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:12px">
               <div style="flex:1;min-width:0">
-                <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.desc}</div>
-                <div style="color:var(--text3);font-size:11px">${t.d} · ${t.bank} · <strong>${fmt(t.amt)} ₺</strong></div>
+                <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escAttr(t.desc)}</div>
+                <div style="color:var(--text3);font-size:11px">${escAttr(t.d)} · ${escAttr(t.bank)} · <strong>${fmt(t.amt)} ₺</strong></div>
               </div>
               <select class="b-input" style="padding:6px 8px" onchange="setTxnCat('${t.id}',this.value)">
                 <option value="">— kategori seç —</option>
@@ -3719,26 +3794,26 @@ function renderTxn(){
   const cf=document.getElementById('quick-txn-cf');
   const list=document.getElementById('quick-txn-list');
   if(mf) mf.innerHTML=`<button class="f-chip ${S.expM===null?'on':''}" onclick="setEM(null)">Tümü</button>`+reversedMN.map(({m,i})=>`<button class="f-chip ${S.expM===i?'on':''}" onclick="setEM(${i})">${m}</button>`).join('');
-  if(cf) cf.innerHTML=`<button class="f-chip ${S.expC===null?'on':''}" onclick="setEC(null)">Tüm kategoriler</button>`+getCats().map(c=>`<button class="f-chip ${S.expC===c.id?'on':''}" onclick="setEC('${c.id}')">${catMeta(c.id).mono} ${catMeta(c.id).label}</button>`).join('');
+  if(cf) cf.innerHTML=`<button class="f-chip ${S.expC===null?'on':''}" onclick="setEC(null)">Tüm kategoriler</button>`+getVisibleCats().map(c=>`<button class="f-chip ${S.expC===c.id?'on':''}" onclick="setEC('${c.id}')">${catMeta(c.id).mono} ${catMeta(c.id).label}</button>`).join('');
   if(!list) return;
   let txns=[...S.expenses];
   if(S.expM!==null) txns=txns.filter(e=>mIdx(e.d)===S.expM);
   if(S.expC!==null) txns=txns.filter(e=>e.cat===S.expC);
   txns.sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id));
   const totalShown=txns.reduce((a,t)=>a+t.amt,0);
-  const catOpts = getCats().map(c=>`<option value="${c.id}">${catMeta(c.id).label}</option>`).join('');
+  const catOpts = getVisibleCats().map(c=>`<option value="${c.id}">${catMeta(c.id).label}</option>`).join('');
   list.innerHTML=(txns.length?`<div class="row-meta" style="display:flex;justify-content:space-between;align-items:center;padding:6px 0 10px;border-bottom:1px solid var(--line);margin-bottom:6px"><span>${txns.length} kayıt${txns.length>100?' · ilk 100':''}</span><span class="row-amt">${fmt(totalShown)} ₺</span></div>`:'')+txns.slice(0,100).map(t=>{
     const c=catMeta(t.cat);
     const isUnrev=t.cat==='diger';
     const selOpts = catOpts.replace(`value="${t.cat}"`,`value="${t.cat}" selected`);
     return`<div class="tx-entry list-row">
       ${monoChip(t.cat,'sm')}
-      <div class="tx-info"><div class="tx-desc">${t.desc}</div><div class="tx-meta">${t.d} · ${t.bank}</div></div>
+      <div class="tx-info"><div class="tx-desc">${escAttr(t.desc)}</div><div class="tx-meta">${escAttr(t.d)} · ${escAttr(t.bank)}</div></div>
       <div class="tx-right">
         <div class="tx-amt row-amt neg">${fmt(t.amt)} ₺</div>
         <div style="display:flex;gap:4px;align-items:center;margin-top:3px">
           <select onchange="setTxnCat('${t.id}',this.value)" title="Kategoriyi değiştir" style="font-size:10px;padding:2px 4px;border:0.5px solid ${isUnrev?'var(--warn)':'rgba(255,255,255,0.1)'};border-radius:4px;background:var(--surface);color:${isUnrev?'var(--warn)':c.color};cursor:pointer;max-width:110px">${selOpts}</select>
-          <button onclick="delExp('${t.id}')" style="font-size:9px;padding:2px 7px;border:0.5px solid rgba(255,255,255,0.1);border-radius:4px;background:none;color:var(--text3);cursor:pointer;font-family:'Inter',sans-serif">sil</button>
+          <button onclick="delExp('${t.id}')" class="row-del">sil</button>
         </div>
       </div>
     </div>`;
@@ -3985,7 +4060,7 @@ function analyzeSpendingLocalHtml(){
     // Kategori toplamları (bu dönem)
     const cats=getCats().map(c=>{
       const total=valid.reduce((a,i)=>a+catMonth(c.id,i),0);
-      return {id:c.id,label:c.label||c.id,total,budget:S.budgets[c.id]||0};
+      return {id:c.id,label:escAttr(c.label||c.id),total,budget:S.budgets[c.id]||0};
     }).filter(c=>c.total>0||c.budget>0);
     const top=cats.filter(c=>c.total>0).sort((a,b)=>b.total-a.total).slice(0, detail?5:3);
 
@@ -4082,13 +4157,16 @@ function resetAll(){
   if(!confirm('Tüm giderler, gelirler ve bütçeler silinecek. Önce otomatik yedek indirilecek. Devam?'))return;
   // Güvenlik: önce otomatik yedek indir
   try{
-    const backup={exportedAt:new Date().toISOString(),note:'resetAll öncesi otomatik yedek',expenses:S.userExp,incomes:S.incomes,budgets:S.budgets,favs:S.favs,customCats:S.customCats||[],subs:S.subs||[],cards:S.cards||[],findeks:S.findeks||[],monthLimit:S.monthLimit};
-    const b=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+    const backup={exportedAt:new Date().toISOString(),note:'resetAll öncesi otomatik yedek',expenses:S.userExp,incomes:S.incomes,budgets:S.budgets,favs:S.favs,customCats:S.customCats||[],deletedDefaults:S.deletedDefaults||[],subs:S.subs||[],cards:S.cards||[],findeks:S.findeks||[],monthLimit:S.monthLimit};
+    const backupJson=JSON.stringify(backup,null,2);
+    // İndirme engellenebilir (mobil/in-app webview); önce cihaz-içi güvenlik kopyası yaz.
+    try{ localStorage.setItem('ay_last_reset_backup', backupJson); }catch(_){}
+    const b=new Blob([backupJson],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ay_backup_reset_'+new Date().toISOString().slice(0,10)+'.json';
     document.body.appendChild(a);a.click();a.remove();
   }catch(e){console.warn('reset backup failed',e);}
   S.userExp=[];S.expenses=[];S.incomes=[];S.budgets={...DEF_BUD};
-  S.customCats=[];S.subs=[];S.cards=JSON.parse(JSON.stringify(DEFAULT_CARDS));
+  S.customCats=[];S.deletedDefaults=[];S.subs=[];S.cards=JSON.parse(JSON.stringify(DEFAULT_CARDS));
   S.findeks=[];S.monthLimit=null;
   save();toast('✓ Veriler sıfırlandı · yedek indirildi');
   renderDash();renderTxn&&renderTxn();renderIncome&&renderIncome();renderBudget&&renderBudget();renderFindeks&&renderFindeks();
@@ -4100,6 +4178,7 @@ function exportData(){
     budgets:S.budgets,
     favs:S.favs,
     customCats:S.customCats||[],
+    deletedDefaults:S.deletedDefaults||[],
     subs:S.subs||[],
     cards:S.cards||[],
     findeks:S.findeks||[],
@@ -4114,13 +4193,35 @@ function importData(e){
   const r=new FileReader();
   r.onload=ev=>{try{
     const d=JSON.parse(ev.target.result);
-    if(d.expenses){S.userExp=d.expenses;S.expenses=[...S.userExp];}
-    if(d.incomes)S.incomes=d.incomes;
-    if(d.budgets)S.budgets={...DEF_BUD,...d.budgets};
+    if(typeof d!=='object'||d===null){ toast('Hata: geçersiz dosya',true); e.target.value=''; return; }
+    // Veri-kaybı koruması: bu yedek mevcut verinin ÜZERİNE yazar → sayı önizlemeli onay
+    const curN=(S.userExp||[]).length+(S.incomes||[]).length;
+    const newExpA=Array.isArray(d.expenses)?d.expenses:null;
+    const newIncA=Array.isArray(d.incomes)?d.incomes:null;
+    const newN=((newExpA||[]).length)+((newIncA||[]).length);
+    if(!confirm(`Bu yedek mevcut verinin ÜZERİNE yazılacak.\nMevcut: ${curN} kayıt · Yedekte: ${newN} kayıt.\nÖnce mevcut verinin otomatik yedeği indirilecek. Devam?`)){ e.target.value=''; return; }
+    // İçe aktarmadan önce mevcut veriyi yedekle (dosya + cihaz-içi güvenlik kopyası)
+    try{
+      const pre={exportedAt:new Date().toISOString(),note:'import öncesi otomatik yedek',expenses:S.userExp,incomes:S.incomes,budgets:S.budgets,favs:S.favs,customCats:S.customCats||[],deletedDefaults:S.deletedDefaults||[],subs:S.subs||[],cards:S.cards||[],findeks:S.findeks||[],monthLimit:S.monthLimit};
+      const pj=JSON.stringify(pre,null,2);
+      try{ localStorage.setItem('ay_last_import_backup', pj); }catch(_){}
+      const bb=new Blob([pj],{type:'application/json'});const aa=document.createElement('a');aa.href=URL.createObjectURL(bb);aa.download='ay_backup_preimport_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(aa);aa.click();aa.remove();
+    }catch(_){}
+    // Alan doğrulama/coerce yardımcıları — bozuk alanı temizle, kaydı ASLA düşürme
+    const isHex=v=>typeof v==='string'&&/^#[0-9a-fA-F]{3,8}$/.test(v);
+    const str=(v,max)=>String(v==null?'':v).slice(0,max);
+    const num=v=>{const n=+v;return Number.isFinite(n)?n:0;};
+    // Özel kategorileri ÖNCE uygula ki gider kategori doğrulaması onları tanısın
+    if(Array.isArray(d.customCats)) S.customCats=d.customCats.filter(c=>c&&c.id&&c.label).map(c=>({id:str(c.id,40),label:str(c.label,40),icon:str(c.icon||'📌',8),color:isHex(c.color)?c.color:'#888'}));
+    if(d.budgets&&typeof d.budgets==='object') S.budgets={...DEF_BUD,...d.budgets};
+    if(Array.isArray(d.deletedDefaults)) S.deletedDefaults=d.deletedDefaults.filter(x=>typeof x==='string'); // alan yoksa mevcut gizli durum korunur
+    const validCat=new Set(getCats().map(c=>c.id));
+    const validInc=new Set(ICATS.map(c=>c.id));
+    if(newExpA){ S.userExp=newExpA.filter(x=>x&&typeof x==='object').map(x=>({id:x.id||genId(),d:str(x.d,10),desc:str(x.desc,200),cat:validCat.has(x.cat)?x.cat:'diger',amt:num(x.amt),bank:str(x.bank,40)})); S.expenses=[...S.userExp]; }
+    if(newIncA) S.incomes=newIncA.filter(x=>x&&typeof x==='object').map(x=>{const o={id:x.id||genId(),d:str(x.d,10),desc:str(x.desc,200),cat:validInc.has(x.cat)?x.cat:'diger',amt:num(x.amt),bank:str(x.bank,40)}; if(Number.isFinite(+x.fiberPct))o.fiberPct=+x.fiberPct; if(Number.isFinite(+x.fiberAmt))o.fiberAmt=+x.fiberAmt; return o;});
     if(Array.isArray(d.favs)) S.favs=d.favs.map(f=>({...f,id:f.id||genId()}));
-    if(Array.isArray(d.customCats)) S.customCats=d.customCats.filter(c=>c&&c.id&&c.label);
     if(Array.isArray(d.subs)) S.subs=d.subs.map(s=>({...s,id:s.id||genId()}));
-    if(Array.isArray(d.cards)) S.cards=d.cards.map(c=>({...c,id:c.id||genId()}));
+    if(Array.isArray(d.cards)) S.cards=d.cards.map(c=>({...c,id:c.id||genId(),color:isHex(c.color)?c.color:(c.color||'#888')}));
     if(Array.isArray(d.findeks)) S.findeks=d.findeks.filter(f=>f&&f.date&&Number.isFinite(+f.score)).map(f=>({id:f.id||genId(),date:String(f.date).slice(0,10),score:+f.score,note:String(f.note||'')}));
     if(d.monthLimit===null||d.monthLimit===undefined){ S.monthLimit=null; }
     else { const _ml=+d.monthLimit; S.monthLimit=(Number.isFinite(_ml)&&_ml>0)?_ml:null; }
