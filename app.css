@@ -1725,3 +1725,14 @@ input, select, textarea { font-size: 16px; }
 }
 .uyap-line span:first-child { flex: 1; }
 .uyap-note { font-size: 11px; opacity: .8; }
+
+/* ── Dikkat kartı ────────────────────────────────────────────── */
+.attn-row {
+  display: flex; align-items: flex-start; gap: var(--s-2);
+  padding: var(--s-2) 0; font-size: 14px; line-height: 1.45;
+}
+.attn-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  margin-top: 7px; flex: 0 0 auto; background: var(--neg);
+}
+.attn-ortalama .attn-dot { background: var(--warn); }

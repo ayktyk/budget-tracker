@@ -110,6 +110,10 @@ function buildDesignLayout(){
         <div class="card-h"><h3>Param Nereye Gidiyor</h3><span class="hint num" id="dist-hint">—</span></div>
         <div id="dist-body"></div>
       </div>
+      <div class="card card--primary" id="attn-card" style="display:none">
+        <div class="card-h"><h3>Dikkat</h3></div>
+        <div id="attn-body"></div>
+      </div>
       <div class="card spark-card"><div class="card-h"><h3>Altı Aylık Nabız</h3><span class="hint">Gider ritmi</span></div><div class="sparkbar" id="dash-spark"></div></div>
       <div class="card"><div class="card-h"><h3>Gelir ve Gider</h3><span class="hint">6 ay trendi</span></div><div class="chart-wrap"><canvas id="pnl-chart" role="img" aria-label="Gelir gider trendi"></canvas></div></div>
       <div class="card"><div class="card-h"><h3>Aylık Net</h3><span class="hint">P&L</span></div><div id="pnl-table"></div></div>
@@ -1150,12 +1154,38 @@ function openCatLimitEditor(catId){
   toast('Limit güncellendi');
 }
 
+// ── Dikkat kartı — en fazla 3 sinyal, yoksa kart hiç gösterilmez ──
+function renderAttention(m){
+  const card=document.getElementById('attn-card');
+  const body=document.getElementById('attn-body');
+  if(!card||!body) return;
+
+  const labels={};
+  getVisibleCats().forEach(c=>{ labels[c.id]=c.label; });
+
+  const sig=CALC.attentionSignals({
+    expenses: S.expenses,
+    monthIdx: m,
+    MK: MK,
+    budgets: S.budgets||{},
+    catLabels: labels
+  });
+
+  if(!sig.length){ card.style.display='none'; body.innerHTML=''; return; }
+
+  card.style.display='';
+  body.innerHTML=sig.map(s=>
+    `<div class="attn-row attn-${escAttr(s.kind)}"><span class="attn-dot"></span><span>${escapeHtml(s.text)}</span></div>`
+  ).join('');
+}
+
 function renderDash(){
   const m = S.dashM!==null ? S.dashM : CUR_IDX;
   const monthKey = MK[m];
 
   renderHero(m);
   renderDistribution(m);
+  renderAttention(m);
 
   renderDashCalendar(monthKey);
   renderDayList();
@@ -1245,16 +1275,8 @@ function renderDash(){
     return`<div class="list-row"><div class="row-main"><div class="row-title">${m}</div><div class="row-meta">${g>0?'+'+fmt(g)+' ₺ gelir':'Gelir yok'}</div></div><div class="row-amt ${net>=0?'pos':'neg'}">${net>=0?'+':''}${fmt(net)} ₺</div></div>`;
   }).join('');
 
-  const alertM = (S.dashM!=null) ? S.dashM : CUR_IDX;
-  const alertMonthLabel = (alertM===CUR_IDX) ? 'Bu ay' : MN[alertM];
-  const als=getAlerts(alertM);
-  const _da=document.getElementById('dash-alerts');
-  if(_da) _da.innerHTML=als.slice(0,4).map(a=>`
-    <div class="alert-pill ${a.lvl}">
-      ${monoChip(a.cat.id,'sm')}
-      <span class="alert-text"><strong>${a.cat.label}</strong> — ${alertMonthLabel} ${fmt(a.spent)} ₺ / limit ${fmt(a.lim)} ₺</span>
-      <span class="alert-pct ${a.lvl}">${Math.round(a.pct)}%</span>
-    </div>`).join('');
+  // Bütçe uyarıları artık renderAttention() içinde (en fazla 3 sinyal).
+  // NOT: getAlerts() bu değişiklikle çağrısız kaldı (ölü kod) — Task 13'te temizlenecek.
   renderThemeSelection();
 }
 function setDashM(m){S.dashM=m;renderDash();}
