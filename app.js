@@ -106,13 +106,15 @@ function buildDesignLayout(){
         <div class="hero-metrics"><span>Gelir <strong class="num" id="bal-inc">—</strong></span><span>·</span><span>Gider <strong class="num" id="bal-exp">—</strong></span></div>
         <div class="goal-wrap-hero" id="hero-limit-wrap" onclick="openMonthLimitEditor()" role="button" tabindex="0" title="Aylık limiti düzenle"><div class="goal-track"><div class="goal-fill-hero" id="goal-fill"></div></div><div class="goal-meta-row"><span id="goal-status">—</span><span id="goal-target">—</span></div></div>
       </div>
-      <div class="card dash-calendar-card"><div class="card-h"><h3>Takvim</h3><div class="cal-head-nav"><button class="cal-nav btn-ghost" onclick="navDashMonth(-1)">‹</button><div class="cal-month" id="dash-cal-month">—</div><button class="cal-nav btn-ghost" onclick="navDashMonth(1)">›</button></div></div><div class="cal-dow"><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span></div><div class="cal-grid dash-grid" id="dash-cal-grid"></div></div>
-      <div class="card day-detail-card"><div class="card-h"><h3>Gün Akışı</h3><span class="hint">Seçili gün</span></div><div class="day-list" id="day-list"></div></div>
+      <div class="card card--primary" id="dist-card">
+        <div class="card-h"><h3>Param Nereye Gidiyor</h3><span class="hint num" id="dist-hint">—</span></div>
+        <div id="dist-body"></div>
+      </div>
       <div class="card spark-card"><div class="card-h"><h3>Altı Aylık Nabız</h3><span class="hint">Gider ritmi</span></div><div class="sparkbar" id="dash-spark"></div></div>
-      <div class="metrics-row" id="dash-metrics"></div>
       <div class="card"><div class="card-h"><h3>Gelir ve Gider</h3><span class="hint">6 ay trendi</span></div><div class="chart-wrap"><canvas id="pnl-chart" role="img" aria-label="Gelir gider trendi"></canvas></div></div>
       <div class="card"><div class="card-h"><h3>Aylık Net</h3><span class="hint">P&L</span></div><div id="pnl-table"></div></div>
-      <div class="card"><div class="card-h"><h3>Bütçe Uyarıları</h3><span class="hint">%70+</span></div><div class="alerts-wrap" id="dash-alerts"></div></div>
+      <div class="card dash-calendar-card"><div class="card-h"><h3>Takvim</h3><div class="cal-head-nav"><button class="cal-nav btn-ghost" onclick="navDashMonth(-1)">‹</button><div class="cal-month" id="dash-cal-month">—</div><button class="cal-nav btn-ghost" onclick="navDashMonth(1)">›</button></div></div><div class="cal-dow"><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span></div><div class="cal-grid dash-grid" id="dash-cal-grid"></div></div>
+      <div class="card day-detail-card"><div class="card-h"><h3>Gün Akışı</h3><span class="hint">Seçili gün</span></div><div class="day-list" id="day-list"></div></div>
       <div class="card mini-meta"><div id="dash-pulse" class="dash-pulse"></div><div id="saved-at" class="saved-at"></div></div>
     </div>`;
   document.getElementById('s-quick').innerHTML = `
@@ -259,7 +261,9 @@ let S = {
   findeks:  [],     // aylık findeks puanı kayıtları [{id, date, score, note}]
   selCat: 'yemek',
   expM: null, expC: null, incM: null, dashM: CUR_IDX, dashDay: '', budM: CUR_IDX,
-  monthLimit: null  // null = otomatik (kategori toplami), number = manuel override
+  monthLimit: null, // null = otomatik (kategori toplami), number = manuel override
+  openGroups: [],   // Ozet ekrani dagilim kartinda acik olan ust grup id'leri
+  openTool: ''      // Araclar ekraninda acik olan akordeon panel id'si
 };
 
 const GEMINI_MODEL='gemini-2.5-flash';
@@ -1018,11 +1022,140 @@ function openMonthLimitEditor(){
   toast(S.monthLimit==null?'Aylık limit otomatiğe alındı':'Aylık limit güncellendi');
 }
 
+// ══════════════════════════════════════════════════════════════
+// PARAM NEREYE GİDİYOR — üst grup dağılımı
+// ══════════════════════════════════════════════════════════════
+
+// Grup limiti = gruptaki kategori limitlerinin toplamı. UYAP hariç.
+function groupLimits(gmap){
+  const out={};
+  getVisibleCats().forEach(c=>{
+    const g=gmap[c.id];
+    if(g==='uyap') return;
+    out[g]=(out[g]||0)+(Number(S.budgets[c.id])||0);
+  });
+  return out;
+}
+
+function deltaHtml(d){
+  if(d===null) return `<span class="delta delta-none">yeni</span>`;
+  if(d===0)    return `<span class="delta delta-none">─</span>`;
+  return `<span class="delta ${d>0?'delta-up':'delta-down'}">${d>0?'↑':'↓'} %${Math.abs(d)}</span>`;
+}
+
+function renderDistribution(m){
+  const body=document.getElementById('dist-body');
+  const hint=document.getElementById('dist-hint');
+  if(!body) return;
+
+  const gmap=catGroupMap();
+  const cur=CALC.groupTotals(S.expenses, m, MK, gmap);
+  const prevByGroup={};
+  if(m>0) CALC.groupTotals(S.expenses, m-1, MK, gmap).groups.forEach(g=>{ prevByGroup[g.id]=g.total; });
+
+  if(hint) hint.textContent = cur.total>0 ? `${fmt(cur.total)} ₺` : '';
+
+  if(cur.total===0 && cur.uyap===0){
+    body.innerHTML=`<div class="empty-line">Bu ay henüz gider kaydı yok.</div>`;
+    return;
+  }
+
+  const limits=groupLimits(gmap);
+  const open=new Set(S.openGroups||[]);
+  let html='';
+
+  cur.groups.forEach(g=>{
+    const share=Math.round((g.total/cur.total)*100);
+    const d=CALC.deltaPct(g.total, prevByGroup[g.id]||0);
+    const fill=CALC.limitFill(g.total, limits[g.id]);
+    const isOpen=open.has(g.id);
+
+    // Limit varsa doluluk, yoksa ayın toplamındaki pay gösterilir
+    const barPct = (fill===null) ? share : Math.min(fill,100);
+    const barCls = (fill===null) ? 'grp-bar-share' : (fill>100 ? 'grp-bar-over' : '');
+    const barMeta = (fill===null)
+      ? `<span class="grp-limit">limit yok</span>`
+      : `<span class="grp-limit">limit ${fmt(limits[g.id])} ₺${fill>100?` · %${fill}`:''}</span>`;
+
+    html += `<div class="grp ${isOpen?'grp-open':''}">`
+      + `<button type="button" class="grp-head" onclick="toggleGroup('${escAttr(g.id)}')" aria-expanded="${isOpen}">`
+      + `<span class="grp-caret">${isOpen?'▾':'▸'}</span>`
+      + `<span class="grp-name">${escapeHtml(g.label)}</span>`
+      + `<span class="grp-amt num">${fmt(g.total)} ₺</span>`
+      + `<span class="grp-share num">%${share}</span>`
+      + deltaHtml(d)
+      + `</button>`
+      + `<div class="grp-bar"><div class="grp-bar-fill ${barCls}" style="width:${barPct}%"></div></div>`
+      + `<div class="grp-meta">${barMeta}</div>`
+      + (isOpen ? renderGroupChildren(g.id, m, gmap) : '')
+      + `</div>`;
+  });
+
+  if(cur.uyap>0){
+    html += `<div class="uyap-line"><span>UYAP · mesleki transfer</span>`
+      + `<span class="num">${fmt(cur.uyap)} ₺</span>`
+      + `<span class="uyap-note">bütçe dışı</span></div>`;
+  }
+
+  body.innerHTML=html;
+}
+
+// Bir grubun alt kategorileri — tutar, delta ve limit düzenleme
+function renderGroupChildren(groupId, m, gmap){
+  const cur=CALC.catTotals(S.expenses, m, MK);
+  const prev=(m>0) ? CALC.catTotals(S.expenses, m-1, MK) : {};
+  const rows=getVisibleCats()
+    .filter(c=>gmap[c.id]===groupId && (cur[c.id]||0)>0)
+    .map(c=>({c, total:cur[c.id]||0}))
+    .sort((a,b)=>b.total-a.total);
+
+  if(!rows.length) return `<div class="grp-children"><div class="empty-line">Bu grupta bu ay kayıt yok.</div></div>`;
+
+  return `<div class="grp-children">` + rows.map(r=>{
+    const d=CALC.deltaPct(r.total, prev[r.c.id]||0);
+    const lim=Number(S.budgets[r.c.id])||0;
+    return `<div class="grp-child">`
+      + `<span class="gc-icon">${escapeHtml(r.c.icon||'')}</span>`
+      + `<span class="gc-name">${escapeHtml(r.c.label)}</span>`
+      + `<span class="gc-amt num">${fmt(r.total)} ₺</span>`
+      + deltaHtml(d)
+      + `<button type="button" class="gc-lim" onclick="openCatLimitEditor('${escAttr(r.c.id)}')" title="Limit belirle">${lim>0?fmt(lim)+' ₺':'limit +'}</button>`
+      + `</div>`;
+  }).join('') + `</div>`;
+}
+
+function toggleGroup(id){
+  const set=new Set(S.openGroups||[]);
+  if(set.has(id)) set.delete(id); else set.add(id);
+  S.openGroups=[...set];
+  save();
+  renderDistribution((S.dashM!==null)?S.dashM:CUR_IDX);
+}
+
+function openCatLimitEditor(catId){
+  const meta=catMeta(catId);
+  const cur=Number(S.budgets[catId])||0;
+  const v=prompt(`${meta?meta.label:catId} için aylık limit (₺).\nBoş bırakırsan limit kalkar.`, cur||'');
+  if(v===null) return;
+  const t=String(v).trim();
+  if(t===''){
+    S.budgets[catId]=0;
+  } else {
+    const n=parseTrNum(t);
+    if(!Number.isFinite(n)||n<0){ toast('Geçerli bir tutar gir',true); return; }
+    S.budgets[catId]=n;
+  }
+  save();
+  renderDash();
+  toast('Limit güncellendi');
+}
+
 function renderDash(){
   const m = S.dashM!==null ? S.dashM : CUR_IDX;
   const monthKey = MK[m];
 
   renderHero(m);
+  renderDistribution(m);
 
   renderDashCalendar(monthKey);
   renderDayList();

@@ -1675,3 +1675,53 @@ input, select, textarea { font-size: 16px; }
 }
 .hero-month-nav:hover { opacity: 1; }
 #hero-limit-wrap { cursor: pointer; }
+
+/* ── Dağılım kartı ───────────────────────────────────────────── */
+.empty-line { padding: var(--s-4) 0; opacity: .55; font-size: 14px; text-align: center; }
+
+.grp { padding: var(--s-3) 0; border-bottom: 1px solid var(--line); }
+.grp:last-child { border-bottom: 0; }
+
+.grp-head {
+  display: flex; align-items: center; gap: var(--s-2);
+  width: 100%; background: none; border: 0; padding: 0; cursor: pointer;
+  color: inherit; text-align: left; font-size: 15px; font-family: inherit;
+}
+.grp-caret { opacity: .4; font-size: 11px; width: 12px; flex: 0 0 auto; }
+.grp-name  { flex: 1; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grp-amt   { font-weight: 650; white-space: nowrap; }
+.grp-share { opacity: .5; font-size: 13px; min-width: 40px; text-align: right; }
+
+.grp-bar {
+  height: 6px; border-radius: 3px; margin-top: var(--s-2);
+  background: var(--line); overflow: hidden;
+}
+.grp-bar-fill { height: 100%; border-radius: 3px; background: var(--pos); transition: width .25s; }
+.grp-bar-over  { background: var(--neg); }
+.grp-bar-share { background: var(--line-2); }
+
+.grp-meta { margin-top: 3px; font-size: 11px; opacity: .45; }
+
+.grp-children {
+  margin-top: var(--s-3); padding-left: var(--s-3);
+  border-left: 2px solid var(--line);
+}
+.grp-child { display: flex; align-items: center; gap: var(--s-2); padding: var(--s-2) 0; font-size: 14px; }
+.gc-icon { width: 20px; flex: 0 0 auto; }
+.gc-name { flex: 1; opacity: .85; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gc-amt  { font-weight: 600; white-space: nowrap; }
+.gc-lim  {
+  background: none; border: 1px dashed var(--line-2); border-radius: 6px;
+  padding: 2px var(--s-2); font-size: 11px; font-family: inherit;
+  color: inherit; opacity: .6; cursor: pointer; white-space: nowrap;
+}
+.gc-lim:hover { opacity: 1; }
+
+.uyap-line {
+  display: flex; align-items: center; gap: var(--s-2);
+  margin-top: var(--s-4); padding-top: var(--s-3);
+  border-top: 1px dashed var(--line-2);
+  font-size: 13px; color: var(--ink-3);
+}
+.uyap-line span:first-child { flex: 1; }
+.uyap-note { font-size: 11px; opacity: .8; }
