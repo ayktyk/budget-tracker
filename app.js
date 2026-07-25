@@ -179,13 +179,6 @@ const FIXED=[
 ];
 
 function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
-// Turkce sayi girisini guvenle sayiya cevirir: "12,50"->12.5, "1.234,56"->1234.56, "12.50"->12.5.
-// Virgul varsa nokta binlik ayraci sayilir; yoksa nokta ondalik birakilir (numpad ciktisiyla uyumlu).
-function parseTrNum(v){
-  let s=String(v==null?'':v).trim();
-  if(s.indexOf(',')>-1) s=s.replace(/\./g,'').replace(',','.');
-  return parseFloat(s);
-}
 
 // ── Seed data ──
 function buildSeed(){
@@ -410,8 +403,12 @@ function save() {
   }
 }
 
-const fmt=n=>Math.round(n).toLocaleString('tr-TR');
-const mIdx=d=>MK.indexOf((d||'').slice(0,7));
+// ── calc.js köprüleri ──────────────────────────────────────────
+// Saf hesaplar calc.js'te yaşıyor. Mevcut ~200 çağrı yeri değişmesin diye
+// aynı kısa adlarla buraya bağlanıyor. MK tanımından sonra gelmeli.
+const fmt=CALC.fmt;
+const parseTrNum=CALC.parseTrNum;
+const mIdx=d=>CALC.mIdx(d,MK);
 const catAvg3=cat=>S.expenses.filter(e=>mIdx(e.d)>=3&&e.cat===cat).reduce((a,e)=>a+e.amt,0)/3;
 const catMonth=(cat,m)=>S.expenses.filter(e=>mIdx(e.d)===m&&e.cat===cat).reduce((a,e)=>a+e.amt,0);
 const monthP=m=>S.expenses.filter(e=>mIdx(e.d)===m&&e.cat!=='uyap').reduce((a,e)=>a+e.amt,0);
