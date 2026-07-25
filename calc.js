@@ -28,7 +28,46 @@ var CALC = (function () {
     return MK.indexOf(String(d || '').slice(0, 7));
   }
 
-  return { fmt: fmt, parseTrNum: parseTrNum, mIdx: mIdx };
+  // ── Üst gruplar ─────────────────────────────────────────────
+  // Gösterim sırası tutara göre belirlenir; bu dizi yalnızca etiket kaynağı.
+  // 'uyap' bilerek yok: UYAP mesleki transfer, dağılıma girmiyor.
+  var GROUPS = [
+    { id: 'zorunlu',       label: 'Zorunlu' },
+    { id: 'yasam',         label: 'Yaşam' },
+    { id: 'keyif',         label: 'Keyif' },
+    { id: 'saglik_egitim', label: 'Sağlık-Eğitim' },
+    { id: 'yatirim',       label: 'Yatırım' },
+    { id: 'ungrouped',     label: 'Gruplanmamış' }
+  ];
+
+  function groupOf(catId, catGroupMap) {
+    return (catGroupMap && catGroupMap[catId]) || 'ungrouped';
+  }
+
+  // Bir ayın giderlerini üst gruplara toplar.
+  // UYAP dağılıma dahil edilmez (mevcut monthP() kuralıyla aynı) — ayrı döner.
+  function groupTotals(expenses, monthIdx, MK, catGroupMap) {
+    var sums = {}, total = 0, uyap = 0;
+    for (var i = 0; i < expenses.length; i++) {
+      var e = expenses[i];
+      if (mIdx(e.d, MK) !== monthIdx) continue;
+      var amt = Number(e.amt) || 0;
+      if (e.cat === 'uyap') { uyap += amt; continue; }
+      var g = groupOf(e.cat, catGroupMap);
+      sums[g] = (sums[g] || 0) + amt;
+      total += amt;
+    }
+    var groups = GROUPS
+      .filter(function (g) { return sums[g.id] > 0; })
+      .map(function (g) { return { id: g.id, label: g.label, total: sums[g.id] }; })
+      .sort(function (a, b) { return b.total - a.total; });
+    return { groups: groups, total: total, uyap: uyap };
+  }
+
+  return {
+    fmt: fmt, parseTrNum: parseTrNum, mIdx: mIdx,
+    GROUPS: GROUPS, groupOf: groupOf, groupTotals: groupTotals
+  };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = CALC;

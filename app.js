@@ -1,25 +1,27 @@
 // ══════════════════════════════════════════════════════════════
 // DATA DEFINITIONS
 // ══════════════════════════════════════════════════════════════
+// group: Özet ekranındaki dağılım kartının üst grubu. Kayıtlara dokunmaz,
+// yalnızca gösterim katmanında kullanılır. 'uyap' grubu dağılıma girmez.
 const CATS=[
-  {id:'kira',     label:'Kira',       icon:'🏠', color:'#6B63E8'},
-  {id:'muhasebe', label:'Muhasebe',   icon:'📋', color:'#185FA5'},
-  {id:'spor',     label:'Spor',       icon:'⚽', color:'#3EC98A'},
-  {id:'fatura',   label:'Faturalar',  icon:'💡', color:'#E8A83E'},
-  {id:'dijital',  label:'Dijital',    icon:'📱', color:'#8B6EE8'},
-  {id:'market',   label:'Market',     icon:'🛒', color:'#4CAF68'},
-  {id:'yemek',    label:'Yemek',      icon:'🍽', color:'#E8603E'},
-  {id:'eticaret', label:'Online Al.', icon:'📦', color:'#888780'},
-  {id:'ulasim',   label:'Ulaşım',     icon:'🚇', color:'#3EC9C4'},
-  {id:'saglik',   label:'Sağlık',     icon:'🏥', color:'#E86E8B'},
-  {id:'egitim',   label:'Eğitim',     icon:'📚', color:'#5B8DE8'},
-  {id:'eglence',  label:'Eğlence',    icon:'🎭', color:'#9B9B9B'},
-  {id:'giyim',    label:'Giyim',      icon:'👕', color:'#E05656'},
-  {id:'yatirim',  label:'Yatırım',    icon:'📈', color:'#8BC449'},
-  {id:'vergi',    label:'Vergi',      icon:'🏛', color:'#E84848'},
-  {id:'uyap',     label:'UYAP',       icon:'⚖️', color:'#888'},
-  {id:'nakit',    label:'Nakit',      icon:'💵', color:'#A0A0A0'},
-  {id:'diger',    label:'Diğer',      icon:'📌', color:'#777'},
+  {id:'kira',     label:'Kira',       icon:'🏠', color:'#6B63E8', group:'zorunlu'},
+  {id:'muhasebe', label:'Muhasebe',   icon:'📋', color:'#185FA5', group:'zorunlu'},
+  {id:'spor',     label:'Spor',       icon:'⚽', color:'#3EC98A', group:'keyif'},
+  {id:'fatura',   label:'Faturalar',  icon:'💡', color:'#E8A83E', group:'zorunlu'},
+  {id:'dijital',  label:'Dijital',    icon:'📱', color:'#8B6EE8', group:'keyif'},
+  {id:'market',   label:'Market',     icon:'🛒', color:'#4CAF68', group:'yasam'},
+  {id:'yemek',    label:'Yemek',      icon:'🍽', color:'#E8603E', group:'yasam'},
+  {id:'eticaret', label:'Online Al.', icon:'📦', color:'#888780', group:'keyif'},
+  {id:'ulasim',   label:'Ulaşım',     icon:'🚇', color:'#3EC9C4', group:'yasam'},
+  {id:'saglik',   label:'Sağlık',     icon:'🏥', color:'#E86E8B', group:'saglik_egitim'},
+  {id:'egitim',   label:'Eğitim',     icon:'📚', color:'#5B8DE8', group:'saglik_egitim'},
+  {id:'eglence',  label:'Eğlence',    icon:'🎭', color:'#9B9B9B', group:'keyif'},
+  {id:'giyim',    label:'Giyim',      icon:'👕', color:'#E05656', group:'keyif'},
+  {id:'yatirim',  label:'Yatırım',    icon:'📈', color:'#8BC449', group:'yatirim'},
+  {id:'vergi',    label:'Vergi',      icon:'🏛', color:'#E84848', group:'zorunlu'},
+  {id:'uyap',     label:'UYAP',       icon:'⚖️', color:'#888',    group:'uyap'},
+  {id:'nakit',    label:'Nakit',      icon:'💵', color:'#A0A0A0', group:'yasam'},
+  {id:'diger',    label:'Diğer',      icon:'📌', color:'#777',    group:'ungrouped'},
 ];
 const ICATS=[
   {id:'dava',          label:'Dava',          color:'#4CAF68'},
@@ -34,6 +36,13 @@ function getCats(){ return [...CATS, ...((S && S.customCats)||[])]; }
 // DİKKAT: doğrulama/AI/uniqueness/aggregation site'leri getCats() kullanmalı, bunu DEĞİL —
 // aksi halde silinmiş bir kategoriye işaret eden gelen kayıt sessizce 'diger'e düşer.
 function getVisibleCats(){ const hid=new Set((S&&S.deletedDefaults)||[]); return getCats().filter(c=>!hid.has(c.id)); }
+// Kategori id → üst grup id haritası. Custom kategorilerde group alanı yoksa 'ungrouped'.
+// Toplama işi yaptığı için getCats() kullanır (silinmiş kategorilerin kayıtları da sayılsın).
+function catGroupMap(){
+  const m={};
+  getCats().forEach(c=>{ m[c.id]=c.group||'ungrouped'; });
+  return m;
+}
 function getCatMeta(id){
   if(CAT_META[id]) return CAT_META[id];
   const custom=((S && S.customCats)||[]).find(c=>c.id===id);
