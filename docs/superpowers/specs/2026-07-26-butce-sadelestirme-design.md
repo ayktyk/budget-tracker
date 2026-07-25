@@ -92,6 +92,9 @@ Yaşam          19.100 ₺    %27    ↑ %31
   (her biri tutar + delta ile). Alt kategoriye dokun → o kategorinin işlem listesi.
   Alt kategori satırında "limit belirle" alanı bulunur.
 
+Grup listesinin altında, ayrılmış ve nötr renkli tek satır: UYAP mesleki transfer toplamı
+(bkz. Bölüm 5). Dağılım yüzdelerine ve delta hesabına girmez.
+
 Veri yoksa: kart yerine tek satır boş durum — "Bu ay henüz gider kaydı yok."
 
 ### 4.3 Dikkat
@@ -124,10 +127,15 @@ dokunulmaz.**
 | Zorunlu | kira, fatura, vergi, muhasebe |
 | Yaşam | market, yemek, ulasim, nakit |
 | Keyif | eglence, giyim, eticaret, dijital, spor |
-| İş / Mesleki | uyap |
 | Sağlık-Eğitim | saglik, egitim |
 | Yatırım | yatirim |
 | Gruplanmamış | diger + kullanıcının custom kategorileri |
+
+**UYAP dağılıma dahil edilmez.** Mevcut kodda `monthP()` aylık gider toplamını
+hesaplarken `uyap` kategorisini dışarıda bırakıyor (`index.html:2144`) — UYAP müvekkil
+parasının transferi, kullanıcının harcaması değil. Dağılıma dahil edilseydi yüzdeler ve
+delta'lar yanıltıcı olurdu. UYAP, dağılım kartının altında ayrı ve nötr bir satır olarak
+gösterilir: `UYAP · mesleki transfer — 13.471 ₺ (bütçe dışı)`. Delta ve limit çubuğu yok.
 
 Kullanıcının kendi eklediği kategoriler varsayılan olarak "Gruplanmamış" altına düşer;
 Araçlar > Kategoriler panelinden bir gruba atanabilir (`customCats[].group`).
@@ -166,19 +174,24 @@ yalnızca seçiciden gizlenir — geri getirmek tek satır.
 Üçe bölünür:
 
 ```
-index.html   ~120 satır — iskelet, nav, script/style referansları
+index.html   ~120 satır — iskelet, nav, style/script referansları
 app.css      ~1.600 satır
-app.js       ~2.700 satır
+calc.js      ~250 satır — saf hesaplar, yan etkisiz
+app.js       ~2.450 satır — render + etkileşim + depolama
+test.js      ~200 satır — node ile koşan assert testleri
 ```
 
 Build adımı eklenmez, Vercel statik deploy ve PWA manifest aynen çalışır.
+`type="module"` kullanılmaz; dosyalar sırayla yüklenen klasik script'ler olarak kalır,
+böylece uygulama `file://` ile açıldığında da çalışmaya devam eder.
 
-**`app.js` iç düzeni** (dosya içi bölüm başlıklarıyla, ayrı modül dosyası yok — `type=module`
-gerektirmediği için `file://` ile açmak da çalışmaya devam eder):
-`VERİ TANIMLARI → DEPOLAMA → SAF HESAPLAR → RENDER → ETKİLEŞİM → BAŞLANGIÇ`
+**`calc.js`** yan etkisiz saf fonksiyonları barındırır: `fmt`, `parseTrNum`, `mIdx`,
+`groupOf`, `groupTotals`, `deltaPct`, `limitFill`, `attentionSignals`. Ne DOM'a ne
+`localStorage`'a dokunur; girdileri parametreyle alır. Dosya sonunda Node uyumluluğu için
+tek satır: `if (typeof module !== 'undefined') module.exports = CALC;`
 
-**Saf hesap fonksiyonları** tek bölümde toplanır ve yan etkisiz olur:
-`fmt`, `parseTrNum`, `groupTotals`, `deltaPct`, `limitFill`, `attentionSignals`.
+**`app.js` iç düzeni** (dosya içi bölüm başlıklarıyla):
+`VERİ TANIMLARI → DEPOLAMA → RENDER → ETKİLEŞİM → BAŞLANGIÇ`
 
 **Yol temizliği (silme yok, taşıma):**
 - Dört adet `index.html.backup-*` dosyası (~540 KB) → `arsiv/` klasörüne taşınır.
@@ -210,10 +223,10 @@ veriyi bozmaz, yalnızca ekranı yanlış gösterir — geri alınabilir hata s�
 
 ## 11. Doğrulama
 
-- **Otomatik:** Saf hesap fonksiyonları için bağımlılıksız `test.html` assert runner.
-  Tarayıcıda açılır, geçti/kaldı listesi gösterir. Kapsam: `parseTrNum` (Türkçe sayı
-  formatı), `groupTotals`, `deltaPct` (0 payda dahil), `limitFill`, `attentionSignals`
-  (öncelik sırası ve tekrar etmeme kuralı).
+- **Otomatik:** `node test.js` — bağımlılıksız assert runner (Node 24 kurulu, ek paket yok).
+  Kapsam: `parseTrNum` (Türkçe sayı formatı), `groupOf`, `groupTotals` (UYAP hariç tutma
+  dahil), `deltaPct` (0 payda dahil), `limitFill`, `attentionSignals` (öncelik sırası ve
+  tekrar etmeme kuralı).
 - **Manuel:** Her aşama sonunda gerçek veriyle kontrol listesi — ay değiştirme,
   grup açma/kapama, limit düzenleme, gün seçme, ekstre içe aktarma, JSON yedek al/yükle.
 - **Commit disiplini:** Her aşama ayrı commit; beğenilmeyen aşama tek `git revert`.

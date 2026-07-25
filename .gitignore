@@ -1,3 +1,8 @@
 .claude/
+
+# Yedekler ve eski surumler — arsiv/ altinda tutulur, repoya girmez
+arsiv/
 index-preview.html
 index.html.backup-*
+*.backup-*
+yedek-*.json
