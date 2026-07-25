@@ -68,5 +68,64 @@ eq(gtEmpty.uyap, 0, 'veri olmayan ay UYAP sifir');
 // Grup toplamlari ay toplamina esit olmali (yuzde hesabinin dogrulugu buna bagli)
 eq(gt.groups.reduce((a, g) => a + g.total, 0), gt.total, 'grup toplamlari ay toplamina esit');
 
+console.log('\ndeltaPct');
+eq(CALC.deltaPct(1300, 1000), 30, 'yuzde 30 artis');
+eq(CALC.deltaPct(700, 1000), -30, 'yuzde 30 azalis');
+eq(CALC.deltaPct(1000, 1000), 0, 'degisim yok');
+eq(CALC.deltaPct(500, 0), null, 'onceki ay sifir ise null');
+eq(CALC.deltaPct(0, 0), null, 'ikisi de sifir ise null');
+
+console.log('\nlimitFill');
+eq(CALC.limitFill(7500, 10000), 75, 'yuzde 75 dolu');
+eq(CALC.limitFill(12700, 10000), 127, 'asim yuzde 100 ustu');
+eq(CALC.limitFill(0, 10000), 0, 'hic harcama yok');
+eq(CALC.limitFill(500, 0), null, 'limit yoksa null');
+eq(CALC.limitFill(500, undefined), null, 'limit tanimsizsa null');
+
+console.log('\ncatTotals');
+eq(CALC.catTotals(EXP, 5, MK), { market: 1000, yemek: 500, kira: 5000, diger: 300 },
+   'kategori toplamlari UYAP haric');
+
+console.log('\nattentionSignals');
+const BUD = { market: 800, kira: 8000, yemek: 5000, diger: 0 };
+const LBL = { market: 'Market', kira: 'Kira', yemek: 'Yemek', diger: 'Diğer' };
+
+const sig = CALC.attentionSignals({
+  expenses: EXP, monthIdx: 5, MK: MK, budgets: BUD, catLabels: LBL
+});
+eq(sig.length <= 3, true, 'en fazla 3 sinyal');
+eq(sig.some(s => s.kind === 'limit'), true, 'limit asimi yakalanir (market 1000 > 800)');
+// EXP'te market: haziran 700 -> temmuz 1000. Artis 300 TL, 500 TL esiginin ALTINDA.
+eq(sig.some(s => s.kind === 'artis'), false, '300 TL artis esik altinda, artis sinyali yok');
+
+const sig2 = CALC.attentionSignals({
+  expenses: EXP, monthIdx: 5, MK: MK, budgets: {}, catLabels: LBL
+});
+eq(sig2.filter(s => s.kind === 'artis').length, 0, '500 TL altindaki artis sinyal uretmez');
+
+const sig3 = CALC.attentionSignals({
+  expenses: [], monthIdx: 5, MK: MK, budgets: BUD, catLabels: LBL
+});
+eq(sig3, [], 'veri yoksa bos dizi');
+
+// Ayni kategori iki kez gecmez: market hem limiti asiyor hem 4000 TL artmis
+const EXP4 = [
+  { id: 'a', d: '2026-06-01', desc: 'M', cat: 'market', amt: 1000, bank: 'İşbank' },
+  { id: 'b', d: '2026-07-01', desc: 'M', cat: 'market', amt: 5000, bank: 'İşbank' },
+];
+const sig4 = CALC.attentionSignals({
+  expenses: EXP4, monthIdx: 5, MK: MK, budgets: { market: 800 }, catLabels: LBL
+});
+eq(sig4.filter(s => s.label === 'Market').length, 1, 'ayni kategori tek sinyal');
+eq(sig4[0].kind, 'limit', 'oncelik limit asiminda');
+
+// Limit yokken buyuk artis 'artis' sinyali uretir
+const sig5 = CALC.attentionSignals({
+  expenses: EXP4, monthIdx: 5, MK: MK, budgets: {}, catLabels: LBL
+});
+eq(sig5.length, 1, 'limit yokken tek sinyal');
+eq(sig5[0].kind, 'artis', '4000 TL artis yakalanir');
+eq(sig5[0].text, 'Market geçen aya göre +4.000 ₺', 'artis metni tutar iceriyor');
+
 console.log('\n' + pass + ' gecti, ' + fail + ' kaldi');
 process.exit(fail > 0 ? 1 : 0);
