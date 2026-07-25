@@ -97,15 +97,18 @@ function buildDesignLayout(){
   document.getElementById('s-dash').innerHTML = `
     <div class="screen-shell">
       <div class="hero-card">
-        <div class="eyebrow" id="dash-kicker">NET BAKİYE · AY</div>
-        <div class="hero-value" id="bal-net">—</div>
-        <div class="hero-metrics"><span>Gelir <strong id="bal-inc">—</strong></span><span>·</span><span>Gider <strong id="bal-exp">—</strong></span></div>
-        <div class="goal-wrap-hero"><div class="goal-track"><div class="goal-fill-hero" id="goal-fill"></div></div><div class="goal-meta-row"><span id="goal-status">—</span><span id="goal-target">₺30.000 hedef</span></div></div>
+        <div class="hero-month">
+          <button type="button" class="hero-month-nav" onclick="navDashMonth(-1)" aria-label="Önceki ay">‹</button>
+          <span id="hero-month-label">—</span>
+          <button type="button" class="hero-month-nav" onclick="navDashMonth(1)" aria-label="Sonraki ay">›</button>
+        </div>
+        <div class="hero-value num" id="bal-net">—</div>
+        <div class="hero-metrics"><span>Gelir <strong class="num" id="bal-inc">—</strong></span><span>·</span><span>Gider <strong class="num" id="bal-exp">—</strong></span></div>
+        <div class="goal-wrap-hero" id="hero-limit-wrap" onclick="openMonthLimitEditor()" role="button" tabindex="0" title="Aylık limiti düzenle"><div class="goal-track"><div class="goal-fill-hero" id="goal-fill"></div></div><div class="goal-meta-row"><span id="goal-status">—</span><span id="goal-target">—</span></div></div>
       </div>
       <div class="card dash-calendar-card"><div class="card-h"><h3>Takvim</h3><div class="cal-head-nav"><button class="cal-nav btn-ghost" onclick="navDashMonth(-1)">‹</button><div class="cal-month" id="dash-cal-month">—</div><button class="cal-nav btn-ghost" onclick="navDashMonth(1)">›</button></div></div><div class="cal-dow"><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span></div><div class="cal-grid dash-grid" id="dash-cal-grid"></div></div>
       <div class="card day-detail-card"><div class="card-h"><h3>Gün Akışı</h3><span class="hint">Seçili gün</span></div><div class="day-list" id="day-list"></div></div>
       <div class="card spark-card"><div class="card-h"><h3>Altı Aylık Nabız</h3><span class="hint">Gider ritmi</span></div><div class="sparkbar" id="dash-spark"></div></div>
-      <div class="month-scroll" id="month-chips"></div>
       <div class="metrics-row" id="dash-metrics"></div>
       <div class="card"><div class="card-h"><h3>Gelir ve Gider</h3><span class="hint">6 ay trendi</span></div><div class="chart-wrap"><canvas id="pnl-chart" role="img" aria-label="Gelir gider trendi"></canvas></div></div>
       <div class="card"><div class="card-h"><h3>Aylık Net</h3><span class="hint">P&L</span></div><div id="pnl-table"></div></div>
@@ -943,34 +946,83 @@ function getAlerts(monthIdx){
 // RENDER DASHBOARD (calendar-first)
 // ══════════════════════════════════════════════════════════════
 let pnlCh;
+// ── Hero: ay seçici + net bakiye + aylık toplam limit çubuğu ────
+// Aylık limit: S.monthLimit varsa o, yoksa kategori limitlerinin toplamı.
+function effectiveMonthLimit(){
+  const catSum=Object.values(S.budgets||{}).reduce((a,v)=>a+(Number(v)||0),0);
+  return (S.monthLimit!=null && +S.monthLimit>0) ? +S.monthLimit : catSum;
+}
+
+function renderHero(m){
+  const monthInc=monthI(m), monthExp=monthP(m), monthNet=monthInc-monthExp;
+
+  const lbl=document.getElementById('hero-month-label');
+  if(lbl) lbl.textContent=MN[m].toUpperCase();
+
+  const balNet=document.getElementById('bal-net');
+  if(balNet){
+    balNet.textContent=`${monthNet>=0?'+':'−'}${fmt(Math.abs(monthNet))} ₺`;
+    balNet.style.color=monthNet>=0?'var(--pos)':'var(--neg)';
+  }
+  const balInc=document.getElementById('bal-inc');
+  if(balInc) balInc.textContent=`${fmt(monthInc)} ₺`;
+  const balExp=document.getElementById('bal-exp');
+  if(balExp) balExp.textContent=`${fmt(monthExp)} ₺`;
+
+  const lim=effectiveMonthLimit();
+  const pct=CALC.limitFill(monthExp,lim);
+  const wrap=document.getElementById('hero-limit-wrap');
+  const fill=document.getElementById('goal-fill');
+  const stat=document.getElementById('goal-status');
+  const targ=document.getElementById('goal-target');
+
+  if(pct===null){
+    // Hiç limit tanımlı değil — çubuk gizlenir, düzenleme yine de açılabilsin diye
+    // wrap görünür kalır ama içi boşaltılır.
+    if(fill) fill.style.width='0%';
+    if(stat) stat.textContent='Aylık limit tanımlı değil';
+    if(targ) targ.textContent='dokun → belirle';
+    if(stat) stat.style.color='var(--ink-3)';
+    return;
+  }
+  if(wrap) wrap.style.display='';
+  if(fill){
+    fill.style.width=Math.min(pct,100)+'%';
+    fill.style.background=pct>100?'var(--neg)':'var(--pos)';
+  }
+  if(stat){
+    stat.textContent=pct>100
+      ? `%${pct} · ${fmt(monthExp-lim)} ₺ aşım`
+      : `%${pct} · ${fmt(lim-monthExp)} ₺ kaldı`;
+    stat.style.color=pct>100?'var(--neg)':'var(--pos)';
+  }
+  if(targ) targ.textContent=`${fmt(lim)} ₺ limit${S.monthLimit!=null?'':' (otomatik)'}`;
+}
+
+// Hedef çubuğuna dokununca aylık toplam limiti düzenle
+function openMonthLimitEditor(){
+  const catSum=Object.values(S.budgets||{}).reduce((a,v)=>a+(Number(v)||0),0);
+  const cur=(S.monthLimit!=null && +S.monthLimit>0) ? +S.monthLimit : '';
+  const v=prompt(`Aylık toplam gider limiti (₺).\nBoş bırakırsan kategori limitleri toplamı kullanılır (${fmt(catSum)} ₺).`, cur);
+  if(v===null) return;
+  const t=String(v).trim();
+  if(t===''){
+    S.monthLimit=null;
+  } else {
+    const n=parseTrNum(t);
+    if(!Number.isFinite(n)||n<=0){ toast('Geçerli bir tutar gir',true); return; }
+    S.monthLimit=n;
+  }
+  save();
+  renderDash();
+  toast(S.monthLimit==null?'Aylık limit otomatiğe alındı':'Aylık limit güncellendi');
+}
+
 function renderDash(){
   const m = S.dashM!==null ? S.dashM : CUR_IDX;
   const monthKey = MK[m];
-  const monthLabel = MN[m];
-  const monthInc = monthI(m);
-  const monthExp = monthP(m);
-  const monthNet = monthInc - monthExp;
-  const monthUyap = S.expenses.filter(e=>mIdx(e.d)===m&&e.cat==='uyap').reduce((a,e)=>a+e.amt,0);
 
-  const hour = new Date().getHours();
-  const hello = hour<6?'İyi geceler':hour<12?'Günaydın':hour<18?'İyi günler':'İyi akşamlar';
-  const helloEl = document.getElementById('dash-hello');
-  if(helloEl) helloEl.textContent = hello;
-  const subEl = document.getElementById('dash-sub');
-  if(subEl) subEl.textContent = curMonthLabel();
-  const kick=document.getElementById('dash-kicker');
-  if(kick) kick.textContent = `NET BAKİYE · ${monthLabel.toUpperCase()}`;
-  const balNet=document.getElementById('bal-net');
-  const balInc=document.getElementById('bal-inc');
-  const balExp=document.getElementById('bal-exp');
-  const balUyap=document.getElementById('bal-uyap');
-  if(balNet){
-    balNet.textContent = `${monthNet>=0?'+':'−'}${fmt(Math.abs(monthNet))} ₺`;
-    balNet.style.color = monthNet>=0 ? 'var(--pos)' : 'var(--neg)';
-  }
-  if(balInc) balInc.textContent = `${monthInc>0?'+':''}${fmt(monthInc)} ₺`;
-  if(balExp) balExp.textContent = `−${fmt(monthExp)} ₺`;
-  if(balUyap) balUyap.textContent = `${fmt(monthUyap)} ₺`;
+  renderHero(m);
 
   renderDashCalendar(monthKey);
   renderDayList();
@@ -989,11 +1041,6 @@ function renderDash(){
     <div class="pill">Bu Ay <strong>${fmt(_mtdG)} ₺</strong></div>
   `;
 
-  const mc=document.getElementById('month-chips');
-  if(mc){
-    const dashReversed=MN.map((m,i)=>({m,i})).reverse();
-    mc.innerHTML=`<button class="m-chip ${S.dashM===null?'on':''}" onclick="setDashM(null)">Tümü</button>`+dashReversed.map(({m,i})=>`<button class="m-chip ${S.dashM===i?'on':''}" onclick="setDashM(${i})">${m}</button>`).join('');
-  }
 
   const displayM=S.dashM;
   const avgG=[0,1,2,3,4,5].reduce((a,i)=>a+monthP(i),0)/6;
@@ -1025,17 +1072,7 @@ function renderDash(){
     </div>
   `;
 
-  const goalPct=Math.min(110,curG/GOAL*100);
-  const _gf=document.getElementById('goal-fill');
-  const _gs=document.getElementById('goal-status');
-  if(_gf){
-    _gf.style.width=Math.min(100,goalPct)+'%';
-    _gf.style.background=goalPct>=100?'var(--neg)':'var(--pos)';
-  }
-  if(_gs){
-    _gs.textContent=goalPct>=100?`+${fmt(curG-GOAL)} ₺ aşım`:`${fmt(GOAL-curG)} ₺ kaldı`;
-    _gs.style.color=goalPct>=100?'var(--neg)':'var(--pos)';
-  }
+  // Hedef çubuğu artık renderHero() içinde, aylık toplam limite bağlı — burada yazma.
   const spark=document.getElementById('dash-spark');
   if(spark){
     const vals=MN.map((_,i)=>monthP(i));

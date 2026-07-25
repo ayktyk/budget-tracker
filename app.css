@@ -1661,3 +1661,17 @@ input, select, textarea { font-size: 16px; }
 .delta-up   { color: var(--neg); }
 .delta-down { color: var(--pos); }
 .delta-none { color: var(--ink-3); font-weight: 500; }
+
+/* ── Hero ay seçici ──────────────────────────────────────────── */
+.hero-month {
+  display: flex; align-items: center; justify-content: center;
+  gap: var(--s-3); margin-bottom: var(--s-2);
+  font-size: 12px; font-weight: 700; letter-spacing: .09em; opacity: .72;
+}
+.hero-month-nav {
+  background: none; border: 0; cursor: pointer; color: inherit;
+  font-size: 20px; line-height: 1; padding: 0 var(--s-2);
+  opacity: .55; transition: opacity .15s;
+}
+.hero-month-nav:hover { opacity: 1; }
+#hero-limit-wrap { cursor: pointer; }
