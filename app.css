@@ -1632,3 +1632,32 @@ input, select, textarea { font-size: 16px; }
   .cal-day { font-size:11px; }
   .nav { width:calc(100% - 18px); bottom:10px; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   SADELEŞTİRME — görsel hiyerarşi, rakam hizalama, delta işaretleri
+   Mevcut token'ları kullanır: --s-1..--s-8, --pos, --neg, --warn,
+   --ink-3, --line, --line-2, --card, --f-mono
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Üç kademe hiyerarşi ─────────────────────────────────────── */
+/* Ana kartlar (Dağılım, Dikkat): tam kontrast başlık, geniş boşluk */
+.card--primary { padding: var(--s-6) var(--s-4); }
+.card--primary .card-h h3 { font-size: 17px; font-weight: 650; opacity: 1; }
+
+/* İkincil kartlar (Trend, Takvim): soluk başlık, dar boşluk */
+.card--secondary { padding: var(--s-4); }
+.card--secondary .card-h h3 { font-size: 14px; font-weight: 550; opacity: .62; }
+
+/* ── Rakam hizalama ──────────────────────────────────────────── */
+/* Para sütunları satır satır kaymasın diye sabit genişlikli rakam */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ── Delta işaretleri ────────────────────────────────────────── */
+/* Özet ekranında renk YALNIZCA anlam taşır: kırmızı artış, yeşil azalış */
+.delta      { font-size: 13px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.delta-up   { color: var(--neg); }
+.delta-down { color: var(--pos); }
+.delta-none { color: var(--ink-3); font-weight: 500; }
