@@ -10,7 +10,8 @@ Tek tarayıcıda çalışan, ekstre günlerinde manuel + AI destekli toplu giri�
 
 [2] TEKNOLOJİ & ARAÇLAR
 - Saf HTML / CSS / JavaScript (framework yok, build adımı yok)
-- Tek dosyalı SPA (`index.html` içinde tüm UI ve mantık)
+- Dört dosyalı statik yapı: index.html (iskelet) + app.css + calc.js (saf hesaplar) + app.js (render/etkileşim)
+- node test.js — bağımlılıksız birim testleri (50 test, calc.js kapsamı)
 - Chart.js (CDN üzerinden, 6 aylık trend grafiği)
 - Google Fonts (CDN)
 - localStorage (veri kalıcılığı — `ay_exp`, `ay_inc`, `ay_bud`, `ay_gemini_key`)
@@ -35,6 +36,8 @@ Tek tarayıcıda çalışan, ekstre günlerinde manuel + AI destekli toplu giri�
 - Yedekleme: JSON export/import (manuel) [AKTİF]
 
 [4] SONRAKI ADIM
-`vercel.json` içindeki `{ "src": "/(.*)", "dest": "/public/$1" }` route'unu kaldır veya kök dizine yönlendir; çünkü repoda `public/` klasörü yok ve mevcut config deploy'u bozuyor.
+Ana ekran sadeleştirmesi tamamlandı (9 kart → 5, nav 5 → 4 sekme, Araçlar akordeonu).
+Sonraki aday: kullanıcının kendi eklediği kategorileri Araçlar > Kategoriler panelinden
+bir üst gruba atayabilmesi (şu an hepsi "Gruplanmamış" altında toplanıyor).
 
 ═══ SON ═══

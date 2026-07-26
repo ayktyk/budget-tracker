@@ -141,16 +141,16 @@ function buildDesignLayout(){
     </div>`;
   document.getElementById('s-quick').innerHTML = `
     <div class="screen-shell">
-      <div class="card fav-strip-card"><div class="card-h"><h3>Sık Havale</h3><button type="button" class="fav-add-btn" onclick="openFavForm()" aria-label="Yeni sık havale ekle">+ Yeni</button></div><div class="fav-list fav-strip" id="fav-list"></div></div>
-      <div class="card quick-main-card"><div class="card-h"><h3>Hızlı Giriş</h3><span class="hint" id="quick-date-display">—</span></div><div class="amount-big-wrap"><div class="amount-big"><span class="amount-currency">₺</span><input type="text" id="q-amt" placeholder="0" inputmode="decimal" autocomplete="off"></div></div><div class="numpad" id="quick-pad"><button onclick="quickPad('1')">1</button><button onclick="quickPad('2')">2</button><button onclick="quickPad('3')">3</button><button onclick="quickPad('4')">4</button><button onclick="quickPad('5')">5</button><button onclick="quickPad('6')">6</button><button onclick="quickPad('7')">7</button><button onclick="quickPad('8')">8</button><button onclick="quickPad('9')">9</button><button onclick="quickPad(',')">,</button><button onclick="quickPad('0')">0</button><button onclick="quickPad('del')">Sil</button></div><div class="quick-fields"><div class="qfield"><label>Açıklama</label><input class="input" type="text" id="q-desc" placeholder="örn: Hebun Çorba, BİM, İbrahim Yaman..." autocomplete="off"></div><div class="q-grid-two"><div class="qfield"><label>Tarih</label><input class="input" type="date" id="q-date"></div><div class="qfield"><label>Kaynak</label><select id="q-bank" style="display:none"><option value="Havale">Havale</option><option value="Nakit">Nakit</option><option value="İşbank">İşbank</option><option value="Enpara">Enpara</option><option value="VakıfBank">VakıfBank</option></select><div class="bank-chip-row" id="q-bank-chips"></div></div></div></div><div class="cat-section"><div class="eyebrow">Kategori</div><div class="cat-grid" id="cat-grid"></div></div><button class="btn btn-primary btn-block" onclick="quickAdd()">Kaydet</button></div>
+      <div class="card card--secondary fav-strip-card"><div class="card-h"><h3>Sık Havale</h3><button type="button" class="fav-add-btn" onclick="openFavForm()" aria-label="Yeni sık havale ekle">+ Yeni</button></div><div class="fav-list fav-strip" id="fav-list"></div></div>
+      <div class="card card--primary quick-main-card"><div class="card-h"><h3>Hızlı Giriş</h3><span class="hint" id="quick-date-display">—</span></div><div class="amount-big-wrap"><div class="amount-big"><span class="amount-currency">₺</span><input type="text" id="q-amt" placeholder="0" inputmode="decimal" autocomplete="off"></div></div><div class="numpad" id="quick-pad"><button onclick="quickPad('1')">1</button><button onclick="quickPad('2')">2</button><button onclick="quickPad('3')">3</button><button onclick="quickPad('4')">4</button><button onclick="quickPad('5')">5</button><button onclick="quickPad('6')">6</button><button onclick="quickPad('7')">7</button><button onclick="quickPad('8')">8</button><button onclick="quickPad('9')">9</button><button onclick="quickPad(',')">,</button><button onclick="quickPad('0')">0</button><button onclick="quickPad('del')">Sil</button></div><div class="quick-fields"><div class="qfield"><label>Açıklama</label><input class="input" type="text" id="q-desc" placeholder="örn: Hebun Çorba, BİM, İbrahim Yaman..." autocomplete="off"></div><div class="q-grid-two"><div class="qfield"><label>Tarih</label><input class="input" type="date" id="q-date"></div><div class="qfield"><label>Kaynak</label><select id="q-bank" style="display:none"><option value="Havale">Havale</option><option value="Nakit">Nakit</option><option value="İşbank">İşbank</option><option value="Enpara">Enpara</option><option value="VakıfBank">VakıfBank</option></select><div class="bank-chip-row" id="q-bank-chips"></div></div></div></div><div class="cat-section"><div class="eyebrow">Kategori</div><div class="cat-grid" id="cat-grid"></div></div><button class="btn btn-primary btn-block" onclick="quickAdd()">Kaydet</button></div>
       <div class="card"><div class="card-h"><h3>İşlemler</h3><span class="hint">Tüm kayıtlar</span></div><div class="filter-row filter-row-tight" id="quick-txn-mf"></div><div class="filter-row filter-row-tight" id="quick-txn-cf"></div><div id="quick-txn-list"></div></div>
     </div>`;
   document.getElementById('s-income').innerHTML = `
     <div class="screen-shell">
-      <div class="card income-header-card"><div class="eyebrow" id="income-period-label">Gelirler · Dönem</div><div class="hero-value income-total" id="inc-total">—</div></div>
+      <div class="card card--primary income-header-card"><div class="eyebrow" id="income-period-label">Gelirler · Dönem</div><div class="hero-value income-total num" id="inc-total">—</div></div>
       <div class="filter-row" id="inc-mf"></div>
       <div class="card"><div class="card-h"><h3>FIBER</h3><span class="hint">Önce kendime ödeme</span></div><div id="fiber-summary"></div></div>
-      <div class="card"><div class="card-h"><h3>Yeni Gelir</h3><span class="hint">Müvekkil akışı</span></div><div class="form-row"><div class="field"><label>Tarih</label><input class="input" type="date" id="gi-date"></div><div class="field"><label>Tutar (₺)</label><input class="input" type="number" id="gi-amt" placeholder="0" inputmode="decimal" oninput="updateFiberPreview()"></div></div><div class="field" style="margin-bottom:10px"><label>Müvekkil / Açıklama</label><input class="input" type="text" id="gi-desc" placeholder="Müvekkil adı, dava türü..."></div><div class="field" style="margin-bottom:10px"><label>Gelir Kategorisi</label><div class="cat-grid income-cat-grid" id="income-cat-grid"></div><select id="gi-cat" style="display:none"><option value="dava">Dava</option><option value="arabuluculuk">Arabuluculuk</option><option value="danisma">Danışma</option><option value="diger">Diğer</option></select></div><div class="fiber-box"><div class="fiber-title-row"><div><div class="eyebrow">FIBER</div><div class="fiber-title">Arkad kuralı</div></div><span class="fiber-badge">min %10</span></div><div class="form-row"><div class="field"><label>FIBER oranı (%)</label><input class="input" type="number" id="gi-fiber-pct" value="10" min="10" max="100" step="1" inputmode="decimal" oninput="updateFiberPreview()"></div><div class="field"><label>FIBER tutarı</label><div class="fiber-preview-value" id="gi-fiber-preview">0 ₺</div></div></div><div class="field-note">Gelir kaydedilince bu tutar sadece gelir içinde takip edilir; gider veya bütçe kaydı oluşturmaz.</div></div><div class="field"><label>Hesap</label><div class="bank-chip-row" id="gi-bank-chips"></div><select id="gi-bank" style="display:none"><option>Enpara</option><option>İşbank</option><option>VakıfBank</option><option>Nakit</option><option>Havale</option></select></div><button class="btn btn-primary btn-block" onclick="addIncome()">Kaydet</button></div>
+      <div class="card"><div class="card-h"><h3>Yeni Gelir</h3><span class="hint">Müvekkil akışı</span></div><div class="form-row"><div class="field"><label>Tarih</label><input class="input" type="date" id="gi-date"></div><div class="field"><label>Tutar (₺)</label><input class="input" type="number" id="gi-amt" placeholder="0" inputmode="decimal" oninput="updateFiberPreview()"></div></div><div class="field" style="margin-bottom:10px"><label>Müvekkil / Açıklama</label><input class="input" type="text" id="gi-desc" placeholder="Müvekkil adı, dava türü..."></div><div class="field" style="margin-bottom:10px"><label>Gelir Kategorisi</label><div class="cat-grid income-cat-grid" id="income-cat-grid"></div><select id="gi-cat" style="display:none"><option value="dava">Dava</option><option value="arabuluculuk">Arabuluculuk</option><option value="danisma">Danışma</option><option value="diger">Diğer</option></select></div><div class="fiber-box"><div class="fiber-title-row"><div><div class="eyebrow">FIBER</div><div class="fiber-title">Arkad kuralı</div></div><span class="fiber-badge">min %10</span></div><div class="form-row"><div class="field"><label>FIBER oranı (%)</label><input class="input" type="number" id="gi-fiber-pct" value="10" min="10" max="100" step="1" inputmode="decimal" oninput="updateFiberPreview()"></div><div class="field"><label>FIBER tutarı</label><div class="fiber-preview-value num" id="gi-fiber-preview">0 ₺</div></div></div><div class="field-note">Gelir kaydedilince bu tutar sadece gelir içinde takip edilir; gider veya bütçe kaydı oluşturmaz.</div></div><div class="field"><label>Hesap</label><div class="bank-chip-row" id="gi-bank-chips"></div><select id="gi-bank" style="display:none"><option>Enpara</option><option>İşbank</option><option>VakıfBank</option><option>Nakit</option><option>Havale</option></select></div><button class="btn btn-primary btn-block" onclick="addIncome()">Kaydet</button></div>
       <div class="card"><div class="card-h"><h3>Gelir Geçmişi</h3><span class="hint">Filtreli liste</span></div><div id="inc-list"></div></div>
     </div>`;
   document.getElementById('s-more').innerHTML = `
@@ -964,13 +964,7 @@ function toast(msg,isErr){
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
 }
-function getAlerts(monthIdx){
-  const m=(monthIdx==null)?CUR_IDX:monthIdx;
-  return getVisibleCats().filter(c=>S.budgets[c.id]>0&&c.id!=='uyap').map(c=>{
-    const spent=catMonth(c.id,m),lim=S.budgets[c.id],pct=spent/lim*100;
-    return{cat:c,spent,lim,pct,lvl:lvl(pct),monthIdx:m};
-  }).filter(a=>a.pct>=70).sort((a,b)=>b.pct-a.pct);
-}
+// getAlerts() kaldırıldı — yerini CALC.attentionSignals() + renderAttention() aldı.
 
 // ══════════════════════════════════════════════════════════════
 // RENDER DASHBOARD (calendar-first)
@@ -1284,8 +1278,6 @@ function renderDash(){
   // Hedef çubuğu renderHero() içinde, trend grafiği renderTrend() içinde.
   renderTrend(m);
 
-  // Bütçe uyarıları artık renderAttention() içinde (en fazla 3 sinyal).
-  // NOT: getAlerts() bu değişiklikle çağrısız kaldı (ölü kod) — Task 13'te temizlenecek.
   renderThemeSelection();
 }
 function setDashM(m){S.dashM=m;renderDash();}
@@ -2120,98 +2112,13 @@ function delInc(id){
 // ══════════════════════════════════════════════════════════════
 // BUDGET
 // ══════════════════════════════════════════════════════════════
+// Bütçe ekranı kaldırıldı (limitler Özet ekranındaki dağılım kartında,
+// kategori yönetimi Araçlar > Kategoriler'de). Bu fonksiyondan geriye
+// yalnızca "gözden geçirilmemiş kalemler" paneli kaldı — o panel
+// Araçlar > Kategoriler içinde yaşıyor.
 function renderBudget(){
-  // Seçili ay (varsayılan: içinde bulunulan ay)
+  if(!document.getElementById('budget-unrev-panel')) return;
   const m = (S.budM!=null && S.budM>=0 && S.budM<MN.length) ? S.budM : CUR_IDX;
-  const monthLabel = MN[m];
-  const isCurrent = (m===CUR_IDX);
-  const spentLabel = isCurrent ? 'Bu ay harcanan' : `${monthLabel} harcaması`;
-
-  // Ay seçici şeritleri (en yenisi solda)
-  const mc=document.getElementById('budget-month-chips');
-  if(mc){
-    const reversedMN=MN.map((mm,i)=>({mm,i})).reverse();
-    mc.innerHTML=reversedMN.map(({mm,i})=>`<button class="m-chip ${m===i?'on':''}" onclick="setBudM(${i})">${mm}${i===CUR_IDX?' ·':''}</button>`).join('');
-  }
-
-  // Aylık Toplam Limit kartı (otomatik = kategori toplamı, manuel = override)
-  const mlEl=document.getElementById('budget-monthlim-card');
-  if(mlEl){
-    const catSum=Object.entries(S.budgets||{}).reduce((a,[k,v])=>((k==='uyap'||(S.deletedDefaults||[]).includes(k))?a:a+(+v||0)),0);
-    const isManual=(S.monthLimit!=null);
-    const effLim=isManual?+S.monthLimit:catSum;
-    const monthSpent=S.expenses.filter(e=>mIdx(e.d)===m&&e.cat!=='uyap').reduce((a,e)=>a+e.amt,0);
-    const mlPct=effLim>0?Math.min(115,monthSpent/effLim*100):0;
-    const mlL=lvl(mlPct);
-    const mlBc={red:'var(--neg)',orange:'var(--warn)',yellow:'var(--warn)',green:'var(--pos)'}[mlL];
-    const mlPc={red:'var(--neg)',orange:'var(--warn)',yellow:'var(--warn)',green:'var(--pos)'}[mlL];
-    const overTxt=(effLim>0&&monthSpent>effLim)?` · +${fmt(monthSpent-effLim)} ₺ aşım`:'';
-    const badge=isManual
-      ? `<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(255,170,0,0.14);color:var(--warn);letter-spacing:.04em">MANUEL</span>`
-      : `<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(0,160,80,0.14);color:var(--pos);letter-spacing:.04em">OTOMATİK</span>`;
-    const resetBtn=isManual
-      ? `<button type="button" class="btn btn-ghost" style="font-size:11px;padding:4px 10px;min-width:0" onclick="setMonthLimit(null)" title="Otomatik moda dön (kategori toplamı)">Sıfırla</button>`
-      : '';
-    mlEl.innerHTML=`
-      <div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px;background:var(--card);color:var(--ink)">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-          <div style="font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px">Aylık Toplam Limit ${badge}</div>
-          ${resetBtn}
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-          <input class="b-input" type="number" min="0" step="500" value="${effLim}" style="width:130px" onchange="setMonthLimit(this.value)" aria-label="Aylık limit">
-          <span style="font-size:11px;color:var(--text3)">₺ / ay</span>
-          <span class="budget-pct" style="color:${mlPc};margin-left:auto">${effLim>0?Math.round(mlPct)+'%':'—'}${mlPct>=100?' ⚠':''}</span>
-        </div>
-        <div class="bbar" style="margin-bottom:6px"><div class="bfill" style="width:${Math.min(100,mlPct)}%;background:${mlBc}"></div></div>
-        <div class="bsub"><span>${spentLabel}: ${fmt(monthSpent)} ₺${overTxt}</span><span>Kategori toplamı: ${fmt(catSum)} ₺</span></div>
-        ${isManual&&effLim!==catSum?`<div style="margin-top:6px;font-size:11px;color:var(--text3)">Manuel limit kategori toplamından ${effLim>catSum?'+':''}${fmt(effLim-catSum)} ₺ farklı.</div>`:''}
-      </div>`;
-  }
-
-  // Hem s-budget (ayrı ekran) hem de varsa eski more-budget için render et
-  const html=getVisibleCats().filter(c=>c.id!=='uyap'&&c.id!=='diger').map(c=>{
-    const lim=S.budgets[c.id]||0;
-    const spent=catMonth(c.id,m);
-    const pct=lim>0?Math.min(115,spent/lim*100):0;
-    const l=lvl(pct);
-    const bc={red:'var(--neg)',orange:'var(--warn)',yellow:'var(--warn)',green:'var(--pos)'}[l];
-    const pc={red:'var(--neg)',orange:'var(--warn)',yellow:'var(--warn)',green:'var(--pos)'}[l];
-    const custom=!isDefaultCat(c.id);
-    const editBtn=custom?`<button type="button" class="fav-ic" title="Kategoriyi düzenle" onclick="openCatForm('${c.id}')" style="margin-left:4px">✎</button>`:'';
-    const overTl = (lim>0 && spent>lim) ? ` · +${fmt(spent-lim)} ₺ aşım` : '';
-    return`<div class="budget-item">
-      <div class="budget-top">
-        <div class="budget-name">${monoChip(c.id,'sm')}${catMeta(c.id).label}</div>
-        <div class="budget-meta">
-          <input class="b-input" type="number" value="${lim}" step="500" min="0" onchange="S.budgets['${c.id}']=+this.value;save();renderBudget();">
-          <span style="font-size:9px;color:var(--text3)">₺</span>
-          <span class="budget-pct" style="color:${pc}">${lim>0?Math.round(pct)+'%':'—'}${pct>=100?'⚠':''}</span>
-          ${editBtn}
-          <button type="button" class="fav-ic fav-ic-del" title="Kategoriyi sil" onclick="delCat('${c.id}')" style="margin-left:4px">×</button>
-        </div>
-      </div>
-      <div class="bbar"><div class="bfill" style="width:${Math.min(100,pct)}%;background:${bc}"></div></div>
-      <div class="bsub"><span>${spentLabel}: ${fmt(spent)} ₺${overTl}</span><span>Limit: ${lim>0?fmt(lim):'—'} ₺</span></div>
-    </div>`;
-  }).join('');
-  // Silinmiş (gizlenmiş) varsayılan kategoriler — geri getirme paneli
-  const delIds=(S.deletedDefaults||[]);
-  const deletedHtml = delIds.length ? `
-    <div style="border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin-top:10px">
-      <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:6px">Silinmiş kategoriler (${delIds.length})</div>
-      ${delIds.map(did=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0">
-        <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2)">${monoChip(did,'sm')}${escAttr(catMeta(did).label)}</span>
-        <button type="button" class="btn btn-ghost" style="font-size:11px;padding:4px 10px;min-width:0" onclick="restoreCat('${escAttr(did)}')">Geri getir</button>
-      </div>`).join('')}
-      <div style="font-size:11px;color:var(--text3);margin-top:6px">Geçmiş harcamalar "Diğer"de korunur. Bir kategorinin bütçesini sıfırlamak için limite 0 yazın.</div>
-    </div>` : '';
-  ['budget-bars-main','budget-bars'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.innerHTML=html+deletedHtml;
-  });
-
-  // Seçili ayın "Diğer" kategorisindeki kalemleri panelle göster (her biri için hızlı kategori seçici)
   const unrev = S.expenses.filter(e=>mIdx(e.d)===m && e.cat==='diger');
   const unrevTotal = unrev.reduce((a,e)=>a+e.amt,0);
   const unrevEl = document.getElementById('budget-unrev-panel');
@@ -2243,13 +2150,6 @@ function renderBudget(){
       unrevEl.innerHTML='';
     }
   }
-
-  // Abonelikler bütçe ekranında birlikte render
-  renderSubs();
-}
-function setBudM(m){
-  S.budM=m;
-  renderBudget();
 }
 // Aylık toplam limit: null veya boş = otomatik (kategori toplamı), sayı = manuel override
 function setMonthLimit(val){
