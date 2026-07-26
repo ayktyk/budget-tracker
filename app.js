@@ -114,9 +114,11 @@ function buildDesignLayout(){
         <div class="card-h"><h3>Dikkat</h3></div>
         <div id="attn-body"></div>
       </div>
-      <div class="card spark-card"><div class="card-h"><h3>Altı Aylık Nabız</h3><span class="hint">Gider ritmi</span></div><div class="sparkbar" id="dash-spark"></div></div>
-      <div class="card"><div class="card-h"><h3>Gelir ve Gider</h3><span class="hint">6 ay trendi</span></div><div class="chart-wrap"><canvas id="pnl-chart" role="img" aria-label="Gelir gider trendi"></canvas></div></div>
-      <div class="card"><div class="card-h"><h3>Aylık Net</h3><span class="hint">P&L</span></div><div id="pnl-table"></div></div>
+      <div class="card card--secondary">
+        <div class="card-h"><h3>6 Aylık Trend</h3><span class="hint">Gelir · Gider</span></div>
+        <div class="chart-wrap"><canvas id="pnl-chart" role="img" aria-label="Gelir gider trendi"></canvas></div>
+        <div class="trend-summary" id="trend-summary"></div>
+      </div>
       <div class="card dash-calendar-card"><div class="card-h"><h3>Takvim</h3><div class="cal-head-nav"><button class="cal-nav btn-ghost" onclick="navDashMonth(-1)">‹</button><div class="cal-month" id="dash-cal-month">—</div><button class="cal-nav btn-ghost" onclick="navDashMonth(1)">›</button></div></div><div class="cal-dow"><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span></div><div class="cal-grid dash-grid" id="dash-cal-grid"></div></div>
       <div class="card day-detail-card"><div class="card-h"><h3>Gün Akışı</h3><span class="hint">Seçili gün</span></div><div class="day-list" id="day-list"></div></div>
       <div class="card mini-meta"><div id="dash-pulse" class="dash-pulse"></div><div id="saved-at" class="saved-at"></div></div>
@@ -1179,6 +1181,57 @@ function renderAttention(m){
   ).join('');
 }
 
+// ── 6 aylık trend: tek grafik + iki satır özet ─────────────────
+// Eski sparkbar + bar chart + P&L tablosu bu tek kartta birleşti.
+function renderTrend(m){
+  const inc=MN.map((_,i)=>monthI(i));
+  const exp=MN.map((_,i)=>monthP(i));
+  const nets=MN.map((_,i)=>inc[i]-exp[i]);
+  const avgNet=nets.reduce((a,v)=>a+v,0)/nets.length;
+
+  const sum=document.getElementById('trend-summary');
+  if(sum){
+    const cur=nets[m];
+    sum.innerHTML=
+      `<div class="trend-line"><span>${MN[m]} net</span><strong class="num ${cur>=0?'delta-down':'delta-up'}">${cur>=0?'+':'−'}${fmt(Math.abs(cur))} ₺</strong></div>`+
+      `<div class="trend-line"><span>6 ay ortalama net</span><strong class="num ${avgNet>=0?'delta-down':'delta-up'}">${avgNet>=0?'+':'−'}${fmt(Math.abs(avgNet))} ₺</strong></div>`;
+  }
+
+  const ctx=document.getElementById('pnl-chart');
+  if(!ctx) return;
+  if(typeof Chart==='undefined'){
+    // CDN yüklenmediyse grafiksiz devam et — özet satırları bilgiyi taşıyor
+    ctx.style.display='none';
+    return;
+  }
+  ctx.style.display='';
+
+  if(pnlCh){ pnlCh.destroy(); pnlCh=null; }
+  const cs=getComputedStyle(document.documentElement);
+  const colPos=cs.getPropertyValue('--pos').trim()||'#5b7553';
+  const colNeg=cs.getPropertyValue('--neg').trim()||'#b8543a';
+  const colInk3=cs.getPropertyValue('--ink-3').trim()||'#8a857d';
+
+  pnlCh=new Chart(ctx,{
+    type:'bar',
+    data:{labels:MN,datasets:[
+      {label:'Gelir',data:inc,backgroundColor:colPos,borderWidth:0,borderRadius:6},
+      {label:'Gider',data:exp,backgroundColor:colNeg,borderWidth:0,borderRadius:6},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.parsed.y)} ₺`}}
+      },
+      scales:{
+        x:{grid:{display:false,drawBorder:false},ticks:{color:colInk3,font:{size:11},autoSkip:false}},
+        y:{grid:{color:'rgba(128,128,128,0.12)',drawBorder:false},ticks:{color:colInk3,font:{size:10},callback:v=>fmt(v)+'₺'}}
+      }
+    }
+  });
+}
+
 function renderDash(){
   const m = S.dashM!==null ? S.dashM : CUR_IDX;
   const monthKey = MK[m];
@@ -1205,75 +1258,11 @@ function renderDash(){
   `;
 
 
-  const displayM=S.dashM;
-  const avgG=[0,1,2,3,4,5].reduce((a,i)=>a+monthP(i),0)/6;
-  const curG=displayM!==null?monthP(displayM):avgG;
-  const curI=displayM!==null?monthI(displayM):S.incomes.reduce((a,i)=>a+i.amt,0)/6;
-  const net=curI-curG;
+  // metrics-row (Gider/Gelir/Net/Mesleki dörtlüsü) kaldırıldı — hero ve
+  // dağılım kartı aynı bilgiyi taşıyor, UYAP dağılımın altındaki satırda.
 
-  const dmetrics=document.getElementById('dash-metrics');
-  if(dmetrics) dmetrics.innerHTML=`
-    <div class="card">
-      <div class="eyebrow">Gider</div>
-      <div class="row-amt ${curG>GOAL?'neg':''}" style="font-size:24px;margin-top:8px">${fmt(curG)} ₺</div>
-      <div class="row-meta">${displayM!==null?MN[displayM]:'6 ay ortalaması'}</div>
-    </div>
-    <div class="card">
-      <div class="eyebrow">Gelir</div>
-      <div class="row-amt pos" style="font-size:24px;margin-top:8px">${curI>0?fmt(curI)+' ₺':'—'}</div>
-      <div class="row-meta">${curI>0?(displayM!==null?MN[displayM]:'6 ay ortalaması'):'henüz giriş yok'}</div>
-    </div>
-    <div class="card">
-      <div class="eyebrow">Net</div>
-      <div class="row-amt ${net>=0?'pos':'neg'}" style="font-size:24px;margin-top:8px">${net>=0?'+':''}${fmt(net)} ₺</div>
-      <div class="row-meta">${net>=0?'kâr':'zarar'}</div>
-    </div>
-    <div class="card">
-      <div class="eyebrow">Mesleki</div>
-      <div class="row-amt" style="font-size:24px;margin-top:8px;color:var(--uyap)">${fmt(S.expenses.filter(e=>(displayM===null||mIdx(e.d)===displayM)&&e.cat==='uyap').reduce((a,e)=>a+e.amt,0))} ₺</div>
-      <div class="row-meta">UYAP gideri</div>
-    </div>
-  `;
-
-  // Hedef çubuğu artık renderHero() içinde, aylık toplam limite bağlı — burada yazma.
-  const spark=document.getElementById('dash-spark');
-  if(spark){
-    const vals=MN.map((_,i)=>monthP(i));
-    const max=Math.max(...vals,1);
-    spark.innerHTML=vals.map((v,i)=>`<div class="spark-col ${i===CUR_IDX?'active':''}"><div class="spark-stick"><span style="height:${Math.max(12,Math.round(v/max*100))}%"></span></div><div class="spark-label">${MN[i].split('-')[0]}</div></div>`).join('');
-  }
-
-  if(pnlCh) pnlCh.destroy();
-  const ctx=document.getElementById('pnl-chart');
-  if(ctx){
-    const cs=getComputedStyle(document.documentElement);
-    const colG=cs.getPropertyValue('--green').trim()||'#30B875';
-    const colR=cs.getPropertyValue('--red').trim()||'#E0544B';
-    const colTxt2=cs.getPropertyValue('--text2').trim()||'#6E6E73';
-    const colTxt3=cs.getPropertyValue('--text3').trim()||'#A1A1A6';
-    pnlCh=new Chart(ctx,{
-      type:'bar',
-      data:{labels:MN,datasets:[
-        {label:'Gelir',data:MN.map((_,i)=>monthI(i)),backgroundColor:colG,borderColor:colG,borderWidth:0,borderRadius:6},
-        {label:'Gider',data:MN.map((_,i)=>monthP(i)),backgroundColor:colR,borderColor:colR,borderWidth:0,borderRadius:6},
-        {label:'Hedef',type:'line',data:Array(6).fill(GOAL),borderColor:colTxt3,borderDash:[4,4],borderWidth:1.5,pointRadius:0,fill:false},
-      ]},
-      options:{
-        responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false}},
-        scales:{
-          x:{grid:{display:false,drawBorder:false},ticks:{color:colTxt2,font:{size:11},autoSkip:false}},
-          y:{grid:{color:'rgba(128,128,128,0.12)',drawBorder:false},ticks:{color:colTxt3,font:{size:10},callback:v=>fmt(v)+'₺'}}
-        }
-      }
-    });
-  }
-
-  const _pt=document.getElementById('pnl-table');
-  if(_pt) _pt.innerHTML=MN.map((m,i)=>{
-    const g=monthI(i),ex=monthP(i),net=g-ex;
-    return`<div class="list-row"><div class="row-main"><div class="row-title">${m}</div><div class="row-meta">${g>0?'+'+fmt(g)+' ₺ gelir':'Gelir yok'}</div></div><div class="row-amt ${net>=0?'pos':'neg'}">${net>=0?'+':''}${fmt(net)} ₺</div></div>`;
-  }).join('');
+  // Hedef çubuğu renderHero() içinde, trend grafiği renderTrend() içinde.
+  renderTrend(m);
 
   // Bütçe uyarıları artık renderAttention() içinde (en fazla 3 sinyal).
   // NOT: getAlerts() bu değişiklikle çağrısız kaldı (ölü kod) — Task 13'te temizlenecek.

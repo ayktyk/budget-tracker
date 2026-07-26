@@ -1736,3 +1736,11 @@ input, select, textarea { font-size: 16px; }
   margin-top: 7px; flex: 0 0 auto; background: var(--neg);
 }
 .attn-ortalama .attn-dot { background: var(--warn); }
+
+/* ── Trend özeti ─────────────────────────────────────────────── */
+.trend-summary { margin-top: var(--s-3); }
+.trend-line {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 3px 0; font-size: 13px;
+}
+.trend-line span { opacity: .6; }
