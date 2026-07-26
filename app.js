@@ -89,6 +89,15 @@ function monoChip(id,size=''){
   const _c=escAttr(meta.color);
   return `<span class="mono-chip ${size}" style="--dot:${_c}"><span class="dot" style="background:${_c}"></span><span class="m">${escAttr(meta.mono)}</span></span>`;
 }
+// Araçlar ekranı akordeon sarmalayıcısı. Gövde, taşınan mevcut .card bloğudur.
+function tool(id,title,bodyHtml){
+  return `<div class="tool" id="tool-${id}">`
+    + `<button type="button" class="tool-head" onclick="toggleTool('${id}')" aria-expanded="false">`
+    + `<span>${title}</span><span class="tool-caret">▸</span></button>`
+    + `<div class="tool-body" id="toolbody-${id}" style="display:none">${bodyHtml}</div>`
+    + `</div>`;
+}
+
 function buildDesignLayout(){
   const app=document.querySelector('.app');
   if(!app) return;
@@ -146,13 +155,17 @@ function buildDesignLayout(){
     </div>`;
   document.getElementById('s-more').innerHTML = `
     <div class="screen-shell">
-      <div id="more-ekstre" class="more-panel"><div class="card"><div class="card-h"><h3>Ekstre Yükle + AI</h3><span class="hint">Gemini + fallback</span></div><details class="api-collapsible" id="gemini-details"><summary>Gemini API Key <span id="gemini-key-status" class="gk-status off">(boş)</span></summary><div class="field"><input class="input" type="password" id="gemini-key" placeholder="Gemini API Key (yalnızca cihazınızda saklanır)" oninput="saveGeminiKey(this.value)"><div class="field-note" style="margin-top:6px">⚠ Bu anahtar düz metin olarak cihazınızda saklanır. Sadece güvendiğiniz cihazlarda kullanın. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Google AI Studio'dan ücretsiz key alın</a>.</div><div class="gk-test-row"><button type="button" class="btn btn-secondary" id="gemini-test-btn" onclick="testGeminiKey()">Bağlantıyı Test Et</button><div id="gemini-test-out" class="gk-test-out"></div></div></div></details><div class="field"><label>Banka</label><select id="stmt-bank" style="display:none"><option>İşbank</option><option>Enpara</option><option>VakıfBank</option></select><div class="bank-chip-row" id="stmt-bank-chips"></div></div><div class="field"><label>Ekstre Metni</label><textarea class="input stmt-area" id="stmt-text" placeholder="Ekstre metnini buraya yapıştır"></textarea></div><button class="btn btn-primary btn-block" onclick="parseStmt()" id="parse-btn">İçe Aktar</button><div class="field-note">Kalemler <strong>bugünün tarihine</strong> kaydedilir. Önce Gemini denenir; başarısız olursa yerel parser devreye girer.</div><div id="parse-res" class="parse-result"></div></div><div class="card"><div class="card-h"><h3>Kart Takvimi</h3><button type="button" class="fav-add-btn" onclick="openCardForm()">+ Yeni</button></div><div id="card-list"></div><div class="field-note" style="margin-top:6px">Kesim ve son ödeme günleri ana sayfadaki takvimde kartın renginde işaretlenir.</div></div><div class="card ai-card"><div class="card-h"><h3>Genel Harcama Analizi</h3><span class="hint">1 / 3 / 6 ay</span></div><div class="field-note">Tüm girdileri okuyarak 1 aylık · 3 aylık · 6 aylık ayrı ayrı analiz üretir. Gemini key varsa AI yorumu, yoksa cihazda lokal hesaplama. Yeni veri eklemez.</div><button class="btn btn-secondary btn-block" onclick="analyzeAllSpending()" id="analyze-all-btn">Analiz Et</button><div id="analysis-res" class="analysis-result"></div></div></div>
-      <div id="more-sabit" class="more-panel"><div class="card"><div class="card-h"><h3>Sabit Giderler</h3><span class="hint">Referans listesi</span></div><div id="fixed-list"></div><div class="field-note" style="margin-top:8px">Bu liste bilgi amaçlıdır. Otomatik kayıt oluşturmaz — ödediğinde Hızlı Giriş'ten veya Ekstre Yükle'den ekle.</div></div></div>
-      <div id="more-findeks" class="more-panel"><div class="card"><div class="card-h"><h3>Findeks Puanı</h3><span class="hint">Aylık manuel kayıt</span></div><div class="findeks-form"><div class="form-row"><div class="field"><label>Tarih</label><input class="input" type="date" id="fk-date"></div><div class="field"><label>Skor (0–1900)</label><input class="input" type="number" id="fk-score" placeholder="örn: 1500" min="0" max="1900" step="1" inputmode="numeric"></div></div><div class="field"><label>Not (opsiyonel)</label><input class="input" type="text" id="fk-note" placeholder="örn: Kredi başvurusu öncesi"></div><button class="btn btn-primary btn-block" onclick="addFindeks()">Kaydet</button></div><div id="findeks-summary" class="findeks-summary"></div><div id="findeks-spark" class="findeks-spark"></div><div id="findeks-list" class="findeks-list"></div><div class="field-note" style="margin-top:8px">Findeks puanı 0–1900 arası bir kredi notudur. 1500+ iyi, 1700+ çok iyi sayılır. Aynı ay için birden çok kayıt yapabilirsiniz; trend grafiği son 12 kayıttan oluşur.</div></div></div>
-      <div id="more-data" class="more-panel"><div class="card"><div class="card-h"><h3>Veri</h3><span class="hint">Yedek / sıfırla</span></div><div class="data-actions"><button class="btn btn-primary btn-block" onclick="exportData()">JSON Yedeği İndir</button><button class="btn btn-secondary btn-block" onclick="document.getElementById('imp-f').click()">JSON Yedeği Yükle</button><input type="file" id="imp-f" accept=".json" style="display:none" onchange="importData(event)"><button class="btn btn-danger btn-block" onclick="resetAll()">Tüm Verileri Sıfırla</button></div><div id="data-st" class="field-note"></div><div class="field-note" style="margin-top:6px">Sıfırlama öncesi otomatik yedek dosyası indirilir. Yedek dosyasını tekrar yüklerseniz tüm kayıtlarınız geri gelir.</div></div></div>
-      <div id="more-theme" class="more-panel"><div class="card theme-picker"><div class="card-h"><h3>Görünüm</h3><span class="hint">Anında değişir</span></div><div class="theme-row"><button data-theme-pick="cream" class="theme-chip" onclick="setTheme('cream')"><span class="sw" style="background:#f4efe6"></span>Krem Kâğıt</button><button data-theme-pick="onyx" class="theme-chip" onclick="setTheme('onyx')"><span class="sw" style="background:#0e1117"></span>Onyx & Altın</button></div></div></div>
+      ${tool('ekstre','Ekstre Yükle + AI',`<div class="card"><div class="card-h"><h3>Ekstre Yükle + AI</h3><span class="hint">Gemini + fallback</span></div><details class="api-collapsible" id="gemini-details"><summary>Gemini API Key <span id="gemini-key-status" class="gk-status off">(boş)</span></summary><div class="field"><input class="input" type="password" id="gemini-key" placeholder="Gemini API Key (yalnızca cihazınızda saklanır)" oninput="saveGeminiKey(this.value)"><div class="field-note" style="margin-top:6px">⚠ Bu anahtar düz metin olarak cihazınızda saklanır. Sadece güvendiğiniz cihazlarda kullanın. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Google AI Studio'dan ücretsiz key alın</a>.</div><div class="gk-test-row"><button type="button" class="btn btn-secondary" id="gemini-test-btn" onclick="testGeminiKey()">Bağlantıyı Test Et</button><div id="gemini-test-out" class="gk-test-out"></div></div></div></details><div class="field"><label>Banka</label><select id="stmt-bank" style="display:none"><option>İşbank</option><option>Enpara</option><option>VakıfBank</option></select><div class="bank-chip-row" id="stmt-bank-chips"></div></div><div class="field"><label>Ekstre Metni</label><textarea class="input stmt-area" id="stmt-text" placeholder="Ekstre metnini buraya yapıştır"></textarea></div><button class="btn btn-primary btn-block" onclick="parseStmt()" id="parse-btn">İçe Aktar</button><div class="field-note">Kalemler <strong>bugünün tarihine</strong> kaydedilir. Önce Gemini denenir; başarısız olursa yerel parser devreye girer.</div><div id="parse-res" class="parse-result"></div></div>`)}
+      ${tool('kart','Kart Takvimi',`<div class="card"><div class="card-h"><h3>Kart Takvimi</h3><button type="button" class="fav-add-btn" onclick="openCardForm()">+ Yeni</button></div><div id="card-list"></div><div class="field-note" style="margin-top:6px">Kesim ve son ödeme günleri Özet ekranındaki takvimde kartın renginde işaretlenir.</div></div>`)}
+      ${tool('abonelik','Abonelikler',`<div class="card"><div class="card-h"><h3>Abonelikler · Aylık</h3><button type="button" class="fav-add-btn" onclick="openSubForm()">+ Yeni</button></div><div id="sub-list"></div></div>`)}
+      ${tool('sabit','Sabit Giderler',`<div class="card"><div class="card-h"><h3>Sabit Giderler</h3><span class="hint">Referans listesi</span></div><div id="fixed-list"></div><div class="field-note" style="margin-top:8px">Bu liste bilgi amaçlıdır. Otomatik kayıt oluşturmaz — ödediğinde Hızlı Giriş'ten veya Ekstre Yükle'den ekle.</div></div>`)}
+      ${tool('analiz','Harcama Analizi',`<div class="card ai-card"><div class="card-h"><h3>Genel Harcama Analizi</h3><span class="hint">1 / 3 / 6 ay</span></div><div class="field-note">Tüm girdileri okuyarak 1 aylık · 3 aylık · 6 aylık ayrı ayrı analiz üretir. Gemini key varsa AI yorumu, yoksa cihazda lokal hesaplama. Yeni veri eklemez.</div><button class="btn btn-secondary btn-block" onclick="analyzeAllSpending()" id="analyze-all-btn">Analiz Et</button><div id="analysis-res" class="analysis-result"></div></div>`)}
+      ${tool('kategori','Kategoriler',`<div class="card"><div class="card-h"><h3>Kategoriler</h3><button type="button" class="fav-add-btn" onclick="openCatForm()" title="Yeni kategori ekle">+ Yeni</button></div><div id="cat-manager"></div><div id="budget-unrev-panel"></div><div class="budget-actions" style="display:flex;gap:var(--s-2);flex-wrap:wrap;margin-top:var(--s-3)"><button type="button" class="btn btn-secondary" style="flex:1;min-width:140px" onclick="recatAllDiger()" title="Diğer kategorisindeki kalemleri otomatik kurallarla yeniden sınıflandır">Yeniden sınıflandır</button><button type="button" class="btn btn-secondary" style="flex:1;min-width:140px" onclick="resetBudgetsToDefault()">Varsayılanlara Sıfırla</button></div><div class="field-note" style="margin-top:var(--s-2)">Kategori limitlerini Özet ekranındaki dağılım kartından, grubu açıp kategoriye dokunarak düzenleyebilirsin.</div></div>`)}
+      ${tool('findeks','Findeks Puanı',`<div class="card"><div class="card-h"><h3>Findeks Puanı</h3><span class="hint">Aylık manuel kayıt</span></div><div class="findeks-form"><div class="form-row"><div class="field"><label>Tarih</label><input class="input" type="date" id="fk-date"></div><div class="field"><label>Skor (0–1900)</label><input class="input" type="number" id="fk-score" placeholder="örn: 1500" min="0" max="1900" step="1" inputmode="numeric"></div></div><div class="field"><label>Not (opsiyonel)</label><input class="input" type="text" id="fk-note" placeholder="örn: Kredi başvurusu öncesi"></div><button class="btn btn-primary btn-block" onclick="addFindeks()">Kaydet</button></div><div id="findeks-summary" class="findeks-summary"></div><div id="findeks-spark" class="findeks-spark"></div><div id="findeks-list" class="findeks-list"></div><div class="field-note" style="margin-top:8px">Findeks puanı 0–1900 arası bir kredi notudur. 1500+ iyi, 1700+ çok iyi sayılır. Aynı ay için birden çok kayıt yapabilirsiniz; trend grafiği son 12 kayıttan oluşur.</div></div>`)}
+      ${tool('veri','Veri · Yedek ve Sıfırlama',`<div class="card"><div class="card-h"><h3>Veri</h3><span class="hint">Yedek / sıfırla</span></div><div class="data-actions"><button class="btn btn-primary btn-block" onclick="exportData()">JSON Yedeği İndir</button><button class="btn btn-secondary btn-block" onclick="document.getElementById('imp-f').click()">JSON Yedeği Yükle</button><input type="file" id="imp-f" accept=".json" style="display:none" onchange="importData(event)"><button class="btn btn-danger btn-block" onclick="resetAll()">Tüm Verileri Sıfırla</button></div><div id="data-st" class="field-note"></div><div class="field-note" style="margin-top:6px">Sıfırlama öncesi otomatik yedek dosyası indirilir. Yedek dosyasını tekrar yüklerseniz tüm kayıtlarınız geri gelir.</div></div>`)}
+      ${tool('gorunum','Görünüm',`<div class="card theme-picker"><div class="card-h"><h3>Görünüm</h3><span class="hint">Anında değişir</span></div><div class="theme-row"><button data-theme-pick="cream" class="theme-chip" onclick="setTheme('cream')"><span class="sw" style="background:#f4efe6"></span>Krem Kâğıt</button><button data-theme-pick="onyx" class="theme-chip" onclick="setTheme('onyx')"><span class="sw" style="background:#0e1117"></span>Onyx &amp; Altın</button></div></div>`)}
     </div>`;
-  document.querySelector('.nav').innerHTML = `<button class="nav-item on" onclick="go('dash',this)" id="nb-dash"><span class="nav-glyph">A</span><span>Ana</span></button><button class="nav-item" onclick="go('income',this)" id="nb-income"><span class="nav-glyph">G</span><span>Gelir</span></button><div class="nav-center"><button class="nav-fab" onclick="go('quick',null)" aria-label="Hızlı giriş">+</button></div><button class="nav-item" onclick="go('budget-shortcut',this)" id="nb-budget"><span class="nav-glyph">B</span><span>Bütçe</span></button><button class="nav-item" onclick="go('more',this)" id="nb-more"><span class="nav-glyph">D</span><span>Detay</span></button>`;
+  document.querySelector('.nav').innerHTML = `<button class="nav-item on" onclick="go('dash',this)" id="nb-dash"><span class="nav-glyph">Ö</span><span>Özet</span></button><button class="nav-item" onclick="go('income',this)" id="nb-income"><span class="nav-glyph">G</span><span>Gelir</span></button><div class="nav-center"><button class="nav-fab" onclick="go('quick',null)" aria-label="Hızlı giriş">+</button></div><button class="nav-item" onclick="go('more',this)" id="nb-more"><span class="nav-glyph">A</span><span>Araçlar</span></button>`;
 }
 function dismissSeedBanner(){
   const el=document.getElementById('seed-banner');
@@ -1608,11 +1621,28 @@ function isDefaultCat(id){ return CATS.some(c=>c.id===id); }
 function renderCatManager(){
   const el=document.getElementById('cat-manager');
   if(!el) return;
-  const defaultHtml=CATS.map(c=>`
-    <div class="cat-row locked">
+  // Silinmiş varsayılanlar listede görünmez; geri getirme paneli aşağıda.
+  const hidden=new Set(S.deletedDefaults||[]);
+  const defaultHtml=CATS.filter(c=>!hidden.has(c.id)).map(c=>`
+    <div class="cat-row">
       <div class="cat-row-main">${monoChip(c.id,'sm')}<span class="cat-row-label">${c.icon||''} ${c.label}</span></div>
-      <span class="cat-row-lock" title="Varsayılan kategori">🔒</span>
+      <div class="fav-actions">
+        <button class="fav-ic fav-ic-del" title="Kategoriyi gizle" onclick="delCat('${escAttr(c.id)}')">×</button>
+      </div>
     </div>`).join('');
+
+  // Gizlenmiş varsayılanları geri getirme paneli. Eskiden Bütçe ekranındaki
+  // çubuk listesinin altındaydı; o ekran kalktığı için buraya taşındı.
+  const delIds=[...hidden];
+  const deletedHtml = delIds.length ? `
+    <div class="cat-deleted-panel">
+      <div class="cat-section-title">Gizlenmiş kategoriler (${delIds.length})</div>
+      ${delIds.map(did=>`<div class="cat-row">
+        <div class="cat-row-main">${monoChip(did,'sm')}<span class="cat-row-label">${escAttr(catMeta(did).label)}</span></div>
+        <button type="button" class="btn btn-ghost" style="font-size:11px;padding:4px 10px;min-width:0" onclick="restoreCat('${escAttr(did)}')">Geri getir</button>
+      </div>`).join('')}
+      <div class="field-note" style="margin-top:6px">Geçmiş harcamalar "Diğer"de korunur.</div>
+    </div>` : '';
   const customHtml=(S.customCats||[]).map(c=>`
     <div class="cat-row">
       <div class="cat-row-main">${monoChip(c.id,'sm')}<span class="cat-row-label">${escAttr(c.icon||'•')} ${escAttr(c.label)}</span></div>
@@ -1621,7 +1651,7 @@ function renderCatManager(){
         <button class="fav-ic fav-ic-del" title="Sil" onclick="delCat('${escAttr(c.id)}')">×</button>
       </div>
     </div>`).join('');
-  el.innerHTML = `<div class="cat-section-title">Sizin kategorileriniz</div>${customHtml||'<div class="fav-empty">Henüz özel kategori yok. <button type="button" class="linky" onclick="openCatForm()">+ Yeni ekle</button></div>'}<div class="cat-section-title">Varsayılanlar</div>${defaultHtml}`;
+  el.innerHTML = `<div class="cat-section-title">Sizin kategorileriniz</div>${customHtml||'<div class="fav-empty">Henüz özel kategori yok. <button type="button" class="linky" onclick="openCatForm()">+ Yeni ekle</button></div>'}<div class="cat-section-title">Varsayılanlar</div>${defaultHtml}${deletedHtml}`;
 }
 function openCatForm(id){
   const editing=id?(S.customCats||[]).find(x=>x.id===id):null;
@@ -2802,13 +2832,37 @@ function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,
 // ══════════════════════════════════════════════════════════════
 // MORE SUB-TABS
 // ══════════════════════════════════════════════════════════════
-function setMoreTab(tab,btn){
-  document.querySelectorAll('.more-panel').forEach(p=>p.style.display='block');
-  renderFixed();
-  renderCards();
-  renderFindeks();
-  const target=document.getElementById('more-'+(tab||'ekstre'));
-  if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+// ── Araçlar ekranı — akordeon. Aynı anda tek panel açık. ──────
+// Öncesinde setMoreTab() beş paneli de açık bırakıp sadece kaydırıyordu;
+// kalabalık hissinin kaynağı buydu.
+function toggleTool(id){
+  S.openTool = (S.openTool===id) ? '' : id;
+  save();
+  renderTools();
+  if(S.openTool){
+    const el=document.getElementById('tool-'+S.openTool);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+}
+
+function renderTools(){
+  document.querySelectorAll('.tool').forEach(t=>{
+    const id=t.id.replace(/^tool-/,'');
+    const open=(S.openTool===id);
+    const body=document.getElementById('toolbody-'+id);
+    const head=t.querySelector('.tool-head');
+    const caret=t.querySelector('.tool-caret');
+    if(body) body.style.display = open ? '' : 'none';
+    if(head) head.setAttribute('aria-expanded', String(open));
+    if(caret) caret.textContent = open ? '▾' : '▸';
+    t.classList.toggle('tool-open', open);
+  });
+  // Açık panelin içeriğini tazele
+  if(S.openTool==='sabit')    renderFixed();
+  if(S.openTool==='kart')     renderCards();
+  if(S.openTool==='findeks')  renderFindeks();
+  if(S.openTool==='abonelik') renderSubs();
+  if(S.openTool==='kategori'){ renderCatManager(); renderBudget(); }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2817,14 +2871,6 @@ function setMoreTab(tab,btn){
 function go(screen,btn){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('on'));
-  if(screen==='budget-shortcut'){
-    const sb=document.getElementById('s-budget');
-    if(sb) sb.classList.add('on');
-    if(btn) btn.classList.add('on');
-    renderBudget();
-    scrollToTopInstant();
-    return;
-  }
   const target=document.getElementById('s-'+screen);
   if(target) target.classList.add('on');
   if(btn) btn.classList.add('on');
@@ -2841,7 +2887,7 @@ function go(screen,btn){
     renderIncome();
   }
   else if(screen==='more'){
-    setMoreTab('ekstre',null);
+    renderTools();
   }
   scrollToTopInstant();
 }

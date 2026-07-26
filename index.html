@@ -35,27 +35,8 @@
     <div id="s-income" class="screen"></div>
     <div id="s-more" class="screen"></div>
 
-    <!-- ── BUDGET (bağımsız ekran, alt nav'daki Bütçe butonu için) ── -->
-    <div id="s-budget" class="screen">
-      <div class="screen-shell">
-        <div class="card">
-          <div class="card-h"><h3>Bütçe · Aylık limitler</h3><button type="button" class="fav-add-btn" onclick="openCatForm()" title="Yeni kategori ekle">+ Yeni kategori</button></div>
-          <div class="month-scroll" id="budget-month-chips" style="padding:0 0 12px;display:flex;gap:6px"></div>
-          <div id="budget-monthlim-card"></div>
-          <div id="budget-unrev-panel"></div>
-          <div id="budget-bars-main"></div>
-          <div class="budget-actions" style="display:flex;gap:8px;flex-wrap:wrap">
-            <button type="button" class="btn btn-secondary" style="flex:1;min-width:140px" onclick="recatAllDiger()" title="Diğer kategorisindeki kalemleri otomatik kurallarla yeniden sınıflandır">Yeniden sınıflandır</button>
-            <button type="button" class="btn btn-secondary" style="flex:1;min-width:140px" onclick="resetBudgetsToDefault()">Varsayılanlara Sıfırla</button>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-h"><h3>Abonelikler · Aylık</h3><button type="button" class="fav-add-btn" onclick="openSubForm()">+ Yeni</button></div>
-          <div id="sub-list"></div>
-        </div>
-        <div class="section-gap"></div>
-      </div>
-    </div>
+    <!-- Bütçe ekranı kaldırıldı: kategori limitleri Özet ekranındaki dağılım
+         kartına, kategori yönetimi ve abonelikler Araçlar akordeonuna taşındı. -->
 
   </div><!-- .screens -->
 
@@ -63,7 +44,7 @@
   <nav class="nav">
     <button class="nav-item on" onclick="go('dash',this)" id="nb-dash">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span>Genel</span>
+      <span>Özet</span>
     </button>
     <button class="nav-item" onclick="go('income',this)" id="nb-income">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
@@ -76,11 +57,7 @@
     </div>
     <button class="nav-item" onclick="go('more',this)" id="nb-more">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-      <span>Detaylar</span>
-    </button>
-    <button class="nav-item" onclick="go('budget-shortcut',this)" id="nb-budget">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-      <span>Bütçe</span>
+      <span>Araçlar</span>
     </button>
   </nav>
 

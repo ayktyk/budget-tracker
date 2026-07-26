@@ -1760,3 +1760,22 @@ input, select, textarea { font-size: 16px; }
   font-size: 14px; opacity: .5; padding: 0 var(--s-1); font-family: inherit;
 }
 .day-panel-close:hover { opacity: 1; }
+
+/* ── Araçlar akordeonu ───────────────────────────────────────── */
+.tool { border-bottom: 1px solid var(--line); }
+.tool:last-child { border-bottom: 0; }
+.tool-head {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; background: none; border: 0; cursor: pointer; color: inherit;
+  padding: var(--s-4) var(--s-1); font-size: 15px; font-weight: 600;
+  text-align: left; font-family: inherit;
+}
+.tool-caret { opacity: .4; font-size: 12px; }
+.tool-open > .tool-head { color: var(--pos); }
+.tool-body { padding-bottom: var(--s-4); }
+.tool-body > .card { margin-bottom: var(--s-3); }
+.tool-body > .card:last-child { margin-bottom: 0; }
+.cat-deleted-panel {
+  margin-top: var(--s-3); padding: var(--s-3);
+  border: 1px dashed var(--line-2); border-radius: var(--r-s);
+}
