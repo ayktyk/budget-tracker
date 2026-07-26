@@ -119,8 +119,15 @@ function buildDesignLayout(){
         <div class="chart-wrap"><canvas id="pnl-chart" role="img" aria-label="Gelir gider trendi"></canvas></div>
         <div class="trend-summary" id="trend-summary"></div>
       </div>
-      <div class="card dash-calendar-card"><div class="card-h"><h3>Takvim</h3><div class="cal-head-nav"><button class="cal-nav btn-ghost" onclick="navDashMonth(-1)">‹</button><div class="cal-month" id="dash-cal-month">—</div><button class="cal-nav btn-ghost" onclick="navDashMonth(1)">›</button></div></div><div class="cal-dow"><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span></div><div class="cal-grid dash-grid" id="dash-cal-grid"></div></div>
-      <div class="card day-detail-card"><div class="card-h"><h3>Gün Akışı</h3><span class="hint">Seçili gün</span></div><div class="day-list" id="day-list"></div></div>
+      <div class="card card--secondary dash-calendar-card">
+        <div class="card-h"><h3>Takvim</h3><div class="cal-head-nav"><button class="cal-nav btn-ghost" onclick="navDashMonth(-1)">‹</button><div class="cal-month" id="dash-cal-month">—</div><button class="cal-nav btn-ghost" onclick="navDashMonth(1)">›</button></div></div>
+        <div class="cal-dow"><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span></div>
+        <div class="cal-grid dash-grid" id="dash-cal-grid"></div>
+        <div class="day-panel" id="day-panel" style="display:none">
+          <div class="day-panel-h"><span id="day-panel-title">—</span><button type="button" class="day-panel-close" onclick="selectDay('')" aria-label="Günü kapat">✕</button></div>
+          <div class="day-list" id="day-list"></div>
+        </div>
+      </div>
       <div class="card mini-meta"><div id="dash-pulse" class="dash-pulse"></div><div id="saved-at" class="saved-at"></div></div>
     </div>`;
   document.getElementById('s-quick').innerHTML = `
@@ -1343,6 +1350,19 @@ function renderDayList(){
   const list=document.getElementById('day-list');
   if(!list) return;
   const iso=S.dashDay;
+
+  // Gün akışı artık takvim kartının içinde: gün seçili değilken panel gizli.
+  const panel=document.getElementById('day-panel');
+  const title=document.getElementById('day-panel-title');
+  if(panel){
+    if(!iso){ panel.style.display='none'; list.innerHTML=''; return; }
+    panel.style.display='';
+    if(title){
+      const p=String(iso).split('-');
+      title.textContent=(p.length===3)?`${p[2]}.${p[1]}.${p[0]}`:iso;
+    }
+  }
+
   if(!iso){
     list.innerHTML=`<div class="day-empty">Takvimde bir güne dokunun; o günün gelir ve giderleri burada görünsün.</div>`;
     return;

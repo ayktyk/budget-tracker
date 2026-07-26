@@ -1744,3 +1744,19 @@ input, select, textarea { font-size: 16px; }
   padding: 3px 0; font-size: 13px;
 }
 .trend-line span { opacity: .6; }
+
+/* ── Takvim içi gün paneli ───────────────────────────────────── */
+.day-panel {
+  margin-top: var(--s-4); padding-top: var(--s-3);
+  border-top: 1px solid var(--line);
+}
+.day-panel-h {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: var(--s-2); font-size: 13px; font-weight: 600;
+  opacity: .7; font-variant-numeric: tabular-nums;
+}
+.day-panel-close {
+  background: none; border: 0; cursor: pointer; color: inherit;
+  font-size: 14px; opacity: .5; padding: 0 var(--s-1); font-family: inherit;
+}
+.day-panel-close:hover { opacity: 1; }
