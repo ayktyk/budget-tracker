@@ -114,6 +114,11 @@ function buildDesignLayout(){
         <div class="hero-value num" id="bal-net">—</div>
         <div class="hero-metrics"><span>Gelir <strong class="num" id="bal-inc">—</strong></span><span>·</span><span>Gider <strong class="num" id="bal-exp">—</strong></span></div>
         <div class="goal-wrap-hero" id="hero-limit-wrap" onclick="openMonthLimitEditor()" role="button" tabindex="0" title="Aylık limiti düzenle"><div class="goal-track"><div class="goal-fill-hero" id="goal-fill"></div></div><div class="goal-meta-row"><span id="goal-status">—</span><span id="goal-target">—</span></div></div>
+        <div class="allowance-line" id="allowance-line"></div>
+      </div>
+      <div class="card card--primary subs-card" id="subs-card">
+        <div class="card-h"><h3>Abonelikler</h3><span class="hint num" id="subs-hint">—</span></div>
+        <div id="subs-body"></div>
       </div>
       <div class="card card--primary" id="dist-card">
         <div class="card-h"><h3>Param Nereye Gidiyor</h3><span class="hint num" id="dist-hint">—</span></div>
@@ -142,7 +147,8 @@ function buildDesignLayout(){
   document.getElementById('s-quick').innerHTML = `
     <div class="screen-shell">
       <div class="card card--secondary fav-strip-card"><div class="card-h"><h3>Sık Havale</h3><button type="button" class="fav-add-btn" onclick="openFavForm()" aria-label="Yeni sık havale ekle">+ Yeni</button></div><div class="fav-list fav-strip" id="fav-list"></div></div>
-      <div class="card card--primary quick-main-card"><div class="card-h"><h3>Hızlı Giriş</h3><span class="hint" id="quick-date-display">—</span></div><div class="amount-big-wrap"><div class="amount-big"><span class="amount-currency">₺</span><input type="text" id="q-amt" placeholder="0" inputmode="decimal" autocomplete="off"></div></div><div class="numpad" id="quick-pad"><button onclick="quickPad('1')">1</button><button onclick="quickPad('2')">2</button><button onclick="quickPad('3')">3</button><button onclick="quickPad('4')">4</button><button onclick="quickPad('5')">5</button><button onclick="quickPad('6')">6</button><button onclick="quickPad('7')">7</button><button onclick="quickPad('8')">8</button><button onclick="quickPad('9')">9</button><button onclick="quickPad(',')">,</button><button onclick="quickPad('0')">0</button><button onclick="quickPad('del')">Sil</button></div><div class="quick-fields"><div class="qfield"><label>Açıklama</label><input class="input" type="text" id="q-desc" placeholder="örn: Hebun Çorba, BİM, İbrahim Yaman..." autocomplete="off"></div><div class="q-grid-two"><div class="qfield"><label>Tarih</label><input class="input" type="date" id="q-date"></div><div class="qfield"><label>Kaynak</label><select id="q-bank" style="display:none"><option value="Havale">Havale</option><option value="Nakit">Nakit</option><option value="İşbank">İşbank</option><option value="Enpara">Enpara</option><option value="VakıfBank">VakıfBank</option></select><div class="bank-chip-row" id="q-bank-chips"></div></div></div></div><div class="cat-section"><div class="eyebrow">Kategori</div><div class="cat-grid" id="cat-grid"></div></div><button class="btn btn-primary btn-block" onclick="quickAdd()">Kaydet</button></div>
+      <div class="card card--secondary repeat-card" id="repeat-card"><div class="card-h"><h3>Tekrarla</h3><span class="hint">son 30 gün</span></div><div class="repeat-strip" id="repeat-strip"></div></div>
+      <div class="card card--primary quick-main-card"><div class="card-h"><h3>Hızlı Giriş</h3><span class="hint" id="quick-date-display">—</span></div><div class="amount-big-wrap"><div class="amount-big"><span class="amount-currency">₺</span><input type="text" id="q-amt" placeholder="0" inputmode="decimal" autocomplete="off" oninput="renderLiveBudget()"></div></div><div class="numpad" id="quick-pad"><button onclick="quickPad('1')">1</button><button onclick="quickPad('2')">2</button><button onclick="quickPad('3')">3</button><button onclick="quickPad('4')">4</button><button onclick="quickPad('5')">5</button><button onclick="quickPad('6')">6</button><button onclick="quickPad('7')">7</button><button onclick="quickPad('8')">8</button><button onclick="quickPad('9')">9</button><button onclick="quickPad(',')">,</button><button onclick="quickPad('0')">0</button><button onclick="quickPad('del')">Sil</button></div><div class="quick-fields"><div class="qfield"><label>Açıklama</label><input class="input" type="text" id="q-desc" placeholder="opsiyonel — boşsa kategori adı yazılır" autocomplete="off"></div><div class="q-grid-two"><div class="qfield"><label>Tarih</label><input class="input" type="date" id="q-date"></div><div class="qfield"><label>Kaynak</label><select id="q-bank" style="display:none"><option value="Havale">Havale</option><option value="Nakit">Nakit</option><option value="İşbank">İşbank</option><option value="Enpara">Enpara</option><option value="VakıfBank">VakıfBank</option></select><div class="bank-chip-row" id="q-bank-chips"></div></div></div></div><div class="cat-section"><div class="eyebrow">Kategori</div><div class="cat-grid" id="cat-grid"></div></div><div class="live-budget" id="live-budget"></div><button class="btn btn-primary btn-block" onclick="quickAdd()">Kaydet</button></div>
       <div class="card"><div class="card-h"><h3>İşlemler</h3><span class="hint">Tüm kayıtlar</span></div><div class="filter-row filter-row-tight" id="quick-txn-mf"></div><div class="filter-row filter-row-tight" id="quick-txn-cf"></div><div id="quick-txn-list"></div></div>
     </div>`;
   document.getElementById('s-income').innerHTML = `
@@ -155,12 +161,12 @@ function buildDesignLayout(){
     </div>`;
   document.getElementById('s-more').innerHTML = `
     <div class="screen-shell">
-      ${tool('ekstre','Ekstre Yükle + AI',`<div class="card"><div class="card-h"><h3>Ekstre Yükle + AI</h3><span class="hint">Gemini + fallback</span></div><details class="api-collapsible" id="gemini-details"><summary>Gemini API Key <span id="gemini-key-status" class="gk-status off">(boş)</span></summary><div class="field"><input class="input" type="password" id="gemini-key" placeholder="Gemini API Key (yalnızca cihazınızda saklanır)" oninput="saveGeminiKey(this.value)"><div class="field-note" style="margin-top:6px">⚠ Bu anahtar düz metin olarak cihazınızda saklanır. Sadece güvendiğiniz cihazlarda kullanın. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Google AI Studio'dan ücretsiz key alın</a>.</div><div class="gk-test-row"><button type="button" class="btn btn-secondary" id="gemini-test-btn" onclick="testGeminiKey()">Bağlantıyı Test Et</button><div id="gemini-test-out" class="gk-test-out"></div></div></div></details><div class="field"><label>Banka</label><select id="stmt-bank" style="display:none"><option>İşbank</option><option>Enpara</option><option>VakıfBank</option></select><div class="bank-chip-row" id="stmt-bank-chips"></div></div><div class="field"><label>Ekstre Metni</label><textarea class="input stmt-area" id="stmt-text" placeholder="Ekstre metnini buraya yapıştır"></textarea></div><button class="btn btn-primary btn-block" onclick="parseStmt()" id="parse-btn">İçe Aktar</button><div class="field-note">Kalemler <strong>bugünün tarihine</strong> kaydedilir. Önce Gemini denenir; başarısız olursa yerel parser devreye girer.</div><div id="parse-res" class="parse-result"></div></div>`)}
+      ${tool('ekstre','Ekstre Yükle + AI',`<div class="card"><div class="card-h"><h3>Ekstre Yükle + AI</h3><span class="hint">Gemini + fallback</span></div><details class="api-collapsible" id="gemini-details"><summary>Gemini API Key <span id="gemini-key-status" class="gk-status off">(boş)</span></summary><div class="field"><input class="input" type="password" id="gemini-key" placeholder="Gemini API Key (yalnızca cihazınızda saklanır)" oninput="saveGeminiKey(this.value)"><div class="field-note" style="margin-top:6px">⚠ Bu anahtar düz metin olarak cihazınızda saklanır. Sadece güvendiğiniz cihazlarda kullanın. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Google AI Studio'dan ücretsiz key alın</a>.</div><div class="gk-test-row"><button type="button" class="btn btn-secondary" id="gemini-test-btn" onclick="testGeminiKey()">Bağlantıyı Test Et</button><div id="gemini-test-out" class="gk-test-out"></div></div></div></details><div class="field"><label>Banka</label><select id="stmt-bank" style="display:none"><option>İşbank</option><option>Enpara</option><option>VakıfBank</option></select><div class="bank-chip-row" id="stmt-bank-chips"></div></div><div class="field"><label>Ekstre Metni</label><textarea class="input stmt-area" id="stmt-text" placeholder="Ekstre metnini buraya yapıştır"></textarea></div><button class="btn btn-primary btn-block" onclick="parseStmt()" id="parse-btn">İçe Aktar</button><div class="field-note">Artık birincil giriş yolu değil — <strong>mutabakat</strong> için: elle girmeyi atladığın kalemleri yakalar. Kalemler bugünün tarihine kaydedilir. Elle girdiğin kayıtlarla çakışan satırlar (aynı tutar, ±1 gün) otomatik atlanır. Önce Gemini denenir; başarısız olursa yerel parser devreye girer.</div><div id="parse-res" class="parse-result"></div></div>`)}
       ${tool('kart','Kart Takvimi',`<div class="card"><div class="card-h"><h3>Kart Takvimi</h3><button type="button" class="fav-add-btn" onclick="openCardForm()">+ Yeni</button></div><div id="card-list"></div><div class="field-note" style="margin-top:6px">Kesim ve son ödeme günleri Özet ekranındaki takvimde kartın renginde işaretlenir.</div></div>`)}
       ${tool('abonelik','Abonelikler',`<div class="card"><div class="card-h"><h3>Abonelikler · Aylık</h3><button type="button" class="fav-add-btn" onclick="openSubForm()">+ Yeni</button></div><div id="sub-list"></div></div>`)}
       ${tool('sabit','Sabit Giderler',`<div class="card"><div class="card-h"><h3>Sabit Giderler</h3><span class="hint">Referans listesi</span></div><div id="fixed-list"></div><div class="field-note" style="margin-top:8px">Bu liste bilgi amaçlıdır. Otomatik kayıt oluşturmaz — ödediğinde Hızlı Giriş'ten veya Ekstre Yükle'den ekle.</div></div>`)}
       ${tool('analiz','Harcama Analizi',`<div class="card ai-card"><div class="card-h"><h3>Genel Harcama Analizi</h3><span class="hint">1 / 3 / 6 ay</span></div><div class="field-note">Tüm girdileri okuyarak 1 aylık · 3 aylık · 6 aylık ayrı ayrı analiz üretir. Gemini key varsa AI yorumu, yoksa cihazda lokal hesaplama. Yeni veri eklemez.</div><button class="btn btn-secondary btn-block" onclick="analyzeAllSpending()" id="analyze-all-btn">Analiz Et</button><div id="analysis-res" class="analysis-result"></div></div>`)}
-      ${tool('kategori','Kategoriler',`<div class="card"><div class="card-h"><h3>Kategoriler</h3><button type="button" class="fav-add-btn" onclick="openCatForm()" title="Yeni kategori ekle">+ Yeni</button></div><div id="cat-manager"></div><div id="budget-unrev-panel"></div><div class="budget-actions" style="display:flex;gap:var(--s-2);flex-wrap:wrap;margin-top:var(--s-3)"><button type="button" class="btn btn-secondary" style="flex:1;min-width:140px" onclick="recatAllDiger()" title="Diğer kategorisindeki kalemleri otomatik kurallarla yeniden sınıflandır">Yeniden sınıflandır</button><button type="button" class="btn btn-secondary" style="flex:1;min-width:140px" onclick="resetBudgetsToDefault()">Varsayılanlara Sıfırla</button></div><div class="field-note" style="margin-top:var(--s-2)">Kategori limitlerini Özet ekranındaki dağılım kartından, grubu açıp kategoriye dokunarak düzenleyebilirsin.</div></div>`)}
+      ${tool('kategori','Kategoriler',`<div class="card"><div class="card-h"><h3>Kategoriler</h3><button type="button" class="fav-add-btn" onclick="openCatForm()" title="Yeni kategori ekle">+ Yeni</button></div><div id="cat-manager"></div><div id="budget-unrev-panel"></div><div id="limit-suggest-panel"></div><div class="budget-actions" style="display:flex;gap:var(--s-2);flex-wrap:wrap;margin-top:var(--s-3)"><button type="button" class="btn btn-secondary" style="flex:1;min-width:140px" onclick="recatAllDiger()" title="Diğer kategorisindeki kalemleri otomatik kurallarla yeniden sınıflandır">Yeniden sınıflandır</button><button type="button" class="btn btn-secondary" style="flex:1;min-width:140px" onclick="resetBudgetsToDefault()">Varsayılanlara Sıfırla</button></div><div class="field-note" style="margin-top:var(--s-2)">Kategori limitlerini Özet ekranındaki dağılım kartından, grubu açıp kategoriye dokunarak düzenleyebilirsin.</div></div>`)}
       ${tool('findeks','Findeks Puanı',`<div class="card"><div class="card-h"><h3>Findeks Puanı</h3><span class="hint">Aylık manuel kayıt</span></div><div class="findeks-form"><div class="form-row"><div class="field"><label>Tarih</label><input class="input" type="date" id="fk-date"></div><div class="field"><label>Skor (0–1900)</label><input class="input" type="number" id="fk-score" placeholder="örn: 1500" min="0" max="1900" step="1" inputmode="numeric"></div></div><div class="field"><label>Not (opsiyonel)</label><input class="input" type="text" id="fk-note" placeholder="örn: Kredi başvurusu öncesi"></div><button class="btn btn-primary btn-block" onclick="addFindeks()">Kaydet</button></div><div id="findeks-summary" class="findeks-summary"></div><div id="findeks-spark" class="findeks-spark"></div><div id="findeks-list" class="findeks-list"></div><div class="field-note" style="margin-top:8px">Findeks puanı 0–1900 arası bir kredi notudur. 1500+ iyi, 1700+ çok iyi sayılır. Aynı ay için birden çok kayıt yapabilirsiniz; trend grafiği son 12 kayıttan oluşur.</div></div>`)}
       ${tool('veri','Veri · Yedek ve Sıfırlama',`<div class="card"><div class="card-h"><h3>Veri</h3><span class="hint">Yedek / sıfırla</span></div><div class="data-actions"><button class="btn btn-primary btn-block" onclick="exportData()">JSON Yedeği İndir</button><button class="btn btn-secondary btn-block" onclick="document.getElementById('imp-f').click()">JSON Yedeği Yükle</button><input type="file" id="imp-f" accept=".json" style="display:none" onchange="importData(event)"><button class="btn btn-danger btn-block" onclick="resetAll()">Tüm Verileri Sıfırla</button></div><div id="data-st" class="field-note"></div><div class="field-note" style="margin-top:6px">Sıfırlama öncesi otomatik yedek dosyası indirilir. Yedek dosyasını tekrar yüklerseniz tüm kayıtlarınız geri gelir.</div></div>`)}
       ${tool('gorunum','Görünüm',`<div class="card theme-picker"><div class="card-h"><h3>Görünüm</h3><span class="hint">Anında değişir</span></div><div class="theme-row"><button data-theme-pick="cream" class="theme-chip" onclick="setTheme('cream')"><span class="sw" style="background:#f4efe6"></span>Krem Kâğıt</button><button data-theme-pick="onyx" class="theme-chip" onclick="setTheme('onyx')"><span class="sw" style="background:#0e1117"></span>Onyx &amp; Altın</button></div></div>`)}
@@ -287,6 +293,7 @@ let S = {
   subs:     [],     // abonelikler
   cards:    JSON.parse(JSON.stringify(DEFAULT_CARDS)), // kredi kartı ekstre kesim/son ödeme günleri
   findeks:  [],     // aylık findeks puanı kayıtları [{id, date, score, note}]
+  lastBank: 'Havale', // Hızlı Giriş'te son kullanılan kaynak — bir sonraki girişte seçili gelir
   selCat: 'yemek',
   expM: null, expC: null, incM: null, dashM: CUR_IDX, dashDay: '', budM: CUR_IDX,
   monthLimit: null, // null = otomatik (kategori toplami), number = manuel override
@@ -389,7 +396,13 @@ function loadFromStorage() {
     const sb = localStorage.getItem('ay_subs');
     if (sb !== null) {
       const parsed = JSON.parse(sb);
-      if (Array.isArray(parsed)) S.subs = parsed.map(s => ({...s, id: s.id || genId()}));
+      // paid: { 'YYYY-MM': {expId, at} } — eski kayıtlarda yok, okurken {} atanır.
+      // Ayrı bir migration adımına gerek yok; eski JSON yedekleri de bu yolla normalize olur.
+      if (Array.isArray(parsed)) S.subs = parsed.map(s => ({
+        ...s,
+        id: s.id || genId(),
+        paid: (s.paid && typeof s.paid === 'object' && !Array.isArray(s.paid)) ? s.paid : {}
+      }));
     }
   } catch(e) {}
   try {
@@ -415,6 +428,10 @@ function loadFromStorage() {
       if (Number.isFinite(n) && n > 0) S.monthLimit = n;
     }
   } catch(e) {}
+  try {
+    const lb = localStorage.getItem('ay_lastbank');
+    if (lb) S.lastBank = lb;
+  } catch(e) {}
   loadGeminiKey();
   const el = document.getElementById('saved-at');
   if (el) el.textContent = new Date().toLocaleDateString('tr-TR');
@@ -436,6 +453,7 @@ function save() {
     localStorage.setItem('ay_subs', JSON.stringify(S.subs||[]));
     localStorage.setItem('ay_cards', JSON.stringify(S.cards||[]));
     localStorage.setItem('ay_findeks', JSON.stringify(S.findeks||[]));
+    localStorage.setItem('ay_lastbank', String(S.lastBank || 'Havale'));
     if (S.monthLimit==null) {
       localStorage.removeItem('ay_monthlim');
     } else {
@@ -734,7 +752,7 @@ function updateFiberPreview(){
   const amt=parseTrNum(amtEl?.value)||0;
   if(out) out.textContent=`${fmt(calcFiberAmt(amt,pct))} ₺`;
 }
-function pickQuickBank(v){ setSelectValue('q-bank',v); buildCatGrid(); }
+function pickQuickBank(v){ setSelectValue('q-bank',v); S.lastBank=v; save(); buildCatGrid(); }
 function pickIncomeBank(v){ setSelectValue('gi-bank',v); renderIncome(); }
 function pickStmtBank(v){ setSelectValue('stmt-bank',v); renderChoiceChips('stmt-bank-chips',[{value:'İşbank',label:'İşbank'},{value:'VakıfBank',label:'VakıfBank'},{value:'Enpara',label:'Enpara'}],v,"pickStmtBank('__VAL__')"); }
 function renderThemeSelection(){
@@ -748,6 +766,7 @@ function quickPad(v){
   if(!el) return;
   if(v==='del') el.value=el.value.slice(0,-1);
   else el.value += v===',' && el.value.includes(',') ? '' : v;
+  renderLiveBudget();
 }
 function normalizeTr(str){
   return String(str||'')
@@ -897,12 +916,18 @@ function parseStatementFallback(text,bank){
   }
   return rows;
 }
+// Son içe aktarımda çift olduğu için atlanan satırlar — sonuç metninde listelenir.
+let LAST_SKIPPED=[];
 function importStatementRows(rows){
   // Ekstre giriş tarihi override: orijinal transaction tarihlerini yoksay,
   // hepsini bugüne kaydet. Takvimde tek kırmızı nokta, bütçe kategorileri korunur.
   const today=new Date().toISOString().slice(0,10);
+  // Manuel giriş artık birincil yol: aynı harcamanın hem elle hem ekstreden
+  // girilmesi asıl risk. Olası çiftler varsayılan olarak İÇE AKTARILMAZ.
+  const dupIdx=new Set(CALC.findDuplicates(S.expenses, rows||[], today));
+  LAST_SKIPPED=[];
   let added=0;
-  rows.forEach(row=>{
+  (rows||[]).forEach((row,i)=>{
     const clean={
       id:row.id||genId(),
       d:today,  // orijinal row.d yoksayıldı
@@ -912,11 +937,20 @@ function importStatementRows(rows){
       bank:(row.bank||'').trim()
     };
     if(!clean.desc||!clean.amt||!clean.bank) return;
+    if(dupIdx.has(i)){ LAST_SKIPPED.push(clean); return; }
     S.userExp.push(clean);
     S.expenses.push(clean);
     added++;
   });
   return added;
+}
+
+// Atlanan satırların sonuç metnine eklenecek özeti
+function skippedSummary(){
+  if(!LAST_SKIPPED.length) return '';
+  return `\n\n⚠ ${LAST_SKIPPED.length} satır olası çift kayıt olduğu için atlandı (aynı tutar, ±1 gün):\n`
+    + LAST_SKIPPED.map(r=>`  ${r.desc}: ${fmt(r.amt)} ₺`).join('\n')
+    + `\nGerçekten ayrı harcamalarsa Gider ekranından elle ekleyebilirsin.`;
 }
 function renderSubsection(sec){
   // Gemini (model) çıktısı GÜVENİLMEZ kabul edilir — başlık/gövde/maddeler escAttr ile kaçışlanır.
@@ -959,12 +993,22 @@ function renderAnalysisHtml(text){
   return sections.map(renderSubsection).join('');
 }
 
-function toast(msg,isErr){
+let TOAST_TIMER=null;
+// onUndo verilirse toast'a "geri al" düğmesi eklenir ve süre 6 sn'ye uzar —
+// tek dokunuşla kaydeden akışlarda (Tekrarla çipi) yanlış girişin çıkışı bu.
+function toast(msg,isErr,onUndo){
   const t=document.getElementById('toast');
-  t.textContent=msg;
   t.style.background=isErr?'#8B2020':'#2A7A52';
+  if(typeof onUndo==='function'){
+    t.innerHTML=escapeHtml(msg)+` <button type="button" class="toast-undo">geri al</button>`;
+    const b=t.querySelector('.toast-undo');
+    if(b) b.onclick=()=>{ t.classList.remove('show'); onUndo(); };
+  } else {
+    t.textContent=msg;
+  }
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
+  if(TOAST_TIMER) clearTimeout(TOAST_TIMER);
+  TOAST_TIMER=setTimeout(()=>t.classList.remove('show'), onUndo?6000:2500);
 }
 // getAlerts() kaldırıldı — yerini CALC.attentionSignals() + renderAttention() aldı.
 
@@ -980,6 +1024,7 @@ function effectiveMonthLimit(){
 }
 
 function renderHero(m){
+  renderAllowance(m); // erken return'ler var, en başta çağrılmalı
   const monthInc=monthI(m), monthExp=monthP(m), monthNet=monthInc-monthExp;
 
   const lbl=document.getElementById('hero-month-label');
@@ -1023,6 +1068,25 @@ function renderHero(m){
     stat.style.color=pct>100?'var(--neg)':'var(--pos)';
   }
   if(targ) targ.textContent=`${fmt(lim)} ₺ limit${S.monthLimit!=null?'':' (otomatik)'}`;
+}
+
+// Bugün harcanabilir = (aylık limit − bu ayın gideri) ÷ ayın kalan günü.
+// Yalnızca içinde bulunulan ay görüntülenirken ve limit tanımlıyken gösterilir.
+function renderAllowance(m){
+  const el=document.getElementById('allowance-line');
+  if(!el) return;
+  if(m!==CUR_IDX){ el.style.display='none'; el.innerHTML=''; return; }
+  const today=new Date().toISOString().slice(0,10);
+  const a=CALC.dailyAllowance(effectiveMonthLimit(), monthP(m), today);
+  if(!a){ el.style.display='none'; el.innerHTML=''; return; }
+  el.style.display='';
+  if(a.remaining<=0){
+    el.className='allowance-line over';
+    el.innerHTML=`Aylık limit aşıldı · <strong class="num">${fmt(Math.abs(a.remaining))} ₺</strong>`;
+    return;
+  }
+  el.className='allowance-line';
+  el.innerHTML=`Bugün harcanabilir <strong class="num">${fmt(a.perDay)} ₺</strong> <span class="allowance-sub">${fmt(a.remaining)} ₺ ÷ ${a.daysLeft} gün</span>`;
 }
 
 // Hedef çubuğuna dokununca aylık toplam limiti düzenle
@@ -1253,6 +1317,7 @@ function renderDash(){
   const monthKey = MK[m];
 
   renderHero(m);
+  renderSubsStatus(monthKey);
   renderDistribution(m);
   renderAttention(m);
 
@@ -1323,6 +1388,13 @@ function renderDashCalendar(monthKey){
     if(c.cutDay){ (cardMarks[c.cutDay]=cardMarks[c.cutDay]||[]).push({color:c.color||'#888',type:'cut',name:c.name||c.bank}); }
     if(c.dueDay){ (cardMarks[c.dueDay]=cardMarks[c.dueDay]||[]).push({color:c.color||'#888',type:'due',name:c.name||c.bank}); }
   });
+  // Abonelik tahsilat günleri — kart noktalarından ayrışsın diye içi boş halka
+  const subMarks={}; // {day: {count, allPaid}}
+  CALC.subsStatus(S.subs||[], monthKey, todayIso).rows.forEach(r=>{
+    const e=subMarks[r.day]=subMarks[r.day]||{count:0, allPaid:true};
+    e.count++;
+    if(r.state!=='paid') e.allPaid=false;
+  });
   // Current month
   for(let d=1;d<=daysInMonth;d++){
     const iso=`${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
@@ -1335,7 +1407,9 @@ function renderDashCalendar(monthKey){
     const marks=cardMarks[d]||[];
     const title=marks.map(m=>`${m.name} ${m.type==='cut'?'ekstre kesim':'son ödeme'}`).join(' · ');
     const cardDots=marks.slice(0,3).map(m=>`<span class="dot card-dot-mark ${m.type==='cut'?'d-cut':'d-due'}" style="--cc:${m.color}" title="${title}"></span>`).join('');
-    html+=`<div class="${cls.join(' ')}" ${title?`title="${title}"`:''} onclick="selectDay('${iso}')"><span class="num">${d}</span><span class="dots">${dots}${cardDots}</span></div>`;
+    const sm=subMarks[d];
+    const subDot = sm ? `<span class="dot sub-dot-mark ${sm.allPaid?'paid':''}" title="${sm.count} abonelik"></span>` : '';
+    html+=`<div class="${cls.join(' ')}" ${title?`title="${title}"`:''} onclick="selectDay('${iso}')"><span class="num">${d}</span><span class="dots">${dots}${cardDots}${subDot}</span></div>`;
   }
   // Next month head (fill to 6 rows = 42 cells)
   const totalCells=startOffset+daysInMonth;
@@ -1399,6 +1473,20 @@ function renderDayList(){
   const cardEventsHtml = cardEvents.length
     ? `<div class="day-card-events">${cardEvents.map(ev=>`<div class="day-card-event"><span class="card-dot" style="background:${ev.color||'#888'}"></span><span class="day-card-event-name">${escAttr(ev.name)}</span><span class="day-card-event-type">${ev.type==='cut'?'ekstre kesim':'SON ÖDEME'}</span></div>`).join('')}</div>`
     : '';
+  // O güne düşen abonelikler — geçmiş ve gelecek günler için de görünür
+  const monthKeyOfDay=iso.slice(0,7);
+  const todayIsoNow=new Date().toISOString().slice(0,10);
+  const daySubs=CALC.subsStatus(S.subs||[], monthKeyOfDay, todayIsoNow).rows.filter(r=>r.dueIso===iso);
+  const subEventsHtml = daySubs.length
+    ? `<div class="day-sub-events">${daySubs.map(r=>{
+        const act = r.state==='paid'
+          ? `<button type="button" class="sub-act undo" onclick="unpaySub('${escAttr(r.id)}','${escAttr(monthKeyOfDay)}')">geri al</button>`
+          : `<button type="button" class="sub-act pay" onclick="paySub('${escAttr(r.id)}','${escAttr(monthKeyOfDay)}')">Ödedim</button>`;
+        return `<div class="day-sub-event"><span class="sub-ring ${r.state==='paid'?'paid':''}"></span>`
+          + `<span class="day-sub-name">${escapeHtml(r.name||'—')}</span>`
+          + `<span class="day-sub-amt num">${fmt(r.amt)} ₺</span>${act}</div>`;
+      }).join('')}</div>`
+    : '';
   const head=`
     <div class="day-list-head">
       <span class="day-list-title">${parseInt(d)} ${mNames[parseInt(mo)-1]}</span>
@@ -1406,7 +1494,7 @@ function renderDayList(){
     </div>`;
 
   if(!rows.length){
-    list.innerHTML=head+cardEventsHtml+`<div class="day-empty">Bu gün için işlem kaydı yok.</div>`;
+    list.innerHTML=head+cardEventsHtml+subEventsHtml+`<div class="day-empty">Bu gün için işlem kaydı yok.</div>`;
     return;
   }
 
@@ -1432,7 +1520,7 @@ function renderDayList(){
     </div>`;
   }).join('');
 
-  list.innerHTML=head+cardEventsHtml+body;
+  list.innerHTML=head+cardEventsHtml+subEventsHtml+body;
 }
 
 function navDashMonth(delta){
@@ -1482,6 +1570,9 @@ function loadTheme(){
 // QUICK ENTRY
 // ══════════════════════════════════════════════════════════════
 function buildCatGrid(){
+  // Son kullanılan kaynak seçili gelsin — her girişte banka seçmek sürtünmeydi
+  const bankSel=document.getElementById('q-bank');
+  if(bankSel && S.lastBank && bankSel.value!==S.lastBank) bankSel.value=S.lastBank;
   document.getElementById('cat-grid').innerHTML=getVisibleCats().map(c=>`
     <div class="cat-tile ${c.id===S.selCat?'on':''}" onclick="selCat('${c.id}')"
       style="${c.id===S.selCat?`border-color:var(--ink);box-shadow:0 0 0 2px var(--accent-ring);`:''}">
@@ -1492,7 +1583,35 @@ function buildCatGrid(){
     {value:'Havale',label:'Havale'},{value:'Nakit',label:'Nakit'},{value:'İşbank',label:'İşbank'},{value:'Enpara',label:'Enpara'},{value:'VakıfBank',label:'VakıfBank'}
   ], document.getElementById('q-bank').value, "pickQuickBank('__VAL__')");
 }
-function selCat(id){S.selCat=id;buildCatGrid();}
+function selCat(id){S.selCat=id;buildCatGrid();renderLiveBudget();}
+
+// Girerken canlı geri bildirim. Bilgi verir, ENGELLEMEZ — Kaydet hiçbir koşulda kilitlenmez.
+function renderLiveBudget(){
+  const el=document.getElementById('live-budget');
+  if(!el) return;
+  const cat=S.selCat;
+  const meta=catMeta(cat)||{};
+  const spent=catMonth(cat,CUR_IDX); // canlı geri bildirim her zaman içinde bulunulan ay için
+  const limit=Number(S.budgets[cat])||0;
+  const typed=parseTrNum((document.getElementById('q-amt')||{}).value||'');
+  const amt=Number.isFinite(typed)?typed:0;
+
+  if(!limit){
+    el.className='live-budget';
+    el.innerHTML=`<div class="lb-head"><span>${escapeHtml(meta.label||cat)} · bu ay ${fmt(spent)} ₺</span>`
+      + `<button type="button" class="lb-set" onclick="openCatLimitEditor('${escAttr(cat)}')">limit yok · belirle</button></div>`;
+    return;
+  }
+  const a=CALC.afterEntry(spent, limit, amt);
+  const barPct=Math.min(a.pct,100);
+  const tail = a.remaining>=0
+    ? (amt>0 ? `bu girişten sonra: ${fmt(a.remaining)} ₺ kalır` : `${fmt(limit-spent)} ₺ kaldı`)
+    : `${fmt(Math.abs(a.remaining))} ₺ aşım`;
+  el.className='live-budget lb-'+a.level;
+  el.innerHTML=`<div class="lb-head"><span>${escapeHtml(meta.label||cat)} · bu ay ${fmt(spent)} / ${fmt(limit)} ₺</span><span class="num">%${a.pct}</span></div>`
+    + `<div class="lb-track"><div class="lb-fill" style="width:${barPct}%"></div></div>`
+    + `<div class="lb-tail">${tail}</div>`;
+}
 
 function escAttr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -1744,6 +1863,49 @@ function clearBudgetRow(id){
   save(); renderBudget();
   toast('Bütçe sıfırlandı');
 }
+// Limitleri tahminle değil kendi verinle oturt: son 3 tam ayın medyanı.
+// Medyan seçildi çünkü tek seferlik büyük harcama ortalamayı yanıltır.
+function renderLimitSuggestions(){
+  const el=document.getElementById('limit-suggest-panel');
+  if(!el) return;
+  const cats=getVisibleCats().filter(c=>c.id!=='uyap').map(c=>c.id);
+  const sug=CALC.suggestLimits(S.expenses, MK, CUR_IDX, cats, 3);
+  const ids=Object.keys(sug).filter(id=>sug[id]>0);
+  if(!ids.length){ el.innerHTML=''; return; }
+  el.innerHTML=`<div class="sug-panel">`
+    + `<div class="sug-head"><span>Gerçek harcamandan limit önerisi</span>`
+    + `<button type="button" class="btn btn-secondary sug-all" onclick="applyAllSuggestions()">Hepsini uygula</button></div>`
+    + `<div class="sug-note">Son 3 tam ayın medyanı. İçinde bulunulan ay hesaba katılmaz.</div>`
+    + ids.map(id=>{
+        const cur=Number(S.budgets[id])||0;
+        return `<div class="sug-row">${monoChip(id,'sm')}`
+          + `<span class="sug-name">${escapeHtml(catMeta(id).label||id)}</span>`
+          + `<span class="sug-cur num">${cur?fmt(cur)+' ₺':'—'}</span>`
+          + `<span class="sug-arrow">→</span>`
+          + `<span class="sug-new num">${fmt(sug[id])} ₺</span>`
+          + `<button type="button" class="sug-apply" onclick="applySuggestion('${escAttr(id)}',${sug[id]})">Uygula</button>`
+          + `</div>`;
+      }).join('')
+    + `</div>`;
+}
+
+function applySuggestion(catId, value){
+  S.budgets[catId]=+value||0;
+  save(); renderDash(); renderLimitSuggestions(); renderCatManager&&renderCatManager();
+  toast(`${catMeta(catId).label} limiti ${fmt(value)} ₺`);
+}
+
+function applyAllSuggestions(){
+  const cats=getVisibleCats().filter(c=>c.id!=='uyap').map(c=>c.id);
+  const sug=CALC.suggestLimits(S.expenses, MK, CUR_IDX, cats, 3);
+  const ids=Object.keys(sug).filter(id=>sug[id]>0);
+  if(!ids.length) return;
+  if(!confirm(`${ids.length} kategorinin limiti önerilen değerlerle güncellenecek. Devam edilsin mi?`)) return;
+  ids.forEach(id=>{ S.budgets[id]=sug[id]; });
+  save(); renderDash(); renderLimitSuggestions(); renderCatManager&&renderCatManager();
+  toast(`✓ ${ids.length} limit güncellendi`);
+}
+
 function resetBudgetsToDefault(){
   if(!confirm('Tüm bütçe limitleri varsayılan değerlere dönecek. Devam?')) return;
   S.budgets={...DEF_BUD};
@@ -1754,6 +1916,102 @@ function resetBudgetsToDefault(){
 // ══════════════════════════════════════════════════════════════
 // ABONELİK CRUD + KEŞİF
 // ══════════════════════════════════════════════════════════════
+// ── Özet ekranı abonelik durum kartı ──────────────────────────
+// Araçlar'daki renderSubs() CRUD listesidir; bu onun canlı, durumlu yüzü.
+// Otomatik gider kaydı YOK — her ödeme kullanıcının "Ödedim" onayıyla oluşur.
+function renderSubsStatus(monthKey){
+  const body=document.getElementById('subs-body');
+  const hint=document.getElementById('subs-hint');
+  if(!body) return;
+  const today=new Date().toISOString().slice(0,10);
+  const st=CALC.subsStatus(S.subs||[], monthKey, today);
+  const isCurMonth = (monthKey === MK[CUR_IDX]);
+
+  if(!st.count){
+    if(hint) hint.textContent='';
+    body.innerHTML=`<div class="empty-line">Abonelik tanımlı değil. <button type="button" class="linky" onclick="openSubsTool()">+ Ekle</button></div>`;
+    return;
+  }
+  if(hint) hint.textContent=`${fmt(st.total)} ₺`;
+
+  const head=`<div class="subs-sum">`
+    + `<span class="subs-sum-item paid">${st.paidCount} ödendi</span>`
+    + `<span class="subs-sum-item pending">${st.count-st.paidCount} bekliyor</span>`
+    + `<span class="subs-sum-amt num">${fmt(st.pendingTotal)} ₺ kaldı</span>`
+    + `</div>`;
+
+  body.innerHTML = head + st.rows.map(r=>{
+    const badge = r.state==='paid'
+      ? `<span class="sub-state paid">✓ ödendi</span>`
+      : r.state==='late'
+        ? `<span class="sub-state late">${isCurMonth?'gecikmiş':'ödenmedi'}</span>`
+        : `<span class="sub-state due">bekliyor</span>`;
+    const act = r.state==='paid'
+      ? `<button type="button" class="sub-act undo" onclick="unpaySub('${escAttr(r.id)}','${escAttr(monthKey)}')">geri al</button>`
+      : `<button type="button" class="sub-act pay" onclick="paySub('${escAttr(r.id)}','${escAttr(monthKey)}')">Ödedim</button>`;
+    return `<div class="sub-line ${r.state}">`
+      + monoChip(r.cat||'dijital','sm')
+      + `<div class="sub-line-info">`
+      +   `<div class="sub-line-name">${escapeHtml(r.name||'—')}${r.pending?' <span class="sub-pending">yeni</span>':''}</div>`
+      +   `<div class="sub-line-meta">ayın ${r.day}'i · ${escapeHtml(r.bank||'—')}</div>`
+      + `</div>`
+      + `<div class="sub-line-right"><span class="sub-line-amt num">${fmt(r.amt)} ₺</span>${badge}${act}</div>`
+      + `</div>`;
+  }).join('');
+}
+
+// "Ödedim" → gerçek bir gider kaydı oluşturur (manuel giriş akışıyla aynı yere yazar).
+function paySub(id, monthKey){
+  const s=(S.subs||[]).find(x=>x.id===id);
+  if(!s) return;
+  s.paid=s.paid||{};
+  if(s.paid[monthKey]) return; // çift basma koruması
+  const meta=catMeta(s.cat);
+  const d=CALC.subDueDate(monthKey, s.dayOfMonth);
+  const exp={
+    id:genId(), d:d||new Date().toISOString().slice(0,10),
+    desc:s.name||(meta&&meta.label)||'Abonelik',
+    cat:s.cat||'dijital', amt:+s.amt||0, bank:s.bank||'Enpara',
+    subId:s.id // hangi abonelikten geldiği izlenebilsin
+  };
+  S.userExp.push(exp); S.expenses.push(exp);
+  s.paid[monthKey]={expId:exp.id, at:new Date().toISOString()};
+  if(s.pending) s.pending=false; // ödeme onayı, aday onayı yerine de geçer
+  save(); renderDash(); renderSubs(); renderTxn&&renderTxn();
+  toast(`✓ ${exp.desc} — ${fmt(exp.amt)} ₺ gider kaydedildi`);
+}
+
+function unpaySub(id, monthKey){
+  const s=(S.subs||[]).find(x=>x.id===id);
+  if(!s||!s.paid||!s.paid[monthKey]) return;
+  const expId=s.paid[monthKey].expId;
+  S.userExp=S.userExp.filter(e=>e.id!==expId);
+  S.expenses=S.expenses.filter(e=>e.id!==expId);
+  delete s.paid[monthKey];
+  save(); renderDash(); renderSubs(); renderTxn&&renderTxn();
+  toast('Geri alındı');
+}
+
+// Bir gider silindiğinde ona bağlı ödeme işaretini temizler — durum kartı ile
+// gerçek kayıtlar birbirinden kopmasın.
+function clearSubPaidByExp(expId){
+  (S.subs||[]).forEach(s=>{
+    if(!s.paid) return;
+    Object.keys(s.paid).forEach(k=>{
+      if(s.paid[k] && s.paid[k].expId===expId) delete s.paid[k];
+    });
+  });
+}
+
+// Araçlar > Abonelikler panelini açar
+function openSubsTool(){
+  S.openTool='abonelik';
+  save();
+  go('more', document.getElementById('nb-more'));
+  const el=document.getElementById('tool-abonelik');
+  if(el) el.scrollIntoView({block:'start'});
+}
+
 function renderSubs(){
   const el=document.getElementById('sub-list');
   if(!el) return;
@@ -1827,7 +2085,7 @@ function saveSubForm(){
     toast('✓ Güncellendi');
   }else{
     S.subs=S.subs||[];
-    S.subs.push({id:genId(),name,amt,cat,bank,dayOfMonth:day,active,source:'manual',pending:false,firstSeen:new Date().toISOString().slice(0,10)});
+    S.subs.push({id:genId(),name,amt,cat,bank,dayOfMonth:day,active,source:'manual',pending:false,paid:{},firstSeen:new Date().toISOString().slice(0,10)});
     toast('✓ Abonelik eklendi');
   }
   save(); closeSubForm(); renderSubs();
@@ -1989,6 +2247,7 @@ function detectSubscriptions(){
       active:true,
       source:'auto',
       pending:true,
+      paid:{},
       firstSeen:rows[0].d,
       lastSeen:sample.d
     });
@@ -2004,19 +2263,74 @@ function detectSubscriptions(){
 function quickAdd(){
   const amt=parseTrNum(document.getElementById('q-amt').value);
   const d=document.getElementById('q-date').value;
-  const desc=document.getElementById('q-desc').value.trim();
   const bank=document.getElementById('q-bank').value;
+  // Açıklama artık opsiyonel — boşsa kategori etiketi yazılır. Günlük giriş
+  // alışkanlığında her seferinde metin yazmak en büyük sürtünmeydi.
+  const typed=document.getElementById('q-desc').value.trim();
+  const desc=typed||((catMeta(S.selCat)||{}).label)||'Harcama';
   if(!amt){toast('Tutar girin',true);return;}
   if(!d){toast('Tarih seçin',true);return;}
-  if(!desc){toast('Açıklama girin',true);return;}
   const newExp = {id:genId(),d,desc,cat:S.selCat,amt,bank};
   S.userExp.push(newExp);
   S.expenses.push(newExp);
+  S.lastBank=bank;
   save();
   toast(`✓ ${desc} — ${fmt(amt)} ₺ eklendi`);
+  // Arka arkaya giriş: yalnızca tutar ve açıklama temizlenir.
+  // Kategori, kaynak ve tarih korunur; odak tutara döner.
   document.getElementById('q-amt').value='';
   document.getElementById('q-desc').value='';
-  renderTxn();renderDash();
+  const amtEl=document.getElementById('q-amt');
+  if(amtEl) amtEl.focus();
+  renderTxn();renderDash();renderRepeatChips();renderLiveBudget();
+}
+
+// ── Tekrarla şeridi ───────────────────────────────────────────
+// Sık Havale'den farkı: kullanıcı tanımlamaz, son 30 günün kendi girişlerinden beslenir.
+let REPEAT_CACHE=[];
+function renderRepeatChips(){
+  const el=document.getElementById('repeat-strip');
+  const card=document.getElementById('repeat-card');
+  if(!el) return;
+  const since=new Date(); since.setDate(since.getDate()-30);
+  const sinceIso=since.toISOString().slice(0,10);
+  const groups={};
+  S.expenses.filter(e=>e.d>=sinceIso&&e.cat!=='uyap').forEach(e=>{
+    const key=`${(e.desc||'').trim()}|${e.cat}|${+e.amt||0}`;
+    if(!groups[key]) groups[key]={desc:e.desc,cat:e.cat,amt:+e.amt||0,bank:e.bank,n:0,last:e.d};
+    groups[key].n++;
+    if(e.d>groups[key].last){ groups[key].last=e.d; groups[key].bank=e.bank; }
+  });
+  const top=Object.values(groups).sort((a,b)=> b.n-a.n || String(b.last).localeCompare(String(a.last))).slice(0,6);
+  REPEAT_CACHE=top;
+  if(!top.length){
+    if(card) card.style.display='none';
+    el.innerHTML='';
+    return;
+  }
+  if(card) card.style.display='';
+  el.innerHTML=top.map((g,i)=>`<button type="button" class="repeat-chip" onclick="repeatEntry(${i})">`
+    + monoChip(g.cat,'sm')
+    + `<span class="repeat-chip-body"><span class="repeat-chip-desc">${escapeHtml(g.desc||'—')}</span>`
+    + `<span class="repeat-chip-amt num">${fmt(g.amt)} ₺</span></span></button>`).join('');
+}
+
+function repeatEntry(i){
+  const g=REPEAT_CACHE[i];
+  if(!g) return;
+  const exp={id:genId(),d:new Date().toISOString().slice(0,10),desc:g.desc,cat:g.cat,amt:g.amt,bank:g.bank||S.lastBank||'Havale'};
+  S.userExp.push(exp); S.expenses.push(exp);
+  save();
+  toast(`✓ ${exp.desc} — ${fmt(exp.amt)} ₺`, false, ()=>undoEntry(exp.id));
+  renderTxn();renderDash();renderRepeatChips();
+}
+
+function undoEntry(id){
+  S.userExp=S.userExp.filter(e=>e.id!==id);
+  S.expenses=S.expenses.filter(e=>e.id!==id);
+  clearSubPaidByExp(id);
+  save(); renderTxn(); renderDash(); renderRepeatChips();
+  toast('Geri alındı');
 }
 
 // Legacy — quick-recents kartı kaldırıldı, renderTxn artık işlemleri gösteriyor
@@ -2035,6 +2349,7 @@ function delExp(id){
   if(!confirm(`Bu gider kaydı silinsin mi?${t?`\n${t.desc||''} · ${fmt(t.amt)} ₺ · ${t.d||''}`:''}`)) return;
   S.userExp=S.userExp.filter(e=>e.id!==id);
   S.expenses=S.expenses.filter(e=>e.id!==id);
+  clearSubPaidByExp(id);
   save();renderTxn();renderDash();
 }
 
@@ -2304,7 +2619,7 @@ Banka alanı daima ${bank} olsun.`,
       const added=importStatementRows(rows);
       save();
       const todayStr=new Date().toLocaleDateString('tr-TR');
-      resultEl.textContent=`✓ Gemini ile ${added} kalem ${todayStr} tarihine kaydedildi.\nTakvimde tek kırmızı nokta · bütçe kategorileri güncellendi.\n\n`+rows.map(t=>`  ${t.desc}: ${fmt(t.amt)} ₺`).join('\n');
+      resultEl.textContent=`✓ Gemini ile ${added} kalem ${todayStr} tarihine kaydedildi.\nTakvimde tek kırmızı nokta · bütçe kategorileri güncellendi.\n\n`+rows.map(t=>`  ${t.desc}: ${fmt(t.amt)} ₺`).join('\n')+skippedSummary();
       document.getElementById('stmt-text').value='';
       toast(`✓ ${added} kalem eklendi`);
       renderDash();
@@ -2317,7 +2632,7 @@ Banka alanı daima ${bank} olsun.`,
       if(added){
         save();
         const todayStr=new Date().toLocaleDateString('tr-TR');
-        resultEl.textContent=`✓ Yerel parser ile ${added} kalem ${todayStr} tarihine kaydedildi.\nTakvimde tek kırmızı nokta · bütçe kategorileri güncellendi.\n\n`+fallbackRows.map(t=>`  ${t.desc}: ${fmt(t.amt)} ₺`).join('\n');
+        resultEl.textContent=`✓ Yerel parser ile ${added} kalem ${todayStr} tarihine kaydedildi.\nTakvimde tek kırmızı nokta · bütçe kategorileri güncellendi.\n\n`+fallbackRows.map(t=>`  ${t.desc}: ${fmt(t.amt)} ₺`).join('\n')+skippedSummary();
         document.getElementById('stmt-text').value='';
         toast(`✓ ${added} kalem eklendi`);
         renderDash();
@@ -2334,7 +2649,7 @@ Banka alanı daima ${bank} olsun.`,
     if(added){
       save();
       const todayStr=new Date().toLocaleDateString('tr-TR');
-      resultEl.textContent=`⚠ Gemini hatası: ${friendlyGeminiError(e)}\n\nYerel parser ile ${added} kalem ${todayStr} tarihine kaydedildi.\n\n`+fallbackRows.map(t=>`  ${t.desc}: ${fmt(t.amt)} ₺`).join('\n');
+      resultEl.textContent=`⚠ Gemini hatası: ${friendlyGeminiError(e)}\n\nYerel parser ile ${added} kalem ${todayStr} tarihine kaydedildi.\n\n`+fallbackRows.map(t=>`  ${t.desc}: ${fmt(t.amt)} ₺`).join('\n')+skippedSummary();
       document.getElementById('stmt-text').value='';
       toast(`✓ Fallback ile ${added} kalem eklendi`);
       renderDash();
@@ -2764,7 +3079,7 @@ function renderTools(){
   if(S.openTool==='kart')     renderCards();
   if(S.openTool==='findeks')  renderFindeks();
   if(S.openTool==='abonelik') renderSubs();
-  if(S.openTool==='kategori'){ renderCatManager(); renderBudget(); }
+  if(S.openTool==='kategori'){ renderCatManager(); renderBudget(); renderLimitSuggestions(); }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2780,7 +3095,7 @@ function go(screen,btn){
     renderDash();
   }
   else if(screen==='quick'){
-    buildCatGrid();buildFavList();renderTxn();
+    buildCatGrid();buildFavList();renderTxn();renderRepeatChips();renderLiveBudget();
     const d=document.getElementById('q-date');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);
     const qd=document.getElementById('quick-date-display');
     if(qd) qd.textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});

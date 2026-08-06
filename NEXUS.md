@@ -11,10 +11,10 @@ Tek tarayıcıda çalışan, ekstre günlerinde manuel + AI destekli toplu giri�
 [2] TEKNOLOJİ & ARAÇLAR
 - Saf HTML / CSS / JavaScript (framework yok, build adımı yok)
 - Dört dosyalı statik yapı: index.html (iskelet) + app.css + calc.js (saf hesaplar) + app.js (render/etkileşim)
-- node test.js — bağımlılıksız birim testleri (50 test, calc.js kapsamı)
+- node test.js — bağımlılıksız birim testleri (100 test, calc.js kapsamı)
 - Chart.js (CDN üzerinden, 6 aylık trend grafiği)
 - Google Fonts (CDN)
-- localStorage (veri kalıcılığı — `ay_exp`, `ay_inc`, `ay_bud`, `ay_gemini_key`)
+- localStorage (veri kalıcılığı — `ay_exp`, `ay_inc`, `ay_bud`, `ay_subs`, `ay_lastbank`, `ay_gemini_key`)
 - Gemini API 2.5 Flash (tarayıcıdan REST çağrısı, ekstre parse + harcama analizi)
 - Yerel fallback parser (Gemini başarısız olursa ekstre satırlarını ayıklar)
 - PWA manifest (`manifest.json`, service worker yok)
@@ -36,7 +36,14 @@ Tek tarayıcıda çalışan, ekstre günlerinde manuel + AI destekli toplu giri�
 - Yedekleme: JSON export/import (manuel) [AKTİF]
 
 [4] SONRAKI ADIM
-Ana ekran sadeleştirmesi tamamlandı (9 kart → 5, nav 5 → 4 sekme, Araçlar akordeonu).
+Manuel giriş öncelikli akışa geçildi. Ekstre yükleme birincil giriş yolu olmaktan çıkıp
+mutabakat aracına dönüştü; günlük harcamalar elle giriliyor.
+Eklenenler: Özet ekranında abonelik durum kartı (ödendi/gecikmiş/bekliyor + tek dokunuşla
+"Ödedim" → gerçek gider kaydı), takvimde abonelik halkaları ve gün panelinde abonelik bloğu,
+Hızlı Giriş'te opsiyonel açıklama · Tekrarla şeridi · kaynak hafızası · arka arkaya giriş,
+girerken canlı bütçe şeridi (uyarır, ENGELLEMEZ), hero'da "bugün harcanabilir",
+Araçlar > Kategoriler'de gerçek harcamadan limit önerisi (son 3 tam ayın medyanı),
+ekstre içe aktarımında çift kayıt koruması (aynı tutar ±1 gün → atlanır).
 Sonraki aday: kullanıcının kendi eklediği kategorileri Araçlar > Kategoriler panelinden
 bir üst gruba atayabilmesi (şu an hepsi "Gruplanmamış" altında toplanıyor).
 

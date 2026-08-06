@@ -1779,3 +1779,79 @@ input, select, textarea { font-size: 16px; }
   margin-top: var(--s-3); padding: var(--s-3);
   border: 1px dashed var(--line-2); border-radius: var(--r-s);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   MANUEL GİRİŞ ÖNCELİKLİ AKIŞ — abonelik kartı, tekrarla şeridi,
+   canlı bütçe geri bildirimi, limit önerisi
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Abonelik durum kartı (Özet) ───────────────────────────── */
+.subs-sum { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px; font-size:12px; color:var(--ink-3); }
+.subs-sum-item.paid { color:var(--pos); }
+.subs-sum-item.pending { color:var(--ink-2); }
+.subs-sum-amt { margin-left:auto; font-weight:600; color:var(--ink); }
+.sub-line { display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--line); }
+.sub-line:first-of-type { border-top:none; }
+.sub-line-info { flex:1; min-width:0; }
+.sub-line-name { font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sub-line-meta { font-size:11px; color:var(--ink-3); margin-top:2px; }
+.sub-line-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.sub-line-amt { font-size:13px; font-weight:600; }
+.sub-state { font-size:10px; padding:3px 7px; border-radius:6px; white-space:nowrap; }
+.sub-state.paid { color:var(--pos); background:var(--pos-soft); }
+.sub-state.late { color:var(--neg); background:var(--neg-soft); }
+.sub-state.due  { color:var(--ink-3); background:var(--line); }
+.sub-line.paid { opacity:.6; }
+.sub-act { font-size:11px; padding:5px 11px; border-radius:9px; border:1px solid var(--line-2); background:transparent; color:var(--ink); cursor:pointer; font-family:inherit; }
+.sub-act.pay { border-color:var(--ink); font-weight:600; }
+.sub-act.undo { color:var(--ink-3); }
+
+/* ── Takvim abonelik noktası — kart noktalarından ayrışsın diye halka ── */
+.dot.sub-dot-mark { width:6px; height:6px; border-radius:50%; background:transparent; border:1.5px solid var(--ink-2); box-sizing:border-box; }
+.dot.sub-dot-mark.paid { opacity:.35; }
+.day-sub-events { display:flex; flex-direction:column; gap:8px; padding:10px 0; border-top:1px solid var(--line); }
+.day-sub-event { display:flex; align-items:center; gap:8px; font-size:12px; }
+.sub-ring { width:8px; height:8px; border-radius:50%; border:1.5px solid var(--ink-2); box-sizing:border-box; flex-shrink:0; }
+.sub-ring.paid { opacity:.35; }
+.day-sub-name { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.day-sub-amt { font-weight:600; }
+
+/* ── Tekrarla şeridi (Hızlı Giriş) ─────────────────────────── */
+.repeat-strip { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch; }
+.repeat-chip { display:flex; align-items:center; gap:8px; padding:9px 11px; border:1px solid var(--line-2); border-radius:12px; background:transparent; cursor:pointer; flex-shrink:0; font-family:inherit; color:var(--ink); }
+.repeat-chip:active { background:var(--bg-elev); }
+.repeat-chip-body { display:flex; flex-direction:column; align-items:flex-start; min-width:0; }
+.repeat-chip-desc { font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:132px; }
+.repeat-chip-amt { font-size:11px; color:var(--ink-3); font-weight:600; margin-top:1px; }
+
+/* ── Canlı bütçe şeridi — bilgi verir, ENGELLEMEZ ──────────── */
+.live-budget { margin:14px 0; padding:11px 13px; border:1px solid var(--line-2); border-radius:12px; }
+.live-budget.lb-warn { border-color:var(--warn); }
+.live-budget.lb-over { border-color:var(--neg); }
+.lb-head { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:12px; color:var(--ink-2); }
+.lb-track { height:6px; border-radius:3px; background:var(--line); margin:9px 0 6px; overflow:hidden; }
+.lb-fill { height:100%; background:var(--pos); transition:width .15s ease; }
+.lb-warn .lb-fill { background:var(--warn); }
+.lb-over .lb-fill { background:var(--neg); }
+.lb-tail { font-size:11px; color:var(--ink-3); }
+.lb-over .lb-tail { color:var(--neg); }
+.lb-set { font-size:11px; padding:4px 9px; border-radius:8px; border:1px solid var(--line-2); background:transparent; color:var(--ink-3); cursor:pointer; font-family:inherit; flex-shrink:0; }
+
+/* ── Bugün harcanabilir (hero) ─────────────────────────────── */
+.allowance-line { margin-top:10px; font-size:12px; color:var(--ink-2); }
+.allowance-line.over { color:var(--neg); }
+.allowance-sub { color:var(--ink-3); font-size:11px; }
+
+/* ── Limit önerisi (Araçlar > Kategoriler) ─────────────────── */
+.sug-panel { border:1px solid var(--line-2); border-radius:12px; padding:13px; margin-bottom:14px; }
+.sug-head { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:13px; font-weight:600; margin-bottom:4px; }
+.sug-all { padding:5px 11px; font-size:11px; flex-shrink:0; }
+.sug-note { font-size:11px; color:var(--ink-3); margin-bottom:8px; }
+.sug-row { display:flex; align-items:center; gap:8px; padding:7px 0; border-top:1px solid var(--line); font-size:12px; }
+.sug-name { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sug-cur, .sug-arrow { color:var(--ink-3); }
+.sug-new { font-weight:600; }
+.sug-apply { font-size:11px; padding:5px 11px; border-radius:9px; border:1px solid var(--ink); background:transparent; color:var(--ink); cursor:pointer; font-family:inherit; flex-shrink:0; }
+
+/* ── Toast geri al ─────────────────────────────────────────── */
+.toast-undo { margin-left:10px; font-size:11px; padding:3px 9px; border-radius:7px; border:1px solid currentColor; background:transparent; color:inherit; cursor:pointer; font-family:inherit; }
