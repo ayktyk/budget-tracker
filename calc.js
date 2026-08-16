@@ -118,7 +118,7 @@ var CALC = (function () {
         if (used[c] || out.length >= MAX_SINYAL) return;
         used[c] = 1;
         out.push({
-          kind: 'limit', label: label(c),
+          kind: 'limit', cat: c, label: label(c),
           text: label(c) + ' limiti %' + limitFill(cur[c], budgets[c])
         });
       });
@@ -135,7 +135,7 @@ var CALC = (function () {
         if (used[c] || out.length >= MAX_SINYAL) return;
         used[c] = 1;
         out.push({
-          kind: 'artis', label: label(c),
+          kind: 'artis', cat: c, label: label(c),
           text: label(c) + ' geçen aya göre +' + fmt(cur[c] - (prev[c] || 0)) + ' ₺'
         });
       });
@@ -156,7 +156,7 @@ var CALC = (function () {
       if (avg > 0 && cur[c] > avg * (1 + ORT_PCT_ESIK / 100)) {
         used[c] = 1;
         out.push({
-          kind: 'ortalama', label: label(c),
+          kind: 'ortalama', cat: c, label: label(c),
           text: label(c) + ' 6 ay ortalamasının %' + Math.round(((cur[c] - avg) / avg) * 100) + ' üstünde'
         });
       }

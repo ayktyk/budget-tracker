@@ -1960,3 +1960,32 @@ button.day-sub-event { width:100%; text-align:left; background:transparent; bord
 .tx-selected { background:color-mix(in srgb, var(--ink) 5%, transparent); border-radius:10px; }
 .tx-tags { font-size:10px; color:var(--ink-3); }
 .tx-auto { font-size:10px; color:var(--ink-3); margin-left:5px; }
+
+/* ── Dikkat satırları tıklanabilir + kategori dökümü ─────────── */
+button.attn-row { width:100%; text-align:left; background:transparent; border:none; font:inherit; color:inherit; cursor:pointer; border-radius:8px; }
+button.attn-row:hover { background:color-mix(in srgb, var(--ink) 4%, transparent); }
+.attn-text { flex:1; min-width:0; }
+.attn-go { color:var(--ink-3); font-size:15px; flex:0 0 auto; margin-top:1px; }
+
+.gc-namebtn { display:flex; align-items:center; gap:inherit; background:transparent; border:none; padding:0; font:inherit; color:inherit; cursor:pointer; flex:1; min-width:0; text-align:left; }
+.gc-namebtn .gc-name { text-decoration-line:underline; text-decoration-style:dotted; text-decoration-color:var(--ink-3); text-underline-offset:3px; }
+
+.catdetail-modal { max-height:82vh; overflow-y:auto; }
+.catdetail-modal .fav-modal-head h3 { display:flex; align-items:center; gap:8px; }
+.cd-summary { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; color:var(--ink-2); padding-bottom:10px; border-bottom:1px solid var(--line); }
+.cd-lim { font-size:11px; color:var(--ink-3); }
+.cd-lim.cd-over { color:var(--neg); font-weight:600; }
+.cd-list { display:flex; flex-direction:column; margin-bottom:8px; }
+.cd-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); }
+.cd-row:last-child { border-bottom:none; }
+.cd-date { font-size:11px; color:var(--ink-3); flex:0 0 38px; }
+.cd-info { flex:1; min-width:0; }
+.cd-desc { font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cd-meta { font-size:11px; color:var(--ink-3); margin-top:1px; }
+.cd-amt { font-size:13px; font-weight:600; flex:0 0 auto; }
+.cd-big .cd-amt { color:var(--neg); }
+.cd-big-tag { font-size:9px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--neg); border:1px solid var(--neg); border-radius:99px; padding:1px 6px; margin-left:5px; vertical-align:1px; }
+
+/* Abonelik satırında aylık tutarın altında yıllık maliyet */
+.sub-amt-col { display:flex; flex-direction:column; align-items:flex-end; gap:1px; }
+.sub-line-yr { font-size:10px; color:var(--ink-3); white-space:nowrap; }

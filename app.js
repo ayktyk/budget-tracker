@@ -1278,8 +1278,10 @@ function renderGroupChildren(groupId, m, gmap, carry){
     const overCls=(f!==null&&f>100)?' gc-over':'';
     const carryNote=cAmt!==0?`<span class="gc-carry" title="Devreden bakiye">${cAmt>0?'+':''}${fmt(cAmt)} devir</span>`:'';
     return `<div class="grp-child${overCls}">`
+      + `<button type="button" class="gc-namebtn" onclick="openCatDetail('${escAttr(r.c.id)}',${m})" title="Dökümü gör: hangi tarihte ne harcanmış">`
       + `<span class="gc-icon">${escapeHtml(r.c.icon||'')}</span>`
       + `<span class="gc-name">${escapeHtml(r.c.label)}${carryNote}</span>`
+      + `</button>`
       + `<span class="gc-amt num">${fmt(r.total)} ₺</span>`
       + deltaHtml(d)
       + `<button type="button" class="gc-lim" onclick="openCatLimitEditor('${escAttr(r.c.id)}')" title="Limit belirle">${lim>0?fmt(lim)+' ₺':'limit +'}</button>`
@@ -1442,9 +1444,78 @@ function renderAttention(m){
   if(!sig.length){ card.style.display='none'; body.innerHTML=''; return; }
 
   card.style.display='';
+  // Satıra dokun → o kategorinin o ayki dökümü (hangi tarihte ne harcanmış)
   body.innerHTML=sig.map(s=>
-    `<div class="attn-row attn-${escAttr(s.kind)}"><span class="attn-dot"></span><span>${escapeHtml(s.text)}</span></div>`
+    `<button type="button" class="attn-row attn-${escAttr(s.kind)}" onclick="openCatDetail('${escAttr(s.cat||'diger')}',${m})"><span class="attn-dot"></span><span class="attn-text">${escapeHtml(s.text)}</span><span class="attn-go">›</span></button>`
   ).join('');
+}
+
+// ── Kategori dökümü ───────────────────────────────────────────
+// Dikkat sinyaline veya Bütçe Kategorileri'ndeki kategori satırına dokununca:
+// o kategorinin o ayki tüm kayıtları — tarih, açıklama, kaynak, tutar.
+function openCatDetail(catId, m){
+  const old=document.getElementById('catdetail-modal'); if(old) old.remove();
+  if(m==null||m<0||m>=MK.length) m=(S.dashM!==null)?S.dashM:CUR_IDX;
+  const meta=catMeta(catId);
+  const rows=S.expenses.filter(e=>mIdx(e.d)===m && e.cat===catId)
+    .sort((a,b)=>String(b.d).localeCompare(String(a.d))||String(b.id).localeCompare(String(a.id)));
+  const total=rows.reduce((a,e)=>a+(+e.amt||0),0);
+  const prevTotal=(m>0)?S.expenses.filter(e=>mIdx(e.d)===m-1&&e.cat===catId).reduce((a,e)=>a+(+e.amt||0),0):0;
+  const d=CALC.deltaPct(total, prevTotal);
+  const carry=distCarry(m);
+  const lim=effCatLimit(catId, carry);
+  const f=CALC.limitFill(total, lim);
+  const maxAmt=rows.length?Math.max(...rows.map(e=>+e.amt||0)):0;
+
+  const limLine = lim>0
+    ? `<span class="cd-lim ${f!==null&&f>100?'cd-over':''}">limit ${fmt(lim)} ₺ · ${f!==null&&f>100?fmt(total-lim)+' ₺ aşım':fmt(lim-total)+' ₺ kaldı'}</span>`
+    : `<button type="button" class="linky" onclick="document.getElementById('catdetail-modal').remove();openBudgetEditor('${escAttr(catId)}')">limit belirle</button>`;
+  const prevLine = prevTotal>0
+    ? ` · geçen ay ${fmt(prevTotal)} ₺${d!==null?` (${d>=0?'+':'−'}%${Math.abs(d)})`:''}`
+    : '';
+
+  const list=rows.length?rows.map(e=>{
+    const dd=String(e.d||'').slice(8,10), mm2=String(e.d||'').slice(5,7);
+    const big=rows.length>2 && (+e.amt||0)===maxAmt && maxAmt>0;
+    const metaBits=[escapeHtml(e.bank||'')];
+    if(e.subId) metaBits.push('abonelik');
+    if(e.tags&&e.tags.length) metaBits.push(e.tags.map(t=>'#'+escapeHtml(t)).join(' '));
+    return `<div class="cd-row${big?' cd-big':''}">
+      <span class="cd-date num">${dd}.${mm2}</span>
+      <div class="cd-info"><div class="cd-desc">${escapeHtml(e.desc||meta.label)}${big?' <span class="cd-big-tag">en büyük</span>':''}</div><div class="cd-meta">${metaBits.filter(Boolean).join(' · ')}</div></div>
+      <span class="cd-amt num">${fmt(e.amt)} ₺</span>
+    </div>`;
+  }).join(''):`<div class="empty-line">${MN[m]} ayında bu kategoride kayıt yok.</div>`;
+
+  const html=`
+    <div class="fav-modal-overlay" id="catdetail-modal" onclick="if(event.target===this)this.remove()">
+      <div class="fav-modal catdetail-modal">
+        <div class="fav-modal-head">
+          <h3>${monoChip(catId,'sm')} ${escapeHtml(meta.label)} · ${MN[m]}</h3>
+          <button class="fav-modal-close" onclick="document.getElementById('catdetail-modal').remove()" aria-label="Kapat">×</button>
+        </div>
+        <div class="cd-summary">
+          <span>${rows.length} kayıt · toplam <strong class="num">${fmt(total)} ₺</strong>${prevLine}</span>
+          ${limLine}
+        </div>
+        <div class="cd-list">${list}</div>
+        <div class="fav-modal-actions">
+          <button class="btn btn-secondary" onclick="openCatInTxns('${escAttr(catId)}',${m})">İşlemler'de aç</button>
+          <button class="btn btn-primary" onclick="document.getElementById('catdetail-modal').remove()">Kapat</button>
+        </div>
+      </div>
+    </div>`;
+  const host=document.createElement('div'); host.innerHTML=html; document.body.appendChild(host.firstElementChild);
+}
+
+// Dökümden İşlemler ekranına: ay + kategori filtresi kurulu gider
+function openCatInTxns(catId, m){
+  const modal=document.getElementById('catdetail-modal'); if(modal) modal.remove();
+  S.expM=(m==null)?CUR_IDX:m;
+  S.expC=catId;
+  go('quick', document.getElementById('nb-quick'));
+  const el=document.getElementById('txn-search');
+  if(el) el.scrollIntoView({block:'start'});
 }
 
 // ── 6 aylık trend: tek grafik + iki satır özet ─────────────────
@@ -2313,7 +2384,7 @@ function renderSubsStatus(monthKey){
       +   `<div class="sub-line-name">${escapeHtml(r.name||'—')}${r.pending?' <span class="sub-pending">onay bekliyor</span>':''}</div>`
       +   `<div class="sub-line-meta">ayın ${r.day}'i · ${escapeHtml(r.bank||'—')}</div>`
       + `</div>`
-      + `<div class="sub-line-right"><span class="sub-line-amt num">${fmt(r.amt)} ₺</span>${badge}<span class="sub-edit-hint">✎</span></div>`
+      + `<div class="sub-line-right"><span class="sub-amt-col"><span class="sub-line-amt num">${fmt(r.amt)} ₺</span><span class="sub-line-yr num">yılda ${fmt((+r.amt||0)*12)} ₺</span></span>${badge}<span class="sub-edit-hint">✎</span></div>`
       + `</button>`;
   }).join('') + raisesHtml;
 }
@@ -2373,7 +2444,7 @@ function renderSubs(){
     const pending=s.source==='auto'&&s.pending;
     return `
       <div class="sub-row ${s.active===false?'off':''} ${pending?'pending':''}">
-        <div class="sub-main">${monoChip(s.cat||'dijital','sm')}<div class="sub-info"><div class="sub-name">${escAttr(s.name||'—')} ${pending?'<span class="sub-pending">Onayla</span>':''}</div><div class="sub-meta">${fmt(+s.amt||0)} ₺ · ayın ${s.dayOfMonth||'—'}'i · ${escAttr(s.bank||'—')}</div></div></div>
+        <div class="sub-main">${monoChip(s.cat||'dijital','sm')}<div class="sub-info"><div class="sub-name">${escAttr(s.name||'—')} ${pending?'<span class="sub-pending">Onayla</span>':''}</div><div class="sub-meta">${fmt(+s.amt||0)} ₺ · yılda ${fmt((+s.amt||0)*12)} ₺ · ayın ${s.dayOfMonth||'—'}'i · ${escAttr(s.bank||'—')}</div></div></div>
         <div class="fav-actions">
           ${pending?`<button class="fav-btn" onclick="confirmSub('${s.id}')">Onayla</button>`:`<button class="fav-ic" title="${s.active===false?'Etkinleştir':'Devre dışı'}" onclick="toggleSub('${s.id}')">${s.active===false?'○':'●'}</button>`}
           <button class="fav-ic" title="Düzenle" onclick="openSubForm('${s.id}')">✎</button>

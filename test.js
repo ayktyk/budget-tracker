@@ -118,6 +118,7 @@ const sig4 = CALC.attentionSignals({
 });
 eq(sig4.filter(s => s.label === 'Market').length, 1, 'ayni kategori tek sinyal');
 eq(sig4[0].kind, 'limit', 'oncelik limit asiminda');
+eq(sig4[0].cat, 'market', 'sinyal kategori id tasir (dokununca dokum acilir)');
 
 // Limit yokken buyuk artis 'artis' sinyali uretir
 const sig5 = CALC.attentionSignals({
