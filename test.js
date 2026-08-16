@@ -163,12 +163,14 @@ eq(CALC.subsStatus([], '2026-08', '2026-08-10').count, 0, 'bos liste');
 eq(CALC.subsStatus(null, '2026-08', '2026-08-10').rows, [], 'null liste bos dizi');
 
 console.log('\ndailyAllowance');
-eq(CALC.dailyAllowance(30000, 18000, '2026-08-20'), { remaining:12000, daysLeft:12, perDay:1000 },
+eq(CALC.dailyAllowance(30000, 18000, '2026-08-20'), { remaining:12000, daysLeft:12, committed:0, perDay:1000 },
    '12 gun kaldi, gunluk 1000');
-eq(CALC.dailyAllowance(30000, 18000, '2026-08-31'), { remaining:12000, daysLeft:1, perDay:12000 },
+eq(CALC.dailyAllowance(30000, 18000, '2026-08-31'), { remaining:12000, daysLeft:1, committed:0, perDay:12000 },
    'ayin son gunu tek gun kalir');
-eq(CALC.dailyAllowance(30000, 35000, '2026-08-20'), { remaining:-5000, daysLeft:12, perDay:0 },
+eq(CALC.dailyAllowance(30000, 35000, '2026-08-20'), { remaining:-5000, daysLeft:12, committed:0, perDay:0 },
    'asim varsa gunluk 0');
+eq(CALC.dailyAllowance(30000, 18000, '2026-08-20', 6000), { remaining:6000, daysLeft:12, committed:6000, perDay:500 },
+   'taahhut (abonelik+zarf) kalan tutardan dusulur');
 eq(CALC.dailyAllowance(0, 5000, '2026-08-20'), null, 'limit yoksa null');
 eq(CALC.dailyAllowance(null, 5000, '2026-08-20'), null, 'limit null ise null');
 eq(CALC.dailyAllowance(30000, 0, 'gecersiz'), null, 'gecersiz tarih null');
@@ -182,8 +184,12 @@ eq(CALC.afterEntry(1000, 7000, 500), { after:1500, remaining:5500, pct:21, level
    'rahat bolge ok');
 eq(CALC.afterEntry(6200, 7000, 100), { after:6300, remaining:700, pct:90, level:'warn' },
    'yuzde 90 esigi warn');
-eq(CALC.afterEntry(6100, 7000, 100), { after:6200, remaining:800, pct:89, level:'ok' },
-   'yuzde 89 hala ok');
+eq(CALC.afterEntry(6100, 7000, 100), { after:6200, remaining:800, pct:89, level:'slow' },
+   'yuzde 89 slow (yavasla bandi)');
+eq(CALC.afterEntry(4900, 7000, 0), { after:4900, remaining:2100, pct:70, level:'slow' },
+   'yuzde 70 esigi slow');
+eq(CALC.afterEntry(4800, 7000, 0), { after:4800, remaining:2200, pct:69, level:'ok' },
+   'yuzde 69 hala ok');
 eq(CALC.afterEntry(1000, 0, 500), null, 'limit yoksa null');
 eq(CALC.afterEntry(1000, 7000, NaN), { after:1000, remaining:6000, pct:14, level:'ok' },
    'gecersiz tutar 0 sayilir');
@@ -230,6 +236,144 @@ eq(CALC.findDuplicates([], [{ d:'2026-08-05', amt:565 }], '2026-08-06'), [],
    'mevcut kayit yoksa cift yok');
 eq(CALC.findDuplicates(EXIST, [{ d:'2026-08-05', amt:565 }, { d:'2026-08-09', amt:100 }], '2026-08-06'),
    [0], 'yalnizca eslesen indeks doner');
+
+console.log('\nsubsAutoCharges');
+const AC_SUBS = [
+  { id:'a1', name:'Netflix', amt:190, cat:'dijital', dayOfMonth:5, active:true, paid:{} },
+  { id:'a2', name:'Spotify', amt:99,  dayOfMonth:20, active:true, paid:{} },
+  { id:'a3', name:'iCloud',  amt:40,  dayOfMonth:3,  active:true, paid:{ '2026-08': { expId:'e9' } } },
+  { id:'a4', name:'Pasif',   amt:50,  dayOfMonth:1,  active:false, paid:{} },
+  { id:'a5', name:'Aday',    amt:60,  dayOfMonth:1,  active:true, pending:true, paid:{} },
+  { id:'a6', name:'Silinen', amt:70,  dayOfMonth:2,  active:true, paid:{}, autoSkip:{ '2026-08':true } },
+  { id:'a7', name:'Elle',    amt:120, dayOfMonth:6,  active:true, paid:{} },
+  { id:'a8', name:'Zamli',   amt:150, dayOfMonth:4,  active:true, paid:{} },
+];
+const AC_EXP = [
+  { id:'m1', d:'2026-08-06', amt:120 },
+  { id:'m2', d:'2026-08-04', amt:100, subId:'a8' },
+];
+const ac = CALC.subsAutoCharges(AC_SUBS, '2026-08', '2026-08-10', AC_EXP);
+eq(ac.create, [{ subId:'a1', dueIso:'2026-08-05', amt:190 }],
+   'gunu gelmis issaretsiz abonelik otomatik gider olur');
+eq(ac.link, [
+  { subId:'a7', expId:'m1', dueIso:'2026-08-06' },
+  { subId:'a8', expId:'m2', dueIso:'2026-08-04' },
+], 'elle girilen (tutar/tarih) ve subId bagli kayitlar cift acilmaz, baglanir');
+eq(CALC.subsAutoCharges([], '2026-08', '2026-08-10', []), { create:[], link:[] }, 'bos liste');
+eq(CALC.subsAutoCharges(AC_SUBS, '2026-08', '', AC_EXP), { create:[], link:[] }, 'tarih yoksa islem yok');
+
+console.log('\nsubsCostSummary');
+const CS = [
+  { id:'c1', name:'A', amt:190 },
+  { id:'c2', name:'B', amt:99, active:true },
+  { id:'c3', name:'C', amt:40 },
+  { id:'c4', name:'D', amt:500, active:false },
+];
+const cs = CALC.subsCostSummary(CS);
+eq(cs.count, 3, 'pasif sayilmaz');
+eq(cs.monthly, 329, 'aylik toplam');
+eq(cs.yearly, 3948, 'yillik = aylik x 12');
+eq(cs.daily, 11, 'gunluk yuvarlanmis');
+eq(cs.top.map(t => t.name), ['A', 'B', 'C'], 'en pahali 3');
+eq(CALC.subsCostSummary([]).monthly, 0, 'bos liste sifir');
+
+console.log('\nsubRaises');
+const RS = [
+  { id:'r1', name:'Netflix', amt:190, active:true },
+  { id:'r2', name:'Spotify', amt:120, active:true },
+  { id:'r3', name:'Sabit',   amt:50,  active:true },
+  { id:'r4', name:'Pasif',   amt:900, active:false },
+];
+const REX = [
+  { subId:'r1', d:'2026-06-05', amt:149 },
+  { subId:'r1', d:'2026-07-05', amt:190 },
+  { subId:'r2', d:'2026-07-02', amt:99 },
+  { subId:'r3', d:'2026-07-01', amt:50 },
+];
+eq(CALC.subRaises(RS, REX), [
+  { id:'r1', name:'Netflix', from:149, to:190, pct:28 },
+  { id:'r2', name:'Spotify', from:99,  to:120, pct:21 },
+], 'ardisik kayit zami + tanimli tutar zami; sabit ve pasif yok');
+eq(CALC.subRaises(RS, []), [], 'gecmis kayit yoksa zam tespiti yok');
+
+console.log('\ntransferSuggestions');
+const TS_BUD = { market:7000, yemek:3500, ulasim:1500, spor:0, uyap:5000 };
+const TS_SPENT = { market:6000, yemek:1000, ulasim:1600 };
+eq(CALC.transferSuggestions(TS_BUD, TS_SPENT, 'giyim'), [
+  { cat:'yemek', remaining:2500 },
+  { cat:'market', remaining:1000 },
+], 'pay kalanlar azalan sirali; asan, limitsiz ve uyap yok');
+eq(CALC.transferSuggestions(TS_BUD, TS_SPENT, 'yemek'), [{ cat:'market', remaining:1000 }],
+   'hedef kategori onerilmez');
+eq(CALC.transferSuggestions({}, {}, 'x'), [], 'butce yoksa bos');
+
+console.log('\nmonthReview');
+const MR_EXP = [
+  { d:'2026-07-05', cat:'market', amt:2000 },
+  { d:'2026-07-15', cat:'market', amt:2200 },
+  { d:'2026-07-10', cat:'yemek',  amt:1000 },
+  { d:'2026-06-08', cat:'market', amt:3000 },
+  { d:'2026-06-09', cat:'yemek',  amt:1500 },
+  { d:'2026-07-02', cat:'uyap',   amt:9000 },
+];
+const mr = CALC.monthReview({ expenses:MR_EXP, monthIdx:5, MK:MK, budgets:{ market:4000, yemek:2000 } });
+eq(mr.spent, 5200, 'ay toplami (uyap haric)');
+eq(mr.prevSpent, 4500, 'onceki ay toplami');
+eq(mr.delta, 16, 'yuzde degisim');
+eq(mr.topIncrease, { cat:'market', delta:1200, pct:40 }, 'en buyuk artis');
+eq(mr.over, [{ cat:'market', pct:105, excess:200 }], 'limit asanlar');
+eq(mr.underCount, 1, 'limit altinda kalan sayisi');
+eq(mr.topCats, [{ cat:'market', total:4200 }, { cat:'yemek', total:1000 }], 'en buyuk kategoriler');
+
+console.log('\nmonthProjection');
+const pr = CALC.monthProjection(30000, 15000, '2026-08-15', [{ day:20, amt:1000 }, { day:10, amt:500 }]);
+eq(pr.avgDaily, 1000, 'gunluk ortalama = harcanan / gecen gun');
+eq(pr.projEnd, 32000, 'ay sonu tahmini: ortalama + kalan abonelikler');
+eq(pr.over, 2000, 'limit asim tahmini');
+eq(pr.zeroDay, 30, 'limitin asilacagi ilk gun');
+eq(pr.daysLeft, 16, 'kalan gun');
+eq(CALC.monthProjection(0, 15000, '2026-08-15', []).over, null, 'limit yoksa asim tahmini yok');
+eq(CALC.monthProjection(30000, 0, 'gecersiz', []), null, 'gecersiz tarih null');
+
+console.log('\nrolloverCarry');
+const RO_EXP = [
+  { d:'2026-02-10', cat:'market', amt:2000 },
+  { d:'2026-03-10', cat:'market', amt:3000 },
+  { d:'2026-04-10', cat:'market', amt:1000 },
+];
+eq(CALC.rolloverCarry(RO_EXP, MK, 3, { market:2500 }, { market:true }), { market:1500 },
+   'devir zinciri: +500, -500, +1500 = 1500');
+eq(CALC.rolloverCarry(RO_EXP, MK, 0, { market:2500 }, { market:true }), {}, 'ilk ayda devir yok');
+eq(CALC.rolloverCarry([], MK, 3, { market:2500 }, { market:true }), {}, 'veri yoksa devir yok');
+eq(CALC.rolloverCarry(RO_EXP, MK, 3, { market:2500 }, {}), {}, 'isaret yoksa bos');
+eq(CALC.rolloverCarry(RO_EXP, MK, 3, { market:0 }, { market:true }), {}, 'limitsiz kategoriye devir yok');
+
+console.log('\nflexSplit');
+eq(CALC.flexSplit({ groups:[
+  { id:'zorunlu', total:5000 }, { id:'yasam', total:3000 },
+  { id:'keyif', total:1000 }, { id:'yatirim', total:2000 },
+] }), { sabit:5000, esnek:4000, donemsel:2000 }, 'sabit/esnek/donemsel kirilimi');
+eq(CALC.flexSplit({ groups:[] }), { sabit:0, esnek:0, donemsel:0 }, 'bos');
+
+console.log('\nfundStats');
+const FUND = { name:'Vergi', target:24000, monthly:2000, active:true, log:{ '2026-06':2000, '2026-07':2000 } };
+const fs = CALC.fundStats(FUND, '2026-08');
+eq(fs.saved, 4000, 'biriken');
+eq(fs.pct, 17, 'yuzde ilerleme');
+eq(fs.remaining, 20000, 'kalan hedef');
+eq(fs.monthsLeft, 10, 'kalan ay');
+eq(fs.dueThisMonth, true, 'bu ay pay ayrilmadi');
+eq(CALC.fundStats(FUND, '2026-07').dueThisMonth, false, 'ayrilan ayda tekrar istemez');
+eq(CALC.fundStats({ target:4000, monthly:2000, log:{ '2026-06':2000, '2026-07':2000 } }, '2026-08').dueThisMonth,
+   false, 'hedef tamamlaninca istemez');
+
+console.log('\nmatchesQuery');
+eq(CALC.matchesQuery({ desc:'ŞOK Market', bank:'İşbank' }, 'şok'), true, 'tr kucuk harf eslesir');
+eq(CALC.matchesQuery({ desc:'Market' }, 'MARKET'), true, 'buyuk harf sorgu eslesir');
+eq(CALC.matchesQuery({ desc:'abc', tags:['tatil'] }, 'tatil'), true, 'etikette arar');
+eq(CALC.matchesQuery({ desc:'abc', bank:'Enpara' }, 'enpara'), true, 'kaynakta arar');
+eq(CALC.matchesQuery({ desc:'abc' }, 'yok'), false, 'eslesme yoksa false');
+eq(CALC.matchesQuery({ desc:'abc' }, ''), true, 'bos sorgu herkesi gecirir');
 
 console.log('\n' + pass + ' gecti, ' + fail + ' kaldi');
 process.exit(fail > 0 ? 1 : 0);

@@ -10,11 +10,11 @@ Tek tarayıcıda çalışan, ekstre günlerinde manuel + AI destekli toplu giri�
 
 [2] TEKNOLOJİ & ARAÇLAR
 - Saf HTML / CSS / JavaScript (framework yok, build adımı yok)
-- Dört dosyalı statik yapı: index.html (iskelet) + app.css + calc.js (saf hesaplar) + app.js (render/etkileşim)
-- node test.js — bağımlılıksız birim testleri (100 test, calc.js kapsamı)
+- Beş dosyalı statik yapı: index.html (iskelet) + app.css + calc.js (saf hesaplar) + app.js (render/etkileşim) + sw.js (çevrimdışı önbellek)
+- node test.js — bağımlılıksız birim testleri (152 test, calc.js kapsamı)
 - Chart.js (CDN üzerinden, 6 aylık trend grafiği)
 - Google Fonts (CDN)
-- localStorage (veri kalıcılığı — `ay_exp`, `ay_inc`, `ay_bud`, `ay_subs`, `ay_lastbank`, `ay_gemini_key`)
+- localStorage (veri kalıcılığı — `ay_exp`, `ay_inc`, `ay_bud`, `ay_subs`, `ay_lastbank`, `ay_gemini_key`, `ay_roll`, `ay_funds`, `ay_lastreview`)
 - Gemini API 2.5 Flash (tarayıcıdan REST çağrısı, ekstre parse + harcama analizi)
 - Yerel fallback parser (Gemini başarısız olursa ekstre satırlarını ayıklar)
 - PWA manifest (`manifest.json`, service worker yok)
@@ -36,15 +36,28 @@ Tek tarayıcıda çalışan, ekstre günlerinde manuel + AI destekli toplu giri�
 - Yedekleme: JSON export/import (manuel) [AKTİF]
 
 [4] SONRAKI ADIM
-Manuel giriş öncelikli akışa geçildi. Ekstre yükleme birincil giriş yolu olmaktan çıkıp
-mutabakat aracına dönüştü; günlük harcamalar elle giriliyor.
-Eklenenler: Özet ekranında abonelik durum kartı (ödendi/gecikmiş/bekliyor + tek dokunuşla
-"Ödedim" → gerçek gider kaydı), takvimde abonelik halkaları ve gün panelinde abonelik bloğu,
-Hızlı Giriş'te opsiyonel açıklama · Tekrarla şeridi · kaynak hafızası · arka arkaya giriş,
-girerken canlı bütçe şeridi (uyarır, ENGELLEMEZ), hero'da "bugün harcanabilir",
-Araçlar > Kategoriler'de gerçek harcamadan limit önerisi (son 3 tam ayın medyanı),
-ekstre içe aktarımında çift kayıt koruması (aynı tutar ±1 gün → atlanır).
-Sonraki aday: kullanıcının kendi eklediği kategorileri Araçlar > Kategoriler panelinden
-bir üst gruba atayabilmesi (şu an hepsi "Gruplanmamış" altında toplanıyor).
+2026-08-16 büyük iyileştirme turu (4 faz) tamamlandı:
+- Özet ekranı yeni sırası: Özet → Dikkat → Ay Özeti → Takvim → Bütçe Kategorileri → Abonelikler → Trend.
+  "Param Nereye Gidiyor" kartı "Bütçe Kategorileri" adını aldı.
+- Abonelikte otomatik tahsilat: "Ödedim" el işi kalktı; günü gelen aktif aboneliğin gider
+  kaydı otomatik açılır (çift kayıt koruması: elle girilene bağlanır; silinen otomatik kayıt
+  o ay yeniden oluşmaz — autoSkip). Kart salt görünüm; satıra dokun → düzenleme modalı.
+- Bütçe Belirle penceresi: tüm kategoriler limit+harcanan+çubuk, aylık toplam limit,
+  medyan bazlı öneri sihirbazı, kategori başına devir (rollover) işareti. prompt() kalktı.
+- Bütçe Kategorileri kartında aşım rozeti ("N aşım"), grup başında aşım noktası,
+  Sabit/Esnek/Dönemsel kırılım satırı, devirli limitlerde "+devir" notu.
+- Kademeli canlı uyarı: %70 yavaşla · %90 durakla · %100'de "Nereden aktarayım?" →
+  kategoriler arası pay aktarım modalı.
+- "Bugün harcanabilir" artık çekilecek abonelikler + zarf paylarını düşer.
+- Ay kapanış özeti kartı (yeni ayda bir kez, kapatılabilir), takvim altında ay sonu
+  projeksiyonu + limitin dolacağı günden itibaren gün boyama.
+- Abonelik maliyet paneli (günlük/aylık/yıllık + en pahalı 3 + zam tespiti).
+- Birikim Zarfları aracı (hedef/aylık pay/ilerleme; gider kaydı oluşturmaz).
+- İşlemler: metin araması, etiket sistemi (Hızlı Giriş'te opsiyonel), etiket filtresi,
+  toplu seçim → toplu kategori taşıma / silme.
+- Özel kategorilere üst grup atama (kategori formunda seçim) — eski "sonraki aday" kapandı.
+- sw.js: ağ-öncelikli service worker → tam çevrimdışı çalışma.
+Sonraki adaylar: haftalık özet bildirimi, Money Lover tarzı önerilen-günlük-harcama grafiği,
+Türkiye bağlamı için altın/döviz cinsinden görünüm.
 
 ═══ SON ═══

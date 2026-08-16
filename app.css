@@ -1855,3 +1855,108 @@ input, select, textarea { font-size: 16px; }
 
 /* ── Toast geri al ─────────────────────────────────────────── */
 .toast-undo { margin-left:10px; font-size:11px; padding:3px 9px; border-radius:7px; border:1px solid currentColor; background:transparent; color:inherit; cursor:pointer; font-family:inherit; }
+
+/* ══════════════════════════════════════════════════════════════
+   FAZ 0-3 BİLEŞENLERİ — bütçe editörü, otomatik abonelik, ay özeti,
+   projeksiyon, zarflar, arama/toplu düzenleme, aktarım
+   ══════════════════════════════════════════════════════════════ */
+
+/* Kart başlığında sağ küme: rozet + hint + eylem düğmesi */
+.card-h-right { display:flex; align-items:center; gap:8px; min-width:0; }
+.over-badge { font-size:10px; font-weight:700; letter-spacing:.04em; color:var(--neg); border:1px solid var(--neg); border-radius:99px; padding:2px 8px; white-space:nowrap; }
+
+/* Sabit / Esnek / Dönemsel kırılım satırı */
+.flex-split { display:flex; gap:14px; flex-wrap:wrap; font-size:11px; color:var(--ink-3); padding:4px 0 10px; border-bottom:1px solid var(--line); margin-bottom:8px; }
+.flex-split strong { color:var(--ink); font-weight:600; margin-left:3px; }
+
+/* Grup başlığında aşım noktası + alt satır devir/aşım işaretleri */
+.grp-over-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--neg); margin-left:5px; vertical-align:1px; }
+.grp-child.gc-over .gc-amt { color:var(--neg); font-weight:700; }
+.gc-carry { font-size:10px; color:var(--ink-3); border:1px solid var(--line); border-radius:99px; padding:1px 6px; margin-left:6px; white-space:nowrap; }
+
+/* Abonelik satırı artık düğme: satıra dokun → düzenle */
+button.sub-line { width:100%; text-align:left; background:transparent; border:none; border-top:1px solid var(--line); font:inherit; color:inherit; cursor:pointer; }
+button.sub-line:first-of-type { border-top:none; }
+.sub-edit-hint { font-size:11px; color:var(--ink-3); opacity:.7; }
+.sub-raises { display:flex; flex-direction:column; gap:4px; margin-top:10px; padding-top:8px; border-top:1px dashed var(--line); }
+.sub-raise { font-size:11px; color:var(--warn); }
+
+/* Abonelik maliyet paneli (Araçlar) */
+.sub-cost-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
+.sub-cost-stat { border:1px solid var(--line); border-radius:12px; padding:9px 10px; text-align:center; }
+.sub-cost-stat .lbl { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-3); }
+.sub-cost-stat .val { font-size:14px; font-weight:600; margin-top:3px; }
+.sub-cost-stat.primary { border-color:var(--ink); }
+.sub-cost-top { font-size:11px; color:var(--ink-3); margin-bottom:6px; }
+
+/* Gün panelindeki abonelik satırı düğmeye dönüştü */
+button.day-sub-event { width:100%; text-align:left; background:transparent; border:none; font:inherit; font-size:12px; color:inherit; cursor:pointer; padding:0; }
+
+/* Ay özeti kartı */
+.review-card { border-left:3px solid var(--ink); }
+.review-line { font-size:12.5px; line-height:1.5; padding:5px 0; border-top:1px solid var(--line); color:var(--ink-2); }
+.review-line:first-child { border-top:none; }
+.review-line strong { color:var(--ink); }
+
+/* Takvim projeksiyon satırı + aşım günleri */
+.cal-proj { font-size:11px; color:var(--ink-3); padding:8px 2px 0; }
+.cal-proj.over { color:var(--neg); }
+.cal-proj.ok { color:var(--pos); }
+.cal-day.proj-over { background:color-mix(in srgb, var(--neg) 9%, transparent); border-radius:8px; }
+
+/* Bütçe Belirle penceresi */
+.budget-modal { max-height:82vh; overflow-y:auto; }
+.be-month { margin-bottom:14px; }
+.be-month label { display:block; font-size:12px; font-weight:600; color:var(--ink-2); margin-bottom:4px; }
+.be-list { display:flex; flex-direction:column; }
+.be-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--line); }
+.be-info { flex:1; min-width:0; }
+.be-name { font-size:13px; font-weight:500; }
+.be-track { height:5px; border-radius:3px; background:var(--line); margin:6px 0 4px; overflow:hidden; }
+.be-fill { height:100%; background:var(--pos); }
+.be-row.be-slow .be-fill { background:var(--warn); opacity:.7; }
+.be-row.be-warn .be-fill { background:var(--warn); }
+.be-row.be-over .be-fill { background:var(--neg); }
+.be-row.be-over .be-meta { color:var(--neg); }
+.be-meta { font-size:11px; color:var(--ink-3); }
+.be-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0; }
+.be-lim { width:96px; text-align:right; padding:7px 9px; font-size:13px; }
+.be-roll { display:flex; align-items:center; gap:4px; font-size:10px; color:var(--ink-3); cursor:pointer; }
+
+/* Canlı bütçe kademesi + aktarım */
+.live-budget.lb-slow { border-color:var(--warn); }
+.lb-slow .lb-fill { background:var(--warn); opacity:.65; }
+.lb-transfer { font-size:11px; padding:3px 9px; border-radius:7px; border:1px solid var(--neg); background:transparent; color:var(--neg); cursor:pointer; font-family:inherit; }
+.tr-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--line); }
+.tr-row:first-of-type { border-top:none; }
+.tr-info { flex:1; min-width:0; }
+.tr-name { font-size:13px; font-weight:500; }
+.tr-meta { font-size:11px; color:var(--ink-3); margin-top:2px; }
+.tr-apply { flex-shrink:0; font-size:12px; }
+
+/* Birikim zarfları */
+.fund-row { display:flex; align-items:flex-start; gap:10px; padding:11px 0; border-top:1px solid var(--line); }
+.fund-row:first-of-type { border-top:none; }
+.fund-row.off { opacity:.5; }
+.fund-main { flex:1; min-width:0; }
+.fund-head-row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.fund-name { font-size:13px; font-weight:600; }
+.fund-nums { font-size:12px; color:var(--ink-2); }
+.fund-track { height:6px; border-radius:3px; background:var(--line); margin:7px 0 4px; overflow:hidden; }
+.fund-fill { height:100%; background:var(--pos); }
+.fund-meta { font-size:11px; color:var(--ink-3); }
+.fund-act { margin-top:7px; }
+.fund-btn { font-size:12px; padding:6px 12px; }
+.fund-done { font-size:11px; color:var(--pos); }
+
+/* İşlemler: arama + toplu düzenleme + etiketler */
+.txn-toolbar { display:flex; gap:8px; margin-bottom:8px; }
+.txn-search { flex:1; font-size:13px; }
+.txn-bulkbar { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--line); border-radius:12px; margin-bottom:8px; flex-wrap:wrap; }
+.bulk-count { font-size:12px; font-weight:600; }
+.bulk-cat { flex:1; min-width:110px; font-size:12px; padding:6px 8px; }
+.bulk-btn { font-size:12px; padding:6px 12px; }
+.tx-check { width:16px; height:16px; flex-shrink:0; accent-color:var(--ink); cursor:pointer; }
+.tx-selected { background:color-mix(in srgb, var(--ink) 5%, transparent); border-radius:10px; }
+.tx-tags { font-size:10px; color:var(--ink-3); }
+.tx-auto { font-size:10px; color:var(--ink-3); margin-left:5px; }

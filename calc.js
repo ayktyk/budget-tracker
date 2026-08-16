@@ -208,23 +208,27 @@ var CALC = (function () {
 
   // ── Bütçe geri bildirimi ────────────────────────────────────
 
-  // Bugün harcanabilir tutar = kalan limit ÷ ayın kalan günü. Limit yoksa null.
-  function dailyAllowance(limit, spent, todayIso) {
+  // Bugün harcanabilir tutar = (kalan limit − ayrılmış taahhütler) ÷ ayın kalan günü.
+  // committed (opsiyonel): bu ay daha çekilmemiş abonelikler + birikim zarfı payları.
+  // Limit yoksa null.
+  function dailyAllowance(limit, spent, todayIso, committed) {
     if (!limit || limit <= 0) return null;
     var p = String(todayIso || '').split('-');
     var y = parseInt(p[0], 10), mo = parseInt(p[1], 10), d = parseInt(p[2], 10);
     if (!y || !mo || !d || mo < 1 || mo > 12) return null;
     var last = new Date(y, mo, 0).getDate();
     var daysLeft = Math.max(1, last - d + 1);
-    var remaining = limit - (Number(spent) || 0);
+    var c = Number(committed) || 0;
+    var remaining = limit - (Number(spent) || 0) - c;
     return {
-      remaining: remaining, daysLeft: daysLeft,
+      remaining: remaining, daysLeft: daysLeft, committed: c,
       perDay: remaining > 0 ? Math.floor(remaining / daysLeft) : 0
     };
   }
 
   // Girilmekte olan tutarın kategori limitine etkisi. Limit yoksa null.
-  // level eşikleri lvl() ile aynı: %90 uyarı, %100 üstü aşım.
+  // Kademeli eşikler (%70 yavaşla · %90 durakla · %100 üstü yeniden planla):
+  // aşım SONRASI gelen tek kırmızı uyarı yerine erken, suçlamayan sinyal.
   // Bilgi amaçlıdır — hiçbir yerde kaydı engellemek için kullanılmaz.
   function afterEntry(spent, limit, amount) {
     if (!limit || limit <= 0) return null;
@@ -235,7 +239,7 @@ var CALC = (function () {
     var pct = Math.round((after / limit) * 100);
     return {
       after: after, remaining: limit - after, pct: pct,
-      level: pct > 100 ? 'over' : (pct >= 90 ? 'warn' : 'ok')
+      level: pct > 100 ? 'over' : (pct >= 90 ? 'warn' : (pct >= 70 ? 'slow' : 'ok'))
     };
   }
 
@@ -299,6 +303,220 @@ var CALC = (function () {
     return out;
   }
 
+  // ── Otomatik abonelik tahsilatı ─────────────────────────────
+  // Kartından zaten otomatik çekilen abonelikler için "Ödedim" el işi kalktı:
+  // günü gelmiş, işaretsiz aktif aboneliklerin gider kaydı otomatik oluşur.
+  // create: yeni gider açılacaklar · link: elle girilmiş kayda bağlanacaklar
+  // (tutar ±1 ₺, tarih ±1 gün — ekstre çift kayıt korumasıyla aynı tolerans).
+  // pending (onaylanmamış aday) ve autoSkip[ay] (kullanıcı o ayın otomatik
+  // kaydını silmiş) olanlar atlanır.
+  function subsAutoCharges(subs, monthKey, todayIso, expenses) {
+    var create = [], link = [];
+    var list = subs || [], ex = expenses || [];
+    for (var i = 0; i < list.length; i++) {
+      var s = list[i];
+      if (!s || s.active === false || s.pending) continue;
+      if (s.paid && s.paid[monthKey]) continue;
+      if (s.autoSkip && s.autoSkip[monthKey]) continue;
+      var dueIso = subDueDate(monthKey, s.dayOfMonth);
+      if (!dueIso || !todayIso || dueIso > todayIso) continue;
+      var amt = Number(s.amt) || 0;
+      var matched = null;
+      for (var j = 0; j < ex.length; j++) {
+        var e = ex[j];
+        if (e.subId === s.id && String(e.d || '').slice(0, 7) === monthKey) { matched = e; break; }
+        if (Math.abs((Number(e.amt) || 0) - amt) <= 1 && dayDiff(e.d, dueIso) <= 1) { matched = e; break; }
+      }
+      if (matched) link.push({ subId: s.id, expId: matched.id, dueIso: dueIso });
+      else create.push({ subId: s.id, dueIso: dueIso, amt: amt });
+    }
+    return { create: create, link: link };
+  }
+
+  // Abonelik maliyet özeti (aktifler): "ayda 90 ₺" hissettirmez,
+  // "yılda 1.080 ₺" karar verdirir. top: en pahalı 3 abonelik.
+  function subsCostSummary(subs) {
+    var act = (subs || []).filter(function (s) { return s && s.active !== false; });
+    var monthly = act.reduce(function (a, s) { return a + (Number(s.amt) || 0); }, 0);
+    var top = act.slice()
+      .sort(function (a, b) { return (Number(b.amt) || 0) - (Number(a.amt) || 0); })
+      .slice(0, 3)
+      .map(function (s) { return { id: s.id, name: s.name, amt: Number(s.amt) || 0 }; });
+    return { count: act.length, monthly: monthly, yearly: monthly * 12, daily: Math.round(monthly * 12 / 365), top: top };
+  }
+
+  // Zam tespiti: aboneliğe bağlı (subId) gider kayıtlarının son iki tutarı
+  // veya son kayıt ile güncel tanımlı tutar arasındaki artış.
+  function subRaises(subs, expenses) {
+    var out = [];
+    var ex = expenses || [];
+    (subs || []).forEach(function (s) {
+      if (!s || s.active === false) return;
+      var hist = ex.filter(function (e) { return e.subId === s.id; })
+        .sort(function (a, b) { return String(a.d || '').localeCompare(String(b.d || '')); })
+        .map(function (e) { return Number(e.amt) || 0; });
+      var cur = Number(s.amt) || 0;
+      var prev = null, next = null;
+      if (hist.length >= 2 && hist[hist.length - 1] > hist[hist.length - 2]) {
+        prev = hist[hist.length - 2]; next = hist[hist.length - 1];
+      } else if (hist.length >= 1 && cur > hist[hist.length - 1]) {
+        prev = hist[hist.length - 1]; next = cur;
+      }
+      if (prev !== null && prev > 0) {
+        out.push({ id: s.id, name: s.name, from: prev, to: next, pct: Math.round((next - prev) / prev * 100) });
+      }
+    });
+    return out;
+  }
+
+  // Limit aşımında aktarım önerisi: en çok payı kalan 3 kategori.
+  // %100'de suçlama yerine eylem: "hangi kategoriden aktarayım?"
+  function transferSuggestions(budgets, spent, excludeCat) {
+    var out = [];
+    Object.keys(budgets || {}).forEach(function (c) {
+      if (c === excludeCat || c === 'uyap') return;
+      var lim = Number(budgets[c]) || 0;
+      if (lim <= 0) return;
+      var rem = lim - (Number((spent || {})[c]) || 0);
+      if (rem > 0) out.push({ cat: c, remaining: rem });
+    });
+    return out.sort(function (a, b) { return b.remaining - a.remaining; }).slice(0, 3);
+  }
+
+  // Ay kapanış özeti — saf veri döner, metni çağıran kurar.
+  // Kullanıcı hiçbir şey yapmadan girdiği verinin karşılığını alır.
+  function monthReview(o) {
+    var m = o.monthIdx;
+    var cur = catTotals(o.expenses, m, o.MK);
+    var prev = m > 0 ? catTotals(o.expenses, m - 1, o.MK) : {};
+    var spent = 0; Object.keys(cur).forEach(function (c) { spent += cur[c]; });
+    var prevSpent = 0; Object.keys(prev).forEach(function (c) { prevSpent += prev[c]; });
+    var topIncrease = null;
+    Object.keys(cur).forEach(function (c) {
+      var d = cur[c] - (prev[c] || 0);
+      if (d > 0 && (!topIncrease || d > topIncrease.delta)) {
+        topIncrease = { cat: c, delta: d, pct: deltaPct(cur[c], prev[c] || 0) };
+      }
+    });
+    var over = [], under = 0, budgets = o.budgets || {};
+    Object.keys(budgets).forEach(function (c) {
+      var lim = Number(budgets[c]) || 0;
+      if (lim <= 0) return;
+      var f = limitFill(cur[c] || 0, lim);
+      if (f !== null && f > 100) over.push({ cat: c, pct: f, excess: (cur[c] || 0) - lim });
+      else if ((cur[c] || 0) > 0) under++;
+    });
+    over.sort(function (a, b) { return b.excess - a.excess; });
+    var topCats = Object.keys(cur)
+      .map(function (c) { return { cat: c, total: cur[c] }; })
+      .sort(function (a, b) { return b.total - a.total; })
+      .slice(0, 3);
+    return {
+      spent: spent, prevSpent: prevSpent, delta: deltaPct(spent, prevSpent),
+      topIncrease: topIncrease, over: over, underCount: under, topCats: topCats
+    };
+  }
+
+  // İleri projeksiyon: bugüne kadarki günlük ortalama + günü gelmemiş
+  // abonelikler → gün gün kümülatif tahmin. "Ayın 25'inde sıkışır mıyım?"
+  // pendingSubs: [{day, amt}] — yalnız bugünden SONRAKİ günler sayılır
+  // (öncekiler ya çekildi ya harcamada zaten var).
+  // zeroDay: limitin projeksiyon olarak aşılacağı ilk gün (yoksa null).
+  function monthProjection(limit, spent, todayIso, pendingSubs) {
+    var p = String(todayIso || '').split('-');
+    var y = parseInt(p[0], 10), mo = parseInt(p[1], 10), d = parseInt(p[2], 10);
+    if (!y || !mo || !d || mo < 1 || mo > 12) return null;
+    var last = new Date(y, mo, 0).getDate();
+    var s = Number(spent) || 0;
+    var avg = d > 0 ? s / d : 0;
+    var subsByDay = {};
+    (pendingSubs || []).forEach(function (x) {
+      var dd = parseInt(x.day, 10) || 0;
+      if (dd > d) subsByDay[dd] = (subsByDay[dd] || 0) + (Number(x.amt) || 0);
+    });
+    var lim = Number(limit) || 0;
+    var cum = s, zeroDay = null;
+    if (lim > 0 && cum > lim) zeroDay = d;
+    for (var day = d + 1; day <= last; day++) {
+      cum += avg + (subsByDay[day] || 0);
+      if (zeroDay === null && lim > 0 && cum > lim) zeroDay = day;
+    }
+    return {
+      avgDaily: Math.round(avg), projEnd: Math.round(cum),
+      over: lim > 0 ? Math.round(cum - lim) : null,
+      zeroDay: zeroDay, daysLeft: last - d
+    };
+  }
+
+  // ── Rollover: kategori artı/eksi devri ──────────────────────
+  // İşaretli kategorilerde kalan pay sonraki aya eklenir, aşım düşülür.
+  // Devir zinciri pencerede verinin başladığı ilk aydan itibaren kurulur
+  // (boş aylar limit biriktirmesin). Limit geçmişi tutulmadığı için geçmiş
+  // aylarda da bugünkü limit esas alınır — bilinçli sadeleştirme.
+  function rolloverCarry(expenses, MK, monthIdx, budgets, flags) {
+    var out = {};
+    var firstActive = -1;
+    for (var m = 0; m < MK.length; m++) {
+      if (Object.keys(catTotals(expenses, m, MK)).length) { firstActive = m; break; }
+    }
+    if (firstActive === -1 || monthIdx <= firstActive) return out;
+    Object.keys(flags || {}).forEach(function (c) {
+      if (!flags[c]) return;
+      var lim = Number((budgets || {})[c]) || 0;
+      if (lim <= 0) return;
+      var carry = 0;
+      for (var mm = firstActive + 1; mm <= monthIdx; mm++) {
+        var t = catTotals(expenses, mm - 1, MK);
+        carry = carry + lim - (t[c] || 0);
+      }
+      out[c] = Math.round(carry);
+    });
+    return out;
+  }
+
+  // ── Sabit / Esnek / Dönemsel kırılımı (Flex görünümü) ───────
+  // Düzinelerce kategori yerine tek soruluk özet: esnek harcaman ne durumda?
+  var GROUP_TYPES = {
+    zorunlu: 'sabit', yasam: 'esnek', keyif: 'esnek',
+    saglik_egitim: 'esnek', yatirim: 'donemsel', ungrouped: 'esnek'
+  };
+
+  function flexSplit(groupsResult, types) {
+    var t = types || GROUP_TYPES;
+    var out = { sabit: 0, esnek: 0, donemsel: 0 };
+    (((groupsResult || {}).groups) || []).forEach(function (g) {
+      var k = t[g.id] || 'esnek';
+      out[k] += g.total;
+    });
+    return out;
+  }
+
+  // ── Birikim zarfı (sinking fund) ────────────────────────────
+  // Bütçeyi bozan aylık harcama değil, yılda bir gelen büyük kalemdir.
+  // fund: {target, monthly, log:{'YYYY-MM': tutar}, active}
+  function fundStats(fund, curMonthKey) {
+    var log = (fund && fund.log) || {};
+    var saved = 0;
+    Object.keys(log).forEach(function (k) { saved += Number(log[k]) || 0; });
+    var target = Number(fund && fund.target) || 0;
+    var monthly = Number(fund && fund.monthly) || 0;
+    var pct = target > 0 ? Math.min(100, Math.round(saved / target * 100)) : 0;
+    var remaining = Math.max(0, target - saved);
+    var monthsLeft = (monthly > 0 && remaining > 0) ? Math.ceil(remaining / monthly) : 0;
+    var dueThisMonth = !!(fund && fund.active !== false && monthly > 0 && curMonthKey && !log[curMonthKey] && remaining > 0);
+    return { saved: saved, target: target, monthly: monthly, pct: pct, remaining: remaining, monthsLeft: monthsLeft, dueThisMonth: dueThisMonth };
+  }
+
+  // ── Metin araması ───────────────────────────────────────────
+  // Açıklama + kaynak + etiketlerde Türkçe küçük harf araması.
+  function matchesQuery(txn, q) {
+    var s = String(q || '').toLocaleLowerCase('tr-TR').trim();
+    if (!s) return true;
+    var hay = (String((txn || {}).desc || '') + ' ' + String((txn || {}).bank || '') + ' '
+      + (((txn || {}).tags) || []).join(' ')).toLocaleLowerCase('tr-TR');
+    return hay.indexOf(s) > -1;
+  }
+
   return {
     fmt: fmt, parseTrNum: parseTrNum, mIdx: mIdx,
     GROUPS: GROUPS, groupOf: groupOf, groupTotals: groupTotals,
@@ -307,7 +525,13 @@ var CALC = (function () {
     subDueDate: subDueDate, subsStatus: subsStatus,
     dailyAllowance: dailyAllowance, afterEntry: afterEntry,
     median: median, suggestLimits: suggestLimits,
-    findDuplicates: findDuplicates
+    findDuplicates: findDuplicates,
+    subsAutoCharges: subsAutoCharges, subsCostSummary: subsCostSummary,
+    subRaises: subRaises, transferSuggestions: transferSuggestions,
+    monthReview: monthReview, monthProjection: monthProjection,
+    rolloverCarry: rolloverCarry,
+    GROUP_TYPES: GROUP_TYPES, flexSplit: flexSplit,
+    fundStats: fundStats, matchesQuery: matchesQuery
   };
 })();
 
